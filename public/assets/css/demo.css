@@ -1,0 +1,156 @@
+/*
+* demo.css
+* File include item demo only specific css only
+******************************************************************************/
+
+/* Sidebar toggle icon: needs background for mask (core.css provides mask-image) */
+.layout-menu-toggle .menu-toggle-icon {
+  background-color: currentColor;
+}
+
+/* Inline SVG navbar icons (Vuexy-style): match demo */
+.navbar-icon-svg {
+  color: inherit;
+  flex-shrink: 0;
+  line-height: 0;
+}
+.navbar-icon-svg svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+}
+/* Navbar right: icon buttons same size and alignment as Vuexy */
+.layout-navbar .navbar-nav-right .navbar-nav .nav-item .nav-link.hide-arrow.p-0 {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border-radius: 0.375rem;
+  color: var(--bs-body-color);
+}
+.layout-navbar .navbar-nav-right .navbar-nav .nav-item .nav-link.hide-arrow.p-0:hover {
+  background-color: var(--bs-gray-100);
+  color: var(--bs-heading-color);
+}
+[data-bs-theme="dark"] .layout-navbar .navbar-nav-right .navbar-nav .nav-item .nav-link.hide-arrow.p-0:hover {
+  background-color: var(--bs-gray-800);
+}
+/* Notifications link has badge so needs position */
+.layout-navbar .navbar-nav-right .navbar-nav .nav-item .nav-link.position-relative .navbar-icon-svg {
+  margin-inline-end: 0.25rem;
+}
+/* Search box in navbar: Vuexy-style max width */
+.layout-navbar .navbar-nav-right .search-box .position-relative {
+  max-width: 20rem;
+}
+.layout-navbar .navbar-nav-right .search-box .search-input {
+  background-color: var(--bs-gray-100);
+  border-radius: 0.375rem;
+}
+[data-bs-theme="dark"] .layout-navbar .navbar-nav-right .search-box .search-input {
+  background-color: var(--bs-gray-800);
+}
+
+.menu .app-brand.demo {
+  height: 64px;
+}
+
+.app-brand-logo.demo svg {
+  width: 34px;
+  height: 24px;
+}
+
+.app-brand-text.demo {
+  font-size: 1.375rem;
+}
+
+/* ! For .layout-navbar-fixed added fix padding top to .layout-page */
+/* Default navbar */
+.layout-navbar-fixed .layout-wrapper:not(.layout-without-menu) .layout-page {
+  padding-top: 64px !important;
+}
+.layout-navbar-fixed .layout-wrapper:not(.layout-horizontal):not(.layout-without-menu) .layout-page {
+  padding-top: 72px !important;
+}
+/* Navbar page z-index issue solution */
+.content-wrapper .navbar {
+  z-index: auto;
+}
+
+/*
+* Content
+******************************************************************************/
+
+.demo-blocks > * {
+  display: block !important;
+}
+
+.demo-inline-spacing > * {
+  margin: 1rem 0.375rem 0 0 !important;
+}
+
+/* ? .demo-vertical-spacing class is used to have vertical margins between elements. To remove margin-top from the first-child, use .demo-only-element class with .demo-vertical-spacing class. For example, we have used this class in forms-input-groups.html file. */
+.demo-vertical-spacing > * {
+  margin-top: 1rem !important;
+  margin-bottom: 0 !important;
+}
+.demo-vertical-spacing.demo-only-element > :first-child {
+  margin-top: 0 !important;
+}
+
+.demo-vertical-spacing-lg > * {
+  margin-top: 1.875rem !important;
+  margin-bottom: 0 !important;
+}
+.demo-vertical-spacing-lg.demo-only-element > :first-child {
+  margin-top: 0 !important;
+}
+
+.demo-vertical-spacing-xl > * {
+  margin-top: 5rem !important;
+  margin-bottom: 0 !important;
+}
+.demo-vertical-spacing-xl.demo-only-element > :first-child {
+  margin-top: 0 !important;
+}
+
+/* Dropdown buttons going out of small screens */
+@media (max-width: 576px) {
+  #dropdown-variation-demo .btn-group .text-truncate {
+    width: 254px;
+    position: relative;
+  }
+  #dropdown-variation-demo .btn-group .text-truncate::after {
+    position: absolute;
+    top: 45%;
+    right: 0.65rem;
+  }
+}
+
+/*
+* Layout demo
+******************************************************************************/
+
+.layout-demo-wrapper {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  margin-top: 1rem;
+}
+.layout-demo-placeholder img {
+  width: 900px;
+}
+.layout-demo-info {
+  text-align: center;
+  margin-top: 1rem;
+}

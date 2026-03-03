@@ -1,0 +1,59 @@
+{
+  "navigation": {
+    "Dashboard": [
+      {
+        "name": "Home",
+        "icon": "tabler-smart-home",
+        "url": "/"
+      },
+      {
+        "name": "Page 2",
+        "icon": "tabler-file-text",
+        "url": "/page-2"
+      }
+    ],
+    "Pages": [
+      {
+        "name": "Error",
+        "icon": "tabler-alert-triangle",
+        "url": "/pages/misc-error"
+      },
+      {
+        "name": "Login",
+        "icon": "tabler-login",
+        "url": "/auth/login-basic"
+      },
+      {
+        "name": "Register",
+        "icon": "tabler-user-plus",
+        "url": "/auth/register-basic"
+      }
+    ]
+  },
+  "suggestions": {
+    "Popular": [
+      {
+        "name": "Home",
+        "icon": "tabler-smart-home",
+        "url": "/"
+      },
+      {
+        "name": "Page 2",
+        "icon": "tabler-file-text",
+        "url": "/page-2"
+      }
+    ],
+    "Auth": [
+      {
+        "name": "Login",
+        "icon": "tabler-login",
+        "url": "/auth/login-basic"
+      },
+      {
+        "name": "Register",
+        "icon": "tabler-user-plus",
+        "url": "/auth/register-basic"
+      }
+    ]
+  }
+}
