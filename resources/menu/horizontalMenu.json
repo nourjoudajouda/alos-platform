@@ -11,6 +11,18 @@
       "name": "Tenants",
       "icon": "menu-icon icon-base ti tabler-building-store",
       "slug": "core.tenants"
+    },
+    {
+      "url": "/core/roles",
+      "name": "Roles",
+      "icon": "menu-icon icon-base ti tabler-shield",
+      "slug": "core.roles"
+    },
+    {
+      "url": "/core/permissions",
+      "name": "Permissions",
+      "icon": "menu-icon icon-base ti tabler-key",
+      "slug": "core.permissions"
     }
   ]
 }

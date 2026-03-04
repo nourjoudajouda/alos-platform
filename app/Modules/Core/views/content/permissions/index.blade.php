@@ -2,14 +2,14 @@
   $configData = Helper::appClasses();
   $isRtl = ($configData['textDirection'] ?? 'ltr') === 'rtl';
   $contentDir = app()->getLocale() === 'ar' ? 'rtl' : 'ltr';
-  $totalTenants = $totalTenants ?? 0;
-  $tenantsWithUsers = $tenantsWithUsers ?? 0;
-  $recentTenants = $recentTenants ?? 0;
-  $withoutUsers = $totalTenants - $tenantsWithUsers;
+  $totalPermissions = $totalPermissions ?? 0;
+  $viewPermissions = $viewPermissions ?? 0;
+  $managePermissions = ($createPermissions ?? 0) + ($editPermissions ?? 0) + ($deletePermissions ?? 0);
+  $recentPermissions = $recentPermissions ?? 0;
 @endphp
 @extends('core::layouts.layoutMaster')
 
-@section('title', __('Tenants') . ' — ' . config('app.name'))
+@section('title', __('Permissions') . ' — ' . config('app.name'))
 
 @section('page-style')
 @include('core::_partials.crud-table-styles')
@@ -17,19 +17,19 @@
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y" dir="{{ $contentDir }}">
-  {{-- Vuexy User List style: إحصائيات علوية (4 كروت) --}}
+  {{-- إحصائيات علوية (4 كروت) — نفس تصميم Tenants --}}
   <div class="row g-4 mb-4">
     <div class="col-sm-6 col-xl-3">
       <div class="card h-100">
         <div class="card-body d-flex align-items-start justify-content-between">
           <div class="me-3">
-            <p class="card-title mb-1 text-muted small">{{ __('Total Tenants') }}</p>
-            <h4 class="mb-0 fw-bold">{{ $totalTenants }}</h4>
-            <small class="text-muted">{{ __('Tenants') }}</small>
+            <p class="card-title mb-1 text-muted small">{{ __('Total Permissions') }}</p>
+            <h4 class="mb-0 fw-bold">{{ $totalPermissions }}</h4>
+            <small class="text-muted">{{ __('Permissions') }}</small>
           </div>
           <div class="avatar flex-shrink-0">
             <span class="avatar-initial rounded bg-label-primary">
-              <i class="icon-base ti tabler-building-store icon-24px"></i>
+              <i class="icon-base ti tabler-key icon-24px"></i>
             </span>
           </div>
         </div>
@@ -39,13 +39,29 @@
       <div class="card h-100">
         <div class="card-body d-flex align-items-start justify-content-between">
           <div class="me-3">
-            <p class="card-title mb-1 text-muted small">{{ __('With Users') }}</p>
-            <h4 class="mb-0 fw-bold">{{ $tenantsWithUsers }}</h4>
-            <small class="text-muted">{{ __('Tenants') }}</small>
+            <p class="card-title mb-1 text-muted small">{{ __('View-only permissions') }}</p>
+            <h4 class="mb-0 fw-bold">{{ $viewPermissions }}</h4>
+            <small class="text-muted">{{ __('Names start with: view …') }}</small>
           </div>
           <div class="avatar flex-shrink-0">
             <span class="avatar-initial rounded bg-label-success">
-              <i class="icon-base ti tabler-users icon-24px"></i>
+              <i class="icon-base ti tabler-eye icon-24px"></i>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      <div class="card h-100">
+        <div class="card-body d-flex align-items-start justify-content-between">
+          <div class="me-3">
+            <p class="card-title mb-1 text-muted small">{{ __('Create / Edit / Delete permissions') }}</p>
+            <h4 class="mb-0 fw-bold">{{ $managePermissions }}</h4>
+            <small class="text-muted">{{ __('Names start with: create, edit or delete') }}</small>
+          </div>
+          <div class="avatar flex-shrink-0">
+            <span class="avatar-initial rounded bg-label-info">
+              <i class="icon-base ti tabler-edit icon-24px"></i>
             </span>
           </div>
         </div>
@@ -56,28 +72,12 @@
         <div class="card-body d-flex align-items-start justify-content-between">
           <div class="me-3">
             <p class="card-title mb-1 text-muted small">{{ __('Last 30 days') }}</p>
-            <h4 class="mb-0 fw-bold">{{ $recentTenants }}</h4>
-            <small class="text-muted">{{ __('Tenants') }}</small>
-          </div>
-          <div class="avatar flex-shrink-0">
-            <span class="avatar-initial rounded bg-label-info">
-              <i class="icon-base ti tabler-calendar icon-24px"></i>
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
-      <div class="card h-100">
-        <div class="card-body d-flex align-items-start justify-content-between">
-          <div class="me-3">
-            <p class="card-title mb-1 text-muted small">{{ __('Without Users') }}</p>
-            <h4 class="mb-0 fw-bold">{{ $withoutUsers }}</h4>
-            <small class="text-muted">{{ __('Tenants') }}</small>
+            <h4 class="mb-0 fw-bold">{{ $recentPermissions }}</h4>
+            <small class="text-muted">{{ __('Permissions') }}</small>
           </div>
           <div class="avatar flex-shrink-0">
             <span class="avatar-initial rounded bg-label-secondary">
-              <i class="icon-base ti tabler-user-off icon-24px"></i>
+              <i class="icon-base ti tabler-calendar icon-24px"></i>
             </span>
           </div>
         </div>
@@ -85,17 +85,13 @@
     </div>
   </div>
 
-  {{-- بطاقة Filters — Per Page + زر فلتر (يفتح قائمة جانبية فيها Plan و Status فقط) + Search + عرض --}}
+  {{-- بطاقة Filters — نفس تصميم Tenants --}}
   <div class="card mb-4">
     <div class="card-header py-3">
       <h5 class="card-title mb-0">{{ __('Filters') }}</h5>
     </div>
     <div class="card-body">
-      <form action="{{ route('core.tenants.index') }}" method="get" id="filtersForm">
-        @if(request('plan'))<input type="hidden" name="plan" value="{{ request('plan') }}">@endif
-        @if(request('status'))<input type="hidden" name="status" value="{{ request('status') }}">@endif
-        @if(request('date_from'))<input type="hidden" name="date_from" value="{{ request('date_from') }}">@endif
-        @if(request('date_to'))<input type="hidden" name="date_to" value="{{ request('date_to') }}">@endif
+      <form action="{{ route('core.permissions.index') }}" method="get" id="filtersForm">
         <div class="d-flex flex-column flex-md-row flex-wrap align-items-stretch align-items-md-end gap-3">
           <div class="d-flex flex-wrap align-items-end gap-3">
             <div class="filter-field">
@@ -108,7 +104,7 @@
             </div>
             <div class="filter-field">
               <label class="form-label small text-muted mb-1 d-block">{{ __('Filters') }}</label>
-              <button type="button" class="btn btn-outline-primary btn-sm" id="tenantsFiltersBtn" aria-controls="tenantsFiltersOffcanvas">
+              <button type="button" class="btn btn-outline-primary btn-sm" id="permissionsFiltersBtn" aria-controls="permissionsFiltersOffcanvas">
                 <i class="icon-base ti tabler-filter {{ $isRtl ? 'ms-1' : 'me-1' }}"></i>
                 {{ __('Filters') }}
               </button>
@@ -137,59 +133,33 @@
     </div>
   </div>
 
-  {{-- قائمة جانبية — فيها Plan و Status فقط --}}
-  <div class="offcanvas offcanvas-{{ $isRtl ? 'start' : 'end' }}" tabindex="-1" id="tenantsFiltersOffcanvas" aria-labelledby="tenantsFiltersOffcanvasLabel">
+  {{-- قائمة جانبية Filters --}}
+  <div class="offcanvas offcanvas-{{ $isRtl ? 'start' : 'end' }}" tabindex="-1" id="permissionsFiltersOffcanvas" aria-labelledby="permissionsFiltersOffcanvasLabel">
     <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="tenantsFiltersOffcanvasLabel">{{ __('Filters') }}</h5>
+      <h5 class="offcanvas-title" id="permissionsFiltersOffcanvasLabel">{{ __('Filters') }}</h5>
       <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="{{ __('Close') }}"></button>
     </div>
     <div class="offcanvas-body">
-      <form action="{{ route('core.tenants.index') }}" method="get" id="filtersFormSide">
+      <form action="{{ route('core.permissions.index') }}" method="get" id="filtersFormSide">
         <input type="hidden" name="per_page" value="{{ $perPage }}">
         <input type="hidden" name="search" value="{{ request('search') }}">
         @if(request('view'))<input type="hidden" name="view" value="{{ request('view') }}">@endif
-        <div class="mb-3">
-          <label for="filterDateFrom" class="form-label">{{ __('From date') }}</label>
-          <input type="date" name="date_from" id="filterDateFrom" class="form-control" value="{{ $filterDateFrom ?? '' }}" aria-describedby="filterDateFromHelp">
-          <div id="filterDateFromHelp" class="form-text small">{{ __('Filter tenants created from this date') }}</div>
-        </div>
-        <div class="mb-3">
-          <label for="filterDateTo" class="form-label">{{ __('To date') }}</label>
-          <input type="date" name="date_to" id="filterDateTo" class="form-control" value="{{ $filterDateTo ?? '' }}" aria-describedby="filterDateToHelp">
-          <div id="filterDateToHelp" class="form-text small">{{ __('Filter tenants created until this date') }}</div>
-        </div>
-        <div class="mb-3">
-          <label for="filterPlan" class="form-label">{{ __('Filter by Plan') }}</label>
-          <select name="plan" id="filterPlan" class="form-select">
-            <option value="">{{ __('All') }}</option>
-            @foreach(\App\Models\Tenant::PLANS as $p)
-              <option value="{{ $p }}" {{ ($filterPlan ?? '') === $p ? 'selected' : '' }}>{{ __(ucfirst($p)) }}</option>
-            @endforeach
-          </select>
-        </div>
-        <div class="mb-3">
-          <label for="filterStatus" class="form-label">{{ __('Filter by Status') }}</label>
-          <select name="status" id="filterStatus" class="form-select">
-            <option value="">{{ __('All') }}</option>
-            <option value="active" {{ ($filterStatus ?? '') === 'active' ? 'selected' : '' }}>{{ __('Active') }}</option>
-            <option value="pending" {{ ($filterStatus ?? '') === 'pending' ? 'selected' : '' }}>{{ __('Pending') }}</option>
-          </select>
-        </div>
+        <p class="text-muted small">{{ __('Use search and per page in the main filters.') }}</p>
         <div class="d-flex gap-2">
-          <button type="submit" class="btn btn-primary flex-grow-1">{{ __('Search') }}</button>
+          <button type="submit" class="btn btn-primary flex-grow-1">{{ __('Apply') }}</button>
           <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas" aria-label="{{ __('Close') }}">{{ __('Close') }}</button>
         </div>
       </form>
     </div>
   </div>
 
-  {{-- Vuexy: بطاقة الجدول + Add Tenant في الهيدر (نفس تصميم كل CRUD) --}}
-  <div class="card crud-table tenants-table">
+  {{-- بطاقة الجدول + Add Permission في الهيدر — نفس تصميم Tenants --}}
+  <div class="card crud-table">
     <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
-      <h5 class="card-title mb-0">{{ __('Tenants') }}</h5>
-      <a href="{{ route('core.tenants.create') }}" class="btn btn-primary">
+      <h5 class="card-title mb-0">{{ __('Permissions') }}</h5>
+      <a href="{{ route('core.permissions.create') }}" class="btn btn-primary">
         <i class="icon-base ti tabler-plus icon-20px {{ $isRtl ? 'ms-1' : 'me-1' }}"></i>
-        {{ __('Add Tenant') }}
+        {{ __('Add Permission') }}
       </a>
     </div>
     <div class="table-responsive">
@@ -197,56 +167,37 @@
         <thead>
           <tr>
             <th>{{ __('Name') }}</th>
+            <th>{{ __('Guard') }}</th>
             <th>{{ __('Created At') }}</th>
-            <th>{{ __('Plan') }}</th>
-            <th>{{ __('Status') }}</th>
             <th class="text-nowrap" style="min-width: 7rem;">{{ __('Actions') }}</th>
           </tr>
         </thead>
         <tbody>
-          @forelse($tenants as $tenant)
-            @php
-              $initials = strtoupper(mb_substr(preg_replace('/[^a-zA-Z0-9\p{Arabic}]/u', '', $tenant->name), 0, 2) ?: $tenant->slug);
-              if (mb_strlen($initials) > 2) $initials = mb_substr($initials, 0, 2);
-              $hasUsers = ($tenant->users_count ?? 0) > 0;
-            @endphp
+          @forelse($permissions as $permission)
             <tr>
               <td>
                 <div class="d-flex align-items-center gap-3">
                   <span class="avatar avatar-sm flex-shrink-0">
-                    <span class="avatar-initial rounded bg-label-primary">{{ $initials }}</span>
+                    <span class="avatar-initial rounded bg-label-secondary">
+                      <i class="icon-base ti tabler-key small"></i>
+                    </span>
                   </span>
                   <div>
-                    <span class="fw-medium d-block">{{ $tenant->name }}</span>
-                    <span class="text-muted small">{{ $tenant->slug }}</span>
+                    <code class="small">{{ $permission->name }}</code>
                   </div>
                 </div>
               </td>
-              <td><span class="text-nowrap">{{ $tenant->created_at?->format('Y-m-d') }}</span></td>
-              <td>
-                @if($tenant->plan)
-                  <span class="badge bg-label-primary">{{ __(ucfirst($tenant->plan)) }}</span>
-                @else
-                  <span class="badge bg-label-secondary">—</span>
-                @endif
-              </td>
-              <td>
-                @if($hasUsers)
-                  <span class="badge bg-label-success">{{ __('Active') }}</span>
-                  <span class="text-muted small d-block mt-0">{{ __('with users') }}</span>
-                @else
-                  <span class="badge bg-label-warning">{{ __('Pending') }}</span>
-                @endif
-              </td>
+              <td><span class="text-muted small">{{ $permission->guard_name }}</span></td>
+              <td><span class="text-nowrap">{{ $permission->created_at?->format('Y-m-d') }}</span></td>
               <td class="text-nowrap">
                 <div class="table-actions">
-                  <a href="{{ route('core.tenants.show', $tenant) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('View') }}">
+                  <a href="{{ route('core.permissions.show', $permission) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('View') }}">
                     <i class="icon-base ti tabler-eye"></i>
                   </a>
-                  <a href="{{ route('core.tenants.edit', $tenant) }}" class="btn btn-icon btn-sm btn-text-warning rounded" title="{{ __('Edit') }}">
+                  <a href="{{ route('core.permissions.edit', $permission) }}" class="btn btn-icon btn-sm btn-text-warning rounded" title="{{ __('Edit') }}">
                     <i class="icon-base ti tabler-pencil"></i>
                   </a>
-                  <form action="{{ route('core.tenants.destroy', $tenant) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Delete this tenant?') }}');">
+                  <form action="{{ route('core.permissions.destroy', $permission) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Delete this permission?') }}');">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-icon btn-sm btn-text-danger rounded" title="{{ __('Delete') }}">
@@ -258,18 +209,18 @@
             </tr>
           @empty
             <tr>
-              <td colspan="5" class="text-center text-muted py-5">
-                <i class="icon-base ti tabler-building-store icon-32px d-block mb-2 opacity-50"></i>
-                {{ __('No tenants yet.') }} <a href="{{ route('core.tenants.create') }}">{{ __('Add Tenant') }}</a>
+              <td colspan="4" class="text-center text-muted py-5">
+                <i class="icon-base ti tabler-key icon-32px d-block mb-2 opacity-50"></i>
+                {{ __('No permissions yet.') }} <a href="{{ route('core.permissions.create') }}">{{ __('Add Permission') }}</a>
               </td>
             </tr>
           @endforelse
         </tbody>
       </table>
     </div>
-    @if($tenants->hasPages())
+    @if($permissions->hasPages())
       <div class="card-footer">
-        {{ $tenants->links() }}
+        {{ $permissions->links() }}
       </div>
     @endif
   </div>
@@ -291,8 +242,8 @@
 <script>
   (function() {
     function init() {
-      var btn = document.getElementById('tenantsFiltersBtn');
-      var ocEl = document.getElementById('tenantsFiltersOffcanvas');
+      var btn = document.getElementById('permissionsFiltersBtn');
+      var ocEl = document.getElementById('permissionsFiltersOffcanvas');
       if (btn && ocEl && typeof bootstrap !== 'undefined' && bootstrap.Offcanvas) {
         btn.addEventListener('click', function() {
           bootstrap.Offcanvas.getOrCreateInstance(ocEl).show();
@@ -300,12 +251,6 @@
       }
       document.getElementById('perPageSelect')?.addEventListener('change', function() {
         document.getElementById('filtersForm')?.submit();
-      });
-      document.querySelectorAll('#filterPlan, #filterStatus').forEach(function(el) {
-        el.addEventListener('change', function() { document.getElementById('filtersFormSide')?.submit(); });
-      });
-      document.querySelectorAll('#filterDateFrom, #filterDateTo').forEach(function(el) {
-        el.addEventListener('change', function() { document.getElementById('filtersFormSide')?.submit(); });
       });
     }
     if (document.readyState === 'complete') { init(); } else { window.addEventListener('load', init); }

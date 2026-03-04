@@ -39,6 +39,15 @@ class TenantController extends Controller
             $query->doesntHave('users');
         }
 
+        $dateFrom = $request->get('date_from');
+        $dateTo = $request->get('date_to');
+        if ($dateFrom) {
+            $query->whereDate('created_at', '>=', $dateFrom);
+        }
+        if ($dateTo) {
+            $query->whereDate('created_at', '<=', $dateTo);
+        }
+
         $tenants = $query->paginate($perPage)->withQueryString();
 
         $totalTenants = Tenant::count();
@@ -53,6 +62,8 @@ class TenantController extends Controller
             'recentTenants' => $recentTenants,
             'filterPlan' => $request->get('plan', ''),
             'filterStatus' => $request->get('status', ''),
+            'filterDateFrom' => $dateFrom ?? '',
+            'filterDateTo' => $dateTo ?? '',
         ]);
     }
 
