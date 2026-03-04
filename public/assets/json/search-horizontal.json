@@ -298,11 +298,6 @@
         "url": "pages-pricing.html"
       },
       {
-        "name": "Error",
-        "icon": "tabler-alert-circle",
-        "url": "pages-misc-error.html"
-      },
-      {
         "name": "Under Maintenance",
         "icon": "tabler-barrier-block",
         "url": "pages-misc-under-maintenance.html"

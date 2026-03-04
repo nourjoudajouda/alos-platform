@@ -177,7 +177,11 @@ class Helpers
     // Get Header type from cookie or fall back to config
     $headerTypeFromCookie = isset($_COOKIE['headerType']) ? $_COOKIE['headerType'] : $data['headerType'];
 
-    $directionVal = isset($_COOKIE['direction']) ? ($_COOKIE['direction'] === 'true' ? 'rtl' : 'ltr') : $data['myRTLMode'];
+    // Direction: cookie overrides; otherwise follow app locale (ar = rtl, else ltr)
+    $locale = app()->getLocale();
+    $rtlLocales = config('localization.rtl_locales', ['ar']);
+    $directionFromLocale = in_array($locale, $rtlLocales, true) ? 'rtl' : 'ltr';
+    $directionVal = isset($_COOKIE['direction']) ? ($_COOKIE['direction'] === 'true' ? 'rtl' : 'ltr') : $directionFromLocale;
 
     //layout classes
     $layoutClasses = [
@@ -235,14 +239,13 @@ class Helpers
       $layoutClasses['footerFixed'] = 'layout-footer-fixed';
     }
 
-    // RTL Layout/Mode
-    if ($layoutClasses['rtlMode'] == true) {
-      $layoutClasses['rtlMode'] = 'rtl';
-      $layoutClasses['textDirection'] = isset($_COOKIE['direction']) ? ($_COOKIE['direction'] === 'true' ? 'rtl' : 'ltr') : 'rtl';
+    // RTL Layout/Mode: respect cookie, else direction from locale
+    if (isset($_COOKIE['direction'])) {
+      $layoutClasses['textDirection'] = $_COOKIE['direction'] === 'true' ? 'rtl' : 'ltr';
     } else {
-      $layoutClasses['rtlMode'] = 'ltr';
-      $layoutClasses['textDirection'] = isset($_COOKIE['direction']) && $_COOKIE['direction'] === 'true' ? 'rtl' : 'ltr';
+      $layoutClasses['textDirection'] = $directionFromLocale;
     }
+    $layoutClasses['rtlMode'] = $layoutClasses['textDirection'] === 'rtl' ? 'rtl' : 'ltr';
 
     // Show DropdownOnHover for Horizontal Menu
     if ($layoutClasses['showDropdownOnHover'] == true) {

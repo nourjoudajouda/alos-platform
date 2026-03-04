@@ -39,7 +39,7 @@ use Illuminate\Support\Facades\Route;
   </div>
   <ul class="navbar-nav flex-row align-items-center ms-auto">
     <!-- Language / Text size -->
-    <li class="nav-item dropdown me-2 me-xl-0">
+    <li class="nav-item navbar-dropdown dropdown me-2 me-xl-0">
       <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);" data-bs-toggle="dropdown" aria-label="Language">
         @include('_partials.navbar-icons', ['name' => 'language', 'class' => 'icon-md'])
       </a>
@@ -50,7 +50,7 @@ use Illuminate\Support\Facades\Route;
       </ul>
     </li>
     <!-- Theme -->
-    <li class="nav-item dropdown me-2 me-xl-0">
+    <li class="nav-item navbar-dropdown dropdown me-2 me-xl-0">
       <a class="nav-link dropdown-toggle hide-arrow p-0" id="nav-theme" href="javascript:void(0);" data-bs-toggle="dropdown" aria-label="Toggle theme">
         @include('_partials.navbar-icons', ['name' => 'sun', 'class' => 'icon-md theme-icon-active'])
       </a>
@@ -73,7 +73,7 @@ use Illuminate\Support\Facades\Route;
       </ul>
     </li>
     <!-- Apps (grid) -->
-    <li class="nav-item dropdown me-2 me-xl-0">
+    <li class="nav-item navbar-dropdown dropdown me-2 me-xl-0">
       <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);" data-bs-toggle="dropdown" aria-label="Apps">
         @include('_partials.navbar-icons', ['name' => 'apps', 'class' => 'icon-md'])
       </a>
@@ -86,7 +86,7 @@ use Illuminate\Support\Facades\Route;
       </ul>
     </li>
     <!-- Notifications -->
-    <li class="nav-item dropdown me-2 me-xl-0">
+    <li class="nav-item navbar-dropdown dropdown-notifications dropdown me-2 me-xl-0">
       <a class="nav-link dropdown-toggle hide-arrow p-0 position-relative" href="javascript:void(0);" data-bs-toggle="dropdown" aria-label="Notifications">
         @include('_partials.navbar-icons', ['name' => 'bell', 'class' => 'icon-md'])
         <span class="badge rounded-pill bg-danger position-absolute top-0 end-0 translate-middle-y me-1">5</span>
@@ -151,12 +151,6 @@ use Illuminate\Support\Facades\Route;
             href="{{ Route::has('profile.show') ? route('profile.show') : 'javascript:void(0);' }}">
             <i class="icon-base ti tabler-user me-3 icon-md"></i><span class="align-middle">My Profile</span> </a>
         </li>
-        @if (Auth::check() && Laravel\Jetstream\Jetstream::hasApiFeatures())
-        <li>
-          <a class="dropdown-item" href="{{ route('api-tokens.index') }}">
-            <i class="icon-base ti tabler-settings me-3 icon-md"></i><span class="align-middle">API Tokens</span> </a>
-        </li>
-        @endif
         <li>
           <a class="dropdown-item" href="javascript:void(0);">
             <span class="d-flex align-items-center align-middle">
@@ -166,48 +160,6 @@ use Illuminate\Support\Facades\Route;
             </span>
           </a>
         </li>
-        @if (Auth::User() && Laravel\Jetstream\Jetstream::hasTeamFeatures())
-        <li>
-          <div class="dropdown-divider my-1 mx-n2"></div>
-        </li>
-        <li>
-          <h6 class="dropdown-header">Manage Team</h6>
-        </li>
-        <li>
-          <div class="dropdown-divider my-1"></div>
-        </li>
-        <li>
-          <a class="dropdown-item"
-            href="{{ Auth::user() ? route('teams.show', Auth::user()->currentTeam->id) : 'javascript:void(0)' }}">
-            <i class="icon-base ti tabler-settings icon-md me-3"></i><span>Team Settings</span>
-          </a>
-        </li>
-        @can('create', Laravel\Jetstream\Jetstream::newTeamModel())
-        <li>
-          <a class="dropdown-item" href="{{ route('teams.create') }}">
-            <i class="icon-base ti tabler-user-plus icon-md me-3"></i><span>Create New Team</span>
-          </a>
-        </li>
-        @endcan
-        @if (Auth::user()->allTeams()->count() > 1)
-        <li>
-          <div class="dropdown-divider my-1"></div>
-        </li>
-        <li>
-          <h6 class="dropdown-header">Switch Teams</h6>
-        </li>
-        <li>
-          <div class="dropdown-divider my-1"></div>
-        </li>
-        @endif
-        @if (Auth::user())
-        @foreach (Auth::user()->allTeams() as $team)
-        {{-- Below commented code read by artisan command while installing jetstream. !! Do not remove if you want to use jetstream. --}}
-
-        {{-- <x-switchable-team :team="$team" /> --}}
-        @endforeach
-        @endif
-        @endif
         <li>
           <div class="dropdown-divider my-1 mx-n2"></div>
         </li>
@@ -225,7 +177,7 @@ use Illuminate\Support\Facades\Route;
         <li>
           <div class="d-grid px-2 pt-2 pb-1">
             <a class="btn btn-sm btn-danger d-flex"
-              href="{{ Route::has('login') ? route('login') : url('auth/login-basic') }}" target="_blank">
+              href="{{ route('login') }}">
               <small class="align-middle">Login</small>
               <i class="icon-base ti tabler-login ms-2 icon-14px"></i>
             </a>

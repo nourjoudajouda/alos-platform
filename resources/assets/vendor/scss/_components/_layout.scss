@@ -363,7 +363,7 @@
 /* Navbar require high z-index as we use z-index for menu slide-out for below large screen */
 @include media-breakpoint-down($menu-collapsed-layout-breakpoint) {
   .layout-navbar {
-    z-index: $zindex-menu-fixed;
+    z-index: $zindex-menu-fixed + 10;
   }
 }
 
@@ -835,15 +835,20 @@ html:not(.layout-footer-fixed) .content-wrapper {
 /* Z-Indexes
 ******************************************************************************* */
 
-/* Navbar (fixed) */
+/* Navbar (fixed) - above buy-now and other fixed elements so dropdowns display correctly */
 body:not(.modal-open) {
   .layout-navbar-full .layout-navbar {
-    z-index: $zindex-menu-fixed;
+    z-index: $zindex-menu-fixed + 10;
   }
 
   .layout-content-navbar .layout-navbar {
-    z-index: $zindex-menu-fixed - 5;
+    z-index: $zindex-menu-fixed + 5;
   }
+}
+
+/* Navbar dropdowns: ensure they stack above everything inside navbar */
+.layout-navbar .navbar-nav .dropdown-menu {
+  z-index: $zindex-menu-fixed + 11;
 }
 
 // Footer (fixed)

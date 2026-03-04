@@ -1,37 +1,16 @@
 {
   "menu": [
     {
-      "url": "/",
-      "name": "Home",
-      "icon": "menu-icon icon-base ti tabler-smart-home",
-      "slug": "pages-home"
+      "url": "/core/dashboard",
+      "name": "Dashboard",
+      "icon": "menu-icon icon-base ti tabler-layout-dashboard",
+      "slug": "core.dashboard"
     },
     {
-      "url": "/page-2",
-      "icon": "menu-icon icon-base ti tabler-file",
-      "name": "Page 2",
-      "slug": "pages-page-2"
-    },
-    {
-      "url": "/pages/misc-error",
-      "name": "Error",
-      "icon": "menu-icon icon-base ti tabler-alert-triangle",
-      "slug": "pages-misc-error",
-      "target": "_blank"
-    },
-    {
-      "url": "/auth/login-basic",
-      "name": "Login",
-      "icon": "menu-icon icon-base ti tabler-login",
-      "slug": "auth-login-basic",
-      "target": "_blank"
-    },
-    {
-      "url": "/auth/register-basic",
-      "name": "Register",
-      "icon": "menu-icon icon-base ti tabler-user",
-      "slug": "auth-register-basic",
-      "target": "_blank"
+      "url": "/core/tenants",
+      "name": "Tenants",
+      "icon": "menu-icon icon-base ti tabler-building-store",
+      "slug": "core.tenants"
     }
   ]
 }

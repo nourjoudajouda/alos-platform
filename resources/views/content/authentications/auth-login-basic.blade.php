@@ -42,11 +42,16 @@ $customizerHidden = 'customizer-hide';
           <h4 class="mb-1">Welcome to {{ config('variables.templateName') }}! 👋</h4>
           <p class="mb-6">Please sign-in to your account and start the adventure</p>
 
-          <form id="formAuthentication" class="mb-4" action="{{ url('/') }}" method="GET">
+          <form id="formAuthentication" class="mb-4" action="{{ route('login.store') }}" method="POST">
+            @csrf
             <div class="mb-6 form-control-validation">
-              <label for="email" class="form-label">Email or Username</label>
-              <input type="text" class="form-control" id="email" name="email-username"
-                placeholder="Enter your email or username" autofocus />
+              <label for="email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="email" name="email"
+                value="{{ old('email') }}"
+                placeholder="Enter your email" autofocus required />
+              @error('email')
+                <div class="invalid-feedback d-block">{{ $message }}</div>
+              @enderror
             </div>
             <div class="mb-6 form-password-toggle form-control-validation">
               <label class="form-label" for="password">Password</label>
@@ -60,7 +65,7 @@ $customizerHidden = 'customizer-hide';
             <div class="my-8">
               <div class="d-flex justify-content-between">
                 <div class="form-check mb-0 ms-2">
-                  <input class="form-check-input" type="checkbox" id="remember-me" />
+                  <input class="form-check-input" type="checkbox" id="remember-me" name="remember" value="1" />
                   <label class="form-check-label" for="remember-me"> Remember Me </label>
                 </div>
                 <a href="javascript:void(0);">
@@ -75,7 +80,7 @@ $customizerHidden = 'customizer-hide';
 
           <p class="text-center">
             <span>New on our platform?</span>
-            <a href="{{ url('auth/register-basic') }}">
+            <a href="{{ route('register') }}">
               <span>Create an account</span>
             </a>
           </p>

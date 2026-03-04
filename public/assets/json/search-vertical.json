@@ -2,57 +2,52 @@
   "navigation": {
     "Dashboard": [
       {
-        "name": "Home",
-        "icon": "tabler-smart-home",
-        "url": "/"
+        "name": "Dashboard",
+        "icon": "tabler-layout-dashboard",
+        "url": "/core/dashboard"
       },
       {
-        "name": "Page 2",
-        "icon": "tabler-file-text",
-        "url": "/page-2"
-      }
-    ],
-    "Pages": [
-      {
-        "name": "Error",
-        "icon": "tabler-alert-triangle",
-        "url": "/pages/misc-error"
-      },
-      {
-        "name": "Login",
-        "icon": "tabler-login",
-        "url": "/auth/login-basic"
-      },
-      {
-        "name": "Register",
-        "icon": "tabler-user-plus",
-        "url": "/auth/register-basic"
-      }
-    ]
-  },
-  "suggestions": {
-    "Popular": [
-      {
-        "name": "Home",
-        "icon": "tabler-smart-home",
-        "url": "/"
-      },
-      {
-        "name": "Page 2",
-        "icon": "tabler-file-text",
-        "url": "/page-2"
+        "name": "Tenants",
+        "icon": "tabler-building-store",
+        "url": "/core/tenants"
       }
     ],
     "Auth": [
       {
         "name": "Login",
         "icon": "tabler-login",
-        "url": "/auth/login-basic"
+        "url": "/login"
       },
       {
         "name": "Register",
         "icon": "tabler-user-plus",
-        "url": "/auth/register-basic"
+        "url": "/register"
+      }
+    ]
+  },
+  "suggestions": {
+    "Popular": [
+      {
+        "name": "Dashboard",
+        "icon": "tabler-layout-dashboard",
+        "url": "/core/dashboard"
+      },
+      {
+        "name": "Tenants",
+        "icon": "tabler-building-store",
+        "url": "/core/tenants"
+      }
+    ],
+    "Auth": [
+      {
+        "name": "Login",
+        "icon": "tabler-login",
+        "url": "/login"
+      },
+      {
+        "name": "Register",
+        "icon": "tabler-user-plus",
+        "url": "/register"
       }
     ]
   }
