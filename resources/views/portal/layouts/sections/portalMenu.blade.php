@@ -25,5 +25,11 @@
         <div>{{ __('Dashboard') }}</div>
       </a>
     </li>
+    <li class="menu-item {{ str_starts_with($currentRouteName ?? '', 'portal.messages') ? 'active' : '' }}">
+      <a href="{{ route('portal.messages.index') }}" class="menu-link">
+        <i class="icon-base ti tabler-message"></i>
+        <div>{{ __('Messages') }}</div>
+      </a>
+    </li>
   </ul>
 </aside>

@@ -128,13 +128,20 @@
       </div>
     </div>
 
-    {{-- Messages (placeholder) --}}
+    {{-- Messages — ALOS-S1-09 Secure Messaging --}}
     <div class="tab-pane fade {{ $activeTab === 'messages' ? 'show active' : '' }}" role="tabpanel">
       <div class="card">
-        <div class="card-body text-center py-5">
-          <i class="icon-base ti tabler-message icon-32px text-muted d-block mb-3"></i>
-          <h6 class="mb-2">{{ __('Messages') }}</h6>
-          <p class="text-muted small mb-0">{{ __('This section will be available in a future release.') }}</p>
+        <div class="card-header d-flex align-items-center justify-content-between">
+          <h5 class="card-title mb-0">{{ __('Messages') }}</h5>
+          <a href="{{ route('core.clients.threads.index', $client) }}" class="btn btn-primary btn-sm">
+            <i class="icon-base ti tabler-message {{ $contentDir === 'rtl' ? 'ms-1' : 'me-1' }}"></i>
+            {{ __('View conversations') }}
+          </a>
+        </div>
+        <div class="card-body">
+          <p class="text-muted small mb-0">
+            {{ __('Secure messaging between the office and this client. Only team members with access to this client can view and reply.') }}
+          </p>
         </div>
       </div>
     </div>
@@ -172,10 +179,11 @@
               <div class="row g-3">
                 <div class="col-md-6">
                   <label for="lead_lawyer_id" class="form-label">{{ __('Lead Lawyer') }}</label>
+                  @php $selectedLeadId = (int) (old('lead_lawyer_id', $leadLawyer?->id)); @endphp
                   <select name="lead_lawyer_id" id="lead_lawyer_id" class="form-select select2-team-access">
                     <option value="">{{ __('None') }}</option>
                     @foreach($assignableUsers as $u)
-                      <option value="{{ $u->id }}" {{ (old('lead_lawyer_id', $leadLawyer?->id) == $u->id) ? 'selected' : '' }}>{{ $u->name }} @if($u->email)({{ $u->email }})@endif</option>
+                      <option value="{{ $u->id }}" {{ $selectedLeadId === (int) $u->id ? 'selected' : '' }}>{{ $u->name }} @if($u->email)({{ $u->email }})@endif</option>
                     @endforeach
                   </select>
                   <div class="form-text small">{{ __('The main lawyer responsible for this client.') }}</div>

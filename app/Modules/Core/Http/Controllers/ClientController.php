@@ -128,13 +128,21 @@ class ClientController extends Controller
      */
     public function updateTeamAccess(Request $request, Client $client): RedirectResponse
     {
+        // Normalize Select2: empty string or empty array => null so validation passes
+        $leadInput = $request->input('lead_lawyer_id');
+        if ($leadInput === '' || $leadInput === []) {
+            $request->merge(['lead_lawyer_id' => null]);
+        } elseif (is_array($leadInput)) {
+            $request->merge(['lead_lawyer_id' => ! empty($leadInput) ? (int) reset($leadInput) : null]);
+        }
+
         $validated = $request->validate([
             'lead_lawyer_id' => ['nullable', 'integer', 'exists:users,id'],
             'assigned_user_ids' => ['nullable', 'array'],
             'assigned_user_ids.*' => ['integer', 'exists:users,id'],
         ]);
 
-        $leadId = $validated['lead_lawyer_id'] ?? null;
+        $leadId = isset($validated['lead_lawyer_id']) && $validated['lead_lawyer_id'] !== '' ? (int) $validated['lead_lawyer_id'] : null;
         $assignedIds = $validated['assigned_user_ids'] ?? [];
         $assignedIds = array_unique(array_map('intval', $assignedIds));
 

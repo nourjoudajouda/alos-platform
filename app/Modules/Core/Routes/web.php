@@ -2,6 +2,7 @@
 
 use App\Modules\Core\Http\Controllers\ClientController;
 use App\Modules\Core\Http\Controllers\DashboardController;
+use App\Modules\Core\Http\Controllers\MessageThreadController;
 use App\Modules\Core\Http\Controllers\PermissionController;
 use App\Modules\Core\Http\Controllers\RoleController;
 use App\Modules\Core\Http\Controllers\TenantController;
@@ -40,6 +41,14 @@ Route::middleware(['auth', 'not_client_portal'])->prefix('core/clients')->name('
     Route::put('/{client}/portal-user', [ClientController::class, 'updatePortalUser'])->name('portal-user.update');
     Route::post('/{client}/portal-user/toggle', [ClientController::class, 'togglePortalStatus'])->name('portal-user.toggle');
     Route::delete('/{client}', [ClientController::class, 'destroy'])->name('destroy');
+
+    // ALOS-S1-09 — Secure Messaging (office side)
+    Route::get('/{client}/threads', [MessageThreadController::class, 'index'])->name('threads.index');
+    Route::post('/{client}/threads', [MessageThreadController::class, 'store'])->name('threads.store');
+    Route::get('/{client}/threads/{thread}', [MessageThreadController::class, 'show'])->name('threads.show');
+    Route::post('/{client}/threads/{thread}/messages', [MessageThreadController::class, 'storeMessage'])->name('threads.messages.store');
+    Route::post('/{client}/threads/{thread}/archive', [MessageThreadController::class, 'archive'])->name('threads.archive');
+    Route::get('/{client}/threads/{thread}/attachments/{attachment}', [MessageThreadController::class, 'downloadAttachment'])->name('threads.attachments.download');
 });
 
 // Tenants CRUD — بنفس آلية Advocate SaaS Companies
