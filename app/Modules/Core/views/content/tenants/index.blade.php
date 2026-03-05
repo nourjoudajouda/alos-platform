@@ -1,314 +1,162 @@
 @php
+  $crudIndexId = 'tenants';
+  $crudIndexTitle = __('Tenants') . ' — ' . config('app.name');
+  $crudIndexFiltersAction = route('core.tenants.index');
+  $crudIndexPerPage = $perPage;
+  $crudIndexTableTitle = __('Tenants');
+  $crudIndexAddUrl = route('core.tenants.create');
+  $crudIndexAddLabel = __('Add Tenant');
+  $crudIndexEmptyMessage = __('No tenants yet.');
+  $crudIndexEmptyLink = route('core.tenants.create');
+  $crudIndexEmptyLinkText = __('Add Tenant');
+  $crudIndexShowViewToggle = true;
+  $items = $tenants;
   $configData = Helper::appClasses();
-  $isRtl = ($configData['textDirection'] ?? 'ltr') === 'rtl';
   $contentDir = app()->getLocale() === 'ar' ? 'rtl' : 'ltr';
   $totalTenants = $totalTenants ?? 0;
   $tenantsWithUsers = $tenantsWithUsers ?? 0;
   $recentTenants = $recentTenants ?? 0;
   $withoutUsers = $totalTenants - $tenantsWithUsers;
 @endphp
-@extends('core::layouts.layoutMaster')
+@extends('core::layouts.crud-index-layout')
 
-@section('title', __('Tenants') . ' — ' . config('app.name'))
-
-@section('page-style')
-@include('core::_partials.crud-table-styles')
+@section('crud_description')
+  {{ __('Tenants are the law firms / organizations. Each tenant is one office. Here you manage all tenants in the platform.') }}
 @endsection
 
-@section('content')
-<div class="container-xxl flex-grow-1 container-p-y" dir="{{ $contentDir }}">
-  {{-- Vuexy User List style: إحصائيات علوية (4 كروت) --}}
-  <div class="row g-4 mb-4">
-    <div class="col-sm-6 col-xl-3">
-      <div class="card h-100">
-        <div class="card-body d-flex align-items-start justify-content-between">
-          <div class="me-3">
-            <p class="card-title mb-1 text-muted small">{{ __('Total Tenants') }}</p>
-            <h4 class="mb-0 fw-bold">{{ $totalTenants }}</h4>
-            <small class="text-muted">{{ __('Tenants') }}</small>
-          </div>
-          <div class="avatar flex-shrink-0">
-            <span class="avatar-initial rounded bg-label-primary">
-              <i class="icon-base ti tabler-building-store icon-24px"></i>
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
-      <div class="card h-100">
-        <div class="card-body d-flex align-items-start justify-content-between">
-          <div class="me-3">
-            <p class="card-title mb-1 text-muted small">{{ __('With Users') }}</p>
-            <h4 class="mb-0 fw-bold">{{ $tenantsWithUsers }}</h4>
-            <small class="text-muted">{{ __('Tenants') }}</small>
-          </div>
-          <div class="avatar flex-shrink-0">
-            <span class="avatar-initial rounded bg-label-success">
-              <i class="icon-base ti tabler-users icon-24px"></i>
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
-      <div class="card h-100">
-        <div class="card-body d-flex align-items-start justify-content-between">
-          <div class="me-3">
-            <p class="card-title mb-1 text-muted small">{{ __('Last 30 days') }}</p>
-            <h4 class="mb-0 fw-bold">{{ $recentTenants }}</h4>
-            <small class="text-muted">{{ __('Tenants') }}</small>
-          </div>
-          <div class="avatar flex-shrink-0">
-            <span class="avatar-initial rounded bg-label-info">
-              <i class="icon-base ti tabler-calendar icon-24px"></i>
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
-      <div class="card h-100">
-        <div class="card-body d-flex align-items-start justify-content-between">
-          <div class="me-3">
-            <p class="card-title mb-1 text-muted small">{{ __('Without Users') }}</p>
-            <h4 class="mb-0 fw-bold">{{ $withoutUsers }}</h4>
-            <small class="text-muted">{{ __('Tenants') }}</small>
-          </div>
-          <div class="avatar flex-shrink-0">
-            <span class="avatar-initial rounded bg-label-secondary">
-              <i class="icon-base ti tabler-user-off icon-24px"></i>
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+@section('crud_stats')
+  @include('core::_partials.crud-stat-card', ['title' => __('Total Tenants'), 'value' => $totalTenants, 'subtitle' => __('Tenants'), 'icon' => 'ti tabler-building-store', 'bgLabel' => 'primary'])
+  @include('core::_partials.crud-stat-card', ['title' => __('With Users'), 'value' => $tenantsWithUsers, 'subtitle' => __('Tenants'), 'icon' => 'ti tabler-users', 'bgLabel' => 'success'])
+  @include('core::_partials.crud-stat-card', ['title' => __('Last 30 days'), 'value' => $recentTenants, 'subtitle' => __('Tenants'), 'icon' => 'ti tabler-calendar', 'bgLabel' => 'info'])
+  @include('core::_partials.crud-stat-card', ['title' => __('Without Users'), 'value' => $withoutUsers, 'subtitle' => __('Tenants'), 'icon' => 'ti tabler-user-off', 'bgLabel' => 'secondary'])
+@endsection
 
-  {{-- بطاقة Filters — Per Page + زر فلتر (يفتح قائمة جانبية فيها Plan و Status فقط) + Search + عرض --}}
-  <div class="card mb-4">
-    <div class="card-header py-3">
-      <h5 class="card-title mb-0">{{ __('Filters') }}</h5>
+@section('crud_filters_hidden_inputs')
+  @if(request('plan'))<input type="hidden" name="plan" value="{{ request('plan') }}">@endif
+  @if(request('status'))<input type="hidden" name="status" value="{{ request('status') }}">@endif
+  @if(request('date_from'))<input type="hidden" name="date_from" value="{{ request('date_from') }}">@endif
+  @if(request('date_to'))<input type="hidden" name="date_to" value="{{ request('date_to') }}">@endif
+@endsection
+
+@section('crud_offcanvas')
+  <form action="{{ route('core.tenants.index') }}" method="get" id="filtersFormSide">
+    <input type="hidden" name="per_page" value="{{ $perPage }}">
+    <input type="hidden" name="search" value="{{ request('search') }}">
+    @if(request('view'))<input type="hidden" name="view" value="{{ request('view') }}">@endif
+    <div class="mb-3">
+      <label for="filterDateFrom" class="form-label">{{ __('From date') }}</label>
+      <input type="date" name="date_from" id="filterDateFrom" class="form-control" value="{{ $filterDateFrom ?? '' }}">
+      <div class="form-text small">{{ __('Filter tenants created from this date') }}</div>
     </div>
-    <div class="card-body">
-      <form action="{{ route('core.tenants.index') }}" method="get" id="filtersForm">
-        @if(request('plan'))<input type="hidden" name="plan" value="{{ request('plan') }}">@endif
-        @if(request('status'))<input type="hidden" name="status" value="{{ request('status') }}">@endif
-        @if(request('date_from'))<input type="hidden" name="date_from" value="{{ request('date_from') }}">@endif
-        @if(request('date_to'))<input type="hidden" name="date_to" value="{{ request('date_to') }}">@endif
-        <div class="d-flex flex-column flex-md-row flex-wrap align-items-stretch align-items-md-end gap-3">
-          <div class="d-flex flex-wrap align-items-end gap-3">
-            <div class="filter-field">
-              <label for="perPageSelect" class="form-label small text-muted mb-1">{{ __('Per Page') }}</label>
-              <select name="per_page" id="perPageSelect" class="form-select form-select-sm" style="width: 5rem;">
-                @foreach([10, 25, 50, 100] as $n)
-                  <option value="{{ $n }}" {{ (int) $perPage === $n ? 'selected' : '' }}>{{ $n }}</option>
-                @endforeach
-              </select>
-            </div>
-            <div class="filter-field">
-              <label class="form-label small text-muted mb-1 d-block">{{ __('Filters') }}</label>
-              <button type="button" class="btn btn-outline-primary btn-sm" id="tenantsFiltersBtn" aria-controls="tenantsFiltersOffcanvas">
-                <i class="icon-base ti tabler-filter {{ $isRtl ? 'ms-1' : 'me-1' }}"></i>
-                {{ __('Filters') }}
-              </button>
-            </div>
+    <div class="mb-3">
+      <label for="filterDateTo" class="form-label">{{ __('To date') }}</label>
+      <input type="date" name="date_to" id="filterDateTo" class="form-control" value="{{ $filterDateTo ?? '' }}">
+      <div class="form-text small">{{ __('Filter tenants created until this date') }}</div>
+    </div>
+    <div class="mb-3">
+      <label for="filterPlan" class="form-label">{{ __('Filter by Plan') }}</label>
+      <select name="plan" id="filterPlan" class="form-select">
+        <option value="">{{ __('All') }}</option>
+        @foreach(\App\Models\Tenant::PLANS as $p)
+          <option value="{{ $p }}" {{ ($filterPlan ?? '') === $p ? 'selected' : '' }}>{{ __(ucfirst($p)) }}</option>
+        @endforeach
+      </select>
+    </div>
+    <div class="mb-3">
+      <label for="filterStatus" class="form-label">{{ __('Filter by Status') }}</label>
+      <select name="status" id="filterStatus" class="form-select">
+        <option value="">{{ __('All') }}</option>
+        <option value="active" {{ ($filterStatus ?? '') === 'active' ? 'selected' : '' }}>{{ __('Active') }}</option>
+        <option value="pending" {{ ($filterStatus ?? '') === 'pending' ? 'selected' : '' }}>{{ __('Pending') }}</option>
+      </select>
+    </div>
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-primary flex-grow-1">{{ __('Search') }}</button>
+      <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">{{ __('Close') }}</button>
+    </div>
+  </form>
+@endsection
+
+@section('crud_table_header')
+  <th>{{ __('Name') }}</th>
+  <th>{{ __('Created At') }}</th>
+  <th>{{ __('Plan') }}</th>
+  <th>{{ __('Status') }}</th>
+  <th class="text-nowrap" style="min-width: 7rem;">{{ __('Actions') }}</th>
+@endsection
+
+@section('crud_table_body')
+  @forelse($tenants as $tenant)
+    @php
+      $initials = strtoupper(mb_substr(preg_replace('/[^a-zA-Z0-9\p{Arabic}]/u', '', $tenant->name), 0, 2) ?: $tenant->slug);
+      if (mb_strlen($initials) > 2) $initials = mb_substr($initials, 0, 2);
+      $hasUsers = ($tenant->users_count ?? 0) > 0;
+    @endphp
+    <tr>
+      <td>
+        <div class="d-flex align-items-center gap-3">
+          <span class="avatar avatar-sm flex-shrink-0">
+            <span class="avatar-initial rounded bg-label-primary">{{ $initials }}</span>
+          </span>
+          <div>
+            <span class="fw-medium d-block">{{ $tenant->name }}</span>
+            <span class="text-muted small">{{ $tenant->slug }}</span>
           </div>
-          <div class="vr d-none d-md-block opacity-25 flex-shrink-0" style="align-self: stretch;"></div>
-          <div class="d-flex flex-wrap align-items-end gap-2 {{ $isRtl ? 'me-auto' : 'ms-md-auto' }}">
-            <div class="input-group input-group-merge" style="width: 12rem;">
-              <input type="search" name="search" class="form-control form-control-sm" placeholder="{{ __('Search placeholder') }}" value="{{ request('search') }}" aria-label="{{ __('Search') }}">
-              <button type="submit" class="btn btn-primary btn-sm" aria-label="{{ __('Search') }}">
-                <i class="icon-base ti tabler-search"></i>
-              </button>
-            </div>
-            <div class="btn-group btn-group-sm" role="group">
-              @php $currentView = request('view', 'list'); @endphp
-              <a href="{{ request()->fullUrlWithQuery(['view' => 'grid']) }}" class="btn {{ $currentView === 'grid' ? 'btn-primary' : 'btn-outline-secondary' }} btn-icon" title="{{ __('Grid view') }}">
-                <i class="icon-base ti tabler-layout-grid"></i>
-              </a>
-              <a href="{{ request()->fullUrlWithQuery(['view' => 'list']) }}" class="btn {{ $currentView === 'list' ? 'btn-primary' : 'btn-outline-secondary' }} btn-icon" title="{{ __('List view') }}">
-                <i class="icon-base ti tabler-list"></i>
-              </a>
-            </div>
-          </div>
         </div>
-      </form>
-    </div>
-  </div>
+      </td>
+      <td><span class="text-nowrap">{{ $tenant->created_at?->format('Y-m-d') }}</span></td>
+      <td>
+        @if($tenant->plan)
+          <span class="badge bg-label-primary">{{ __(ucfirst($tenant->plan)) }}</span>
+        @else
+          <span class="badge bg-label-secondary">—</span>
+        @endif
+      </td>
+      <td>
+        @if($hasUsers)
+          <span class="badge bg-label-success">{{ __('Active') }}</span>
+          <span class="text-muted small d-block mt-0">{{ __('with users') }}</span>
+        @else
+          <span class="badge bg-label-warning">{{ __('Pending') }}</span>
+        @endif
+      </td>
+      <td class="text-nowrap">
+        <div class="table-actions">
+          <a href="{{ route('core.tenants.show', $tenant) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('View') }}">
+            <i class="icon-base ti tabler-eye"></i>
+          </a>
+          <a href="{{ route('core.tenants.edit', $tenant) }}" class="btn btn-icon btn-sm btn-text-warning rounded" title="{{ __('Edit') }}">
+            <i class="icon-base ti tabler-pencil"></i>
+          </a>
+          <form action="{{ route('core.tenants.destroy', $tenant) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Delete this tenant?') }}');">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn btn-icon btn-sm btn-text-danger rounded" title="{{ __('Delete') }}">
+              <i class="icon-base ti tabler-trash"></i>
+            </button>
+          </form>
+        </div>
+      </td>
+    </tr>
+  @empty
+    <tr>
+      <td colspan="5" class="text-center text-muted py-5">
+        <i class="icon-base ti tabler-building-store icon-32px d-block mb-2 opacity-50"></i>
+        {{ $crudIndexEmptyMessage }} <a href="{{ $crudIndexEmptyLink }}">{{ $crudIndexEmptyLinkText }}</a>
+      </td>
+    </tr>
+  @endforelse
+@endsection
 
-  {{-- قائمة جانبية — فيها Plan و Status فقط --}}
-  <div class="offcanvas offcanvas-{{ $isRtl ? 'start' : 'end' }}" tabindex="-1" id="tenantsFiltersOffcanvas" aria-labelledby="tenantsFiltersOffcanvasLabel">
-    <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="tenantsFiltersOffcanvasLabel">{{ __('Filters') }}</h5>
-      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="{{ __('Close') }}"></button>
-    </div>
-    <div class="offcanvas-body">
-      <form action="{{ route('core.tenants.index') }}" method="get" id="filtersFormSide">
-        <input type="hidden" name="per_page" value="{{ $perPage }}">
-        <input type="hidden" name="search" value="{{ request('search') }}">
-        @if(request('view'))<input type="hidden" name="view" value="{{ request('view') }}">@endif
-        <div class="mb-3">
-          <label for="filterDateFrom" class="form-label">{{ __('From date') }}</label>
-          <input type="date" name="date_from" id="filterDateFrom" class="form-control" value="{{ $filterDateFrom ?? '' }}" aria-describedby="filterDateFromHelp">
-          <div id="filterDateFromHelp" class="form-text small">{{ __('Filter tenants created from this date') }}</div>
-        </div>
-        <div class="mb-3">
-          <label for="filterDateTo" class="form-label">{{ __('To date') }}</label>
-          <input type="date" name="date_to" id="filterDateTo" class="form-control" value="{{ $filterDateTo ?? '' }}" aria-describedby="filterDateToHelp">
-          <div id="filterDateToHelp" class="form-text small">{{ __('Filter tenants created until this date') }}</div>
-        </div>
-        <div class="mb-3">
-          <label for="filterPlan" class="form-label">{{ __('Filter by Plan') }}</label>
-          <select name="plan" id="filterPlan" class="form-select">
-            <option value="">{{ __('All') }}</option>
-            @foreach(\App\Models\Tenant::PLANS as $p)
-              <option value="{{ $p }}" {{ ($filterPlan ?? '') === $p ? 'selected' : '' }}>{{ __(ucfirst($p)) }}</option>
-            @endforeach
-          </select>
-        </div>
-        <div class="mb-3">
-          <label for="filterStatus" class="form-label">{{ __('Filter by Status') }}</label>
-          <select name="status" id="filterStatus" class="form-select">
-            <option value="">{{ __('All') }}</option>
-            <option value="active" {{ ($filterStatus ?? '') === 'active' ? 'selected' : '' }}>{{ __('Active') }}</option>
-            <option value="pending" {{ ($filterStatus ?? '') === 'pending' ? 'selected' : '' }}>{{ __('Pending') }}</option>
-          </select>
-        </div>
-        <div class="d-flex gap-2">
-          <button type="submit" class="btn btn-primary flex-grow-1">{{ __('Search') }}</button>
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas" aria-label="{{ __('Close') }}">{{ __('Close') }}</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  {{-- Vuexy: بطاقة الجدول + Add Tenant في الهيدر (نفس تصميم كل CRUD) --}}
-  <div class="card crud-table tenants-table">
-    <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
-      <h5 class="card-title mb-0">{{ __('Tenants') }}</h5>
-      <a href="{{ route('core.tenants.create') }}" class="btn btn-primary">
-        <i class="icon-base ti tabler-plus icon-20px {{ $isRtl ? 'ms-1' : 'me-1' }}"></i>
-        {{ __('Add Tenant') }}
-      </a>
-    </div>
-    <div class="table-responsive">
-      <table class="table table-hover" dir="{{ $contentDir }}">
-        <thead>
-          <tr>
-            <th>{{ __('Name') }}</th>
-            <th>{{ __('Created At') }}</th>
-            <th>{{ __('Plan') }}</th>
-            <th>{{ __('Status') }}</th>
-            <th class="text-nowrap" style="min-width: 7rem;">{{ __('Actions') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          @forelse($tenants as $tenant)
-            @php
-              $initials = strtoupper(mb_substr(preg_replace('/[^a-zA-Z0-9\p{Arabic}]/u', '', $tenant->name), 0, 2) ?: $tenant->slug);
-              if (mb_strlen($initials) > 2) $initials = mb_substr($initials, 0, 2);
-              $hasUsers = ($tenant->users_count ?? 0) > 0;
-            @endphp
-            <tr>
-              <td>
-                <div class="d-flex align-items-center gap-3">
-                  <span class="avatar avatar-sm flex-shrink-0">
-                    <span class="avatar-initial rounded bg-label-primary">{{ $initials }}</span>
-                  </span>
-                  <div>
-                    <span class="fw-medium d-block">{{ $tenant->name }}</span>
-                    <span class="text-muted small">{{ $tenant->slug }}</span>
-                  </div>
-                </div>
-              </td>
-              <td><span class="text-nowrap">{{ $tenant->created_at?->format('Y-m-d') }}</span></td>
-              <td>
-                @if($tenant->plan)
-                  <span class="badge bg-label-primary">{{ __(ucfirst($tenant->plan)) }}</span>
-                @else
-                  <span class="badge bg-label-secondary">—</span>
-                @endif
-              </td>
-              <td>
-                @if($hasUsers)
-                  <span class="badge bg-label-success">{{ __('Active') }}</span>
-                  <span class="text-muted small d-block mt-0">{{ __('with users') }}</span>
-                @else
-                  <span class="badge bg-label-warning">{{ __('Pending') }}</span>
-                @endif
-              </td>
-              <td class="text-nowrap">
-                <div class="table-actions">
-                  <a href="{{ route('core.tenants.show', $tenant) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('View') }}">
-                    <i class="icon-base ti tabler-eye"></i>
-                  </a>
-                  <a href="{{ route('core.tenants.edit', $tenant) }}" class="btn btn-icon btn-sm btn-text-warning rounded" title="{{ __('Edit') }}">
-                    <i class="icon-base ti tabler-pencil"></i>
-                  </a>
-                  <form action="{{ route('core.tenants.destroy', $tenant) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Delete this tenant?') }}');">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-icon btn-sm btn-text-danger rounded" title="{{ __('Delete') }}">
-                      <i class="icon-base ti tabler-trash"></i>
-                    </button>
-                  </form>
-                </div>
-              </td>
-            </tr>
-          @empty
-            <tr>
-              <td colspan="5" class="text-center text-muted py-5">
-                <i class="icon-base ti tabler-building-store icon-32px d-block mb-2 opacity-50"></i>
-                {{ __('No tenants yet.') }} <a href="{{ route('core.tenants.create') }}">{{ __('Add Tenant') }}</a>
-              </td>
-            </tr>
-          @endforelse
-        </tbody>
-      </table>
-    </div>
-    @if($tenants->hasPages())
-      <div class="card-footer">
-        {{ $tenants->links() }}
-      </div>
-    @endif
-  </div>
-
-  @if(session('success'))
-    <div class="alert alert-success alert-dismissible mt-3" role="alert">
-      {{ session('success') }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-  @endif
-  @if(session('error'))
-    <div class="alert alert-danger alert-dismissible mt-3" role="alert">
-      {{ session('error') }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-  @endif
-</div>
-
+@section('crud_extra_script')
 <script>
-  (function() {
-    function init() {
-      var btn = document.getElementById('tenantsFiltersBtn');
-      var ocEl = document.getElementById('tenantsFiltersOffcanvas');
-      if (btn && ocEl && typeof bootstrap !== 'undefined' && bootstrap.Offcanvas) {
-        btn.addEventListener('click', function() {
-          bootstrap.Offcanvas.getOrCreateInstance(ocEl).show();
-        });
-      }
-      document.getElementById('perPageSelect')?.addEventListener('change', function() {
-        document.getElementById('filtersForm')?.submit();
-      });
-      document.querySelectorAll('#filterPlan, #filterStatus').forEach(function(el) {
-        el.addEventListener('change', function() { document.getElementById('filtersFormSide')?.submit(); });
-      });
-      document.querySelectorAll('#filterDateFrom, #filterDateTo').forEach(function(el) {
-        el.addEventListener('change', function() { document.getElementById('filtersFormSide')?.submit(); });
-      });
-    }
-    if (document.readyState === 'complete') { init(); } else { window.addEventListener('load', init); }
-  })();
+(function() {
+  var formSide = document.getElementById('filtersFormSide');
+  if (formSide) {
+    document.querySelectorAll('#filterPlan, #filterStatus, #filterDateFrom, #filterDateTo').forEach(function(el) {
+      if (el) el.addEventListener('change', function() { formSide.submit(); });
+    });
+  }
+})();
 </script>
 @endsection

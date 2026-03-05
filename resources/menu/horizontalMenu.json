@@ -13,6 +13,12 @@
       "slug": "core.tenants"
     },
     {
+      "url": "/core/clients",
+      "name": "Clients",
+      "icon": "menu-icon icon-base ti tabler-users-group",
+      "slug": "core.clients"
+    },
+    {
       "url": "/core/roles",
       "name": "Roles",
       "icon": "menu-icon icon-base ti tabler-shield",
@@ -23,6 +29,12 @@
       "name": "Permissions",
       "icon": "menu-icon icon-base ti tabler-key",
       "slug": "core.permissions"
+    },
+    {
+      "url": "/identity/users",
+      "name": "Internal Users",
+      "icon": "menu-icon icon-base ti tabler-users",
+      "slug": "identity.users"
     }
   ]
 }

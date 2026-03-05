@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\Core\Http\Controllers\ClientController;
 use App\Modules\Core\Http\Controllers\DashboardController;
 use App\Modules\Core\Http\Controllers\PermissionController;
 use App\Modules\Core\Http\Controllers\RoleController;
@@ -24,10 +25,25 @@ Route::get('/module-core', function () {
 
 Route::get('/core/dashboard', DashboardController::class)
     ->name('core.dashboard')
-    ->middleware('auth');
+    ->middleware(['auth', 'not_client_portal']);
+
+// Clients CRUD — ALOS-S1-06; ALOS-S1-07 Team Access (lead lawyer + assigned users); ALOS-S1-08 Portal
+Route::middleware(['auth', 'not_client_portal'])->prefix('core/clients')->name('core.clients.')->group(function () {
+    Route::get('/', [ClientController::class, 'index'])->name('index');
+    Route::get('/create', [ClientController::class, 'create'])->name('create');
+    Route::post('/', [ClientController::class, 'store'])->name('store');
+    Route::get('/{client}', [ClientController::class, 'show'])->name('show');
+    Route::get('/{client}/edit', [ClientController::class, 'edit'])->name('edit');
+    Route::put('/{client}', [ClientController::class, 'update'])->name('update');
+    Route::put('/{client}/team-access', [ClientController::class, 'updateTeamAccess'])->name('team-access.update');
+    Route::post('/{client}/portal-user', [ClientController::class, 'storePortalUser'])->name('portal-user.store');
+    Route::put('/{client}/portal-user', [ClientController::class, 'updatePortalUser'])->name('portal-user.update');
+    Route::post('/{client}/portal-user/toggle', [ClientController::class, 'togglePortalStatus'])->name('portal-user.toggle');
+    Route::delete('/{client}', [ClientController::class, 'destroy'])->name('destroy');
+});
 
 // Tenants CRUD — بنفس آلية Advocate SaaS Companies
-Route::middleware('auth')->prefix('core/tenants')->name('core.tenants.')->group(function () {
+Route::middleware(['auth', 'not_client_portal'])->prefix('core/tenants')->name('core.tenants.')->group(function () {
     Route::get('/', [TenantController::class, 'index'])->name('index');
     Route::get('/create', [TenantController::class, 'create'])->name('create');
     Route::post('/', [TenantController::class, 'store'])->name('store');
@@ -38,7 +54,7 @@ Route::middleware('auth')->prefix('core/tenants')->name('core.tenants.')->group(
 });
 
 // Roles & Permissions (Spatie)
-Route::middleware('auth')->prefix('core/roles')->name('core.roles.')->group(function () {
+Route::middleware(['auth', 'not_client_portal'])->prefix('core/roles')->name('core.roles.')->group(function () {
     Route::get('/', [RoleController::class, 'index'])->name('index');
     Route::get('/create', [RoleController::class, 'create'])->name('create');
     Route::post('/', [RoleController::class, 'store'])->name('store');
@@ -48,7 +64,7 @@ Route::middleware('auth')->prefix('core/roles')->name('core.roles.')->group(func
     Route::delete('/{role}', [RoleController::class, 'destroy'])->name('destroy');
 });
 
-Route::middleware('auth')->prefix('core/permissions')->name('core.permissions.')->group(function () {
+Route::middleware(['auth', 'not_client_portal'])->prefix('core/permissions')->name('core.permissions.')->group(function () {
     Route::get('/', [PermissionController::class, 'index'])->name('index');
     Route::get('/create', [PermissionController::class, 'create'])->name('create');
     Route::post('/', [PermissionController::class, 'store'])->name('store');

@@ -26,4 +26,12 @@ class Tenant extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    /**
+     * Clients belonging to this tenant (ALOS-S1-06).
+     */
+    public function clients(): HasMany
+    {
+        return $this->hasMany(Client::class);
+    }
 }

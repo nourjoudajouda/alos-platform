@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Services\TenantContext;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -22,6 +23,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        View::addNamespace('portal', resource_path('views/portal'));
     }
 }

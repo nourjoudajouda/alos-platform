@@ -28,6 +28,16 @@ class LoginBasic extends Controller
             ]);
         }
 
+        // ALOS-S1-08 — Client portal users must use /portal/login
+        if (Auth::user()->isClientPortalUser()) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            throw ValidationException::withMessages([
+                'email' => [__('Please sign in via the client portal.')],
+            ]);
+        }
+
         $request->session()->regenerate();
         return redirect()->intended(route('core.dashboard'));
     }
