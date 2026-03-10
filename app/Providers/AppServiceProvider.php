@@ -6,6 +6,7 @@ use App\Models\Admin;
 use App\Models\CaseModel;
 use App\Models\CaseSession;
 use App\Services\TenantContext;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
@@ -28,6 +29,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Paginator::useBootstrapFive();
+
         // Platform admins bypass all permission checks
         Gate::before(function ($user, $ability) {
             if ($user instanceof Admin) {

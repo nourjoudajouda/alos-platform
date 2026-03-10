@@ -121,10 +121,12 @@
   <div class="card crud-table {{ $cid }}-table">
     <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
       <h5 class="card-title mb-0">{{ $crudIndexTableTitle }}</h5>
+      @if(($crudIndexShowAddButton ?? true) && !empty($crudIndexAddUrl))
       <a href="{{ $crudIndexAddUrl }}" class="btn btn-primary">
         <i class="icon-base ti tabler-plus icon-20px {{ $isRtl ? 'ms-1' : 'me-1' }}"></i>
         {{ $crudIndexAddLabel }}
       </a>
+      @endif
     </div>
     <div class="table-responsive">
       <table class="table table-hover" dir="{{ $contentDir }}">

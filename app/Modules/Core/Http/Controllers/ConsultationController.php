@@ -3,6 +3,7 @@
 namespace App\Modules\Core\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Admin;
 use App\Models\Client;
 use App\Models\Consultation;
 use App\Models\MessageThread;
@@ -22,6 +23,9 @@ class ConsultationController extends Controller
     private function authorizeClient(Client $client): void
     {
         $user = auth()->user();
+        if ($user instanceof Admin) {
+            return;
+        }
         if ($user->isClientPortalUser()) {
             abort(403, __('Access denied.'));
         }
@@ -35,10 +39,14 @@ class ConsultationController extends Controller
         $this->authorizeClient($consultation->client);
     }
 
-    /** Client IDs the current user can access (team access). */
+    /** Client IDs the current user can access (team access; Admin sees all). */
     private function accessibleClientIds(): array
     {
-        return auth()->user()->clientAccess()->pluck('clients.id')->all();
+        $user = auth()->user();
+        if ($user instanceof Admin) {
+            return Client::pluck('id')->all();
+        }
+        return $user->clientAccess()->pluck('clients.id')->all();
     }
 
     public function index(Request $request): View
@@ -89,8 +97,9 @@ class ConsultationController extends Controller
             ? (int) $request->get('client_id') : null;
 
         $assignableUsers = User::whereNull('client_id')->orderBy('name')->get();
-        if (auth()->user()->tenant_id) {
-            $assignableUsers = User::where('tenant_id', auth()->user()->tenant_id)->whereNull('client_id')->orderBy('name')->get();
+        $authUser = auth()->user();
+        if (! $authUser instanceof Admin && $authUser->tenant_id) {
+            $assignableUsers = User::where('tenant_id', $authUser->tenant_id)->whereNull('client_id')->orderBy('name')->get();
         }
 
         return view('core::content.consultations.create', [
@@ -158,8 +167,9 @@ class ConsultationController extends Controller
         $clientIds = $this->accessibleClientIds();
         $clients = Client::whereIn('id', $clientIds)->orderBy('name')->get();
         $assignableUsers = User::whereNull('client_id')->orderBy('name')->get();
-        if (auth()->user()->tenant_id) {
-            $assignableUsers = User::where('tenant_id', auth()->user()->tenant_id)->whereNull('client_id')->orderBy('name')->get();
+        $authUser = auth()->user();
+        if (! $authUser instanceof Admin && $authUser->tenant_id) {
+            $assignableUsers = User::where('tenant_id', $authUser->tenant_id)->whereNull('client_id')->orderBy('name')->get();
         }
 
         return view('core::content.consultations.edit', [

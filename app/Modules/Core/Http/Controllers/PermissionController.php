@@ -3,7 +3,6 @@
 namespace App\Modules\Core\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Spatie\Permission\Models\Permission;
@@ -43,27 +42,6 @@ class PermissionController extends Controller
         ]);
     }
 
-    public function create(): View
-    {
-        return view('core::content.permissions.create');
-    }
-
-    public function store(Request $request): RedirectResponse
-    {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-        ]);
-
-        Permission::firstOrCreate([
-            'name' => $validated['name'],
-            'guard_name' => 'web',
-        ]);
-
-        return redirect()
-            ->route('admin.core.permissions.index')
-            ->with('success', __('Permission created successfully.'));
-    }
-
     public function show(Permission $permission): View
     {
         $permission->load('roles');
@@ -71,30 +49,4 @@ class PermissionController extends Controller
         return view('core::content.permissions.show', ['permission' => $permission]);
     }
 
-    public function edit(Permission $permission): View
-    {
-        return view('core::content.permissions.edit', ['permission' => $permission]);
-    }
-
-    public function update(Request $request, Permission $permission): RedirectResponse
-    {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-        ]);
-
-        $permission->update(['name' => $validated['name']]);
-
-        return redirect()
-            ->route('admin.core.permissions.index')
-            ->with('success', __('Permission updated successfully.'));
-    }
-
-    public function destroy(Permission $permission): RedirectResponse
-    {
-        $permission->delete();
-
-        return redirect()
-            ->route('admin.core.permissions.index')
-            ->with('success', __('Permission deleted successfully.'));
-    }
 }

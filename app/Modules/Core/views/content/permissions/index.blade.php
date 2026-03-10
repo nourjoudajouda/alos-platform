@@ -4,11 +4,12 @@
   $crudIndexFiltersAction = route('admin.core.permissions.index');
   $crudIndexPerPage = $perPage;
   $crudIndexTableTitle = __('Permissions');
-  $crudIndexAddUrl = route('admin.core.permissions.create');
-  $crudIndexAddLabel = __('Add Permission');
+  $crudIndexAddUrl = null;
+  $crudIndexAddLabel = null;
+  $crudIndexShowAddButton = false;
   $crudIndexEmptyMessage = __('No permissions yet.');
-  $crudIndexEmptyLink = route('admin.core.permissions.create');
-  $crudIndexEmptyLinkText = __('Add Permission');
+  $crudIndexEmptyLink = null;
+  $crudIndexEmptyLinkText = null;
   $crudIndexShowViewToggle = true;
   $items = $permissions;
   $managePermissions = ($createPermissions ?? 0) + ($editPermissions ?? 0) + ($deletePermissions ?? 0);
@@ -58,12 +59,6 @@
       <td class="text-nowrap">
         <div class="table-actions">
           <a href="{{ route('admin.core.permissions.show', $permission) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('View') }}"><i class="icon-base ti tabler-eye"></i></a>
-          <a href="{{ route('admin.core.permissions.edit', $permission) }}" class="btn btn-icon btn-sm btn-text-warning rounded" title="{{ __('Edit') }}"><i class="icon-base ti tabler-pencil"></i></a>
-          <form action="{{ route('admin.core.permissions.destroy', $permission) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Delete this permission?') }}');">
-            @csrf
-            @method('DELETE')
-            <button type="submit" class="btn btn-icon btn-sm btn-text-danger rounded" title="{{ __('Delete') }}"><i class="icon-base ti tabler-trash"></i></button>
-          </form>
         </div>
       </td>
     </tr>
@@ -71,7 +66,7 @@
     <tr>
       <td colspan="4" class="text-center text-muted py-5">
         <i class="icon-base ti tabler-key icon-32px d-block mb-2 opacity-50"></i>
-        {{ $crudIndexEmptyMessage }} <a href="{{ $crudIndexEmptyLink }}">{{ $crudIndexEmptyLinkText }}</a>
+        {{ $crudIndexEmptyMessage }}
       </td>
     </tr>
   @endforelse

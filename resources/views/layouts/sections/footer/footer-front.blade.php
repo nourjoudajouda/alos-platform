@@ -10,9 +10,7 @@
             <span class="app-brand-logo demo">@include('_partials.macros')</span>
             <span class="app-brand-text demo text-white fw-bold ms-2 ps-1">{{ config('variables.templateName') }}</span>
           </a>
-          <p class="footer-text footer-logo-description mb-6">Most developer friendly & highly customisable
-            Admin
-            Dashboard Template.</p>
+          <p class="footer-text footer-logo-description mb-6">{{ config('variables.templateDescription') }}</p>
           <form class="footer-form">
             <label for="footer-email" class="small">Subscribe to newsletter</label>
             <div class="d-flex mt-1">

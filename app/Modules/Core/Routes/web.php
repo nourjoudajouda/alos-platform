@@ -132,10 +132,5 @@ Route::middleware(['auth:admin'])->prefix('roles')->name('core.roles.')->group(f
 
 Route::middleware(['auth:admin'])->prefix('permissions')->name('core.permissions.')->group(function () {
     Route::get('/', [PermissionController::class, 'index'])->name('index');
-    Route::get('/create', [PermissionController::class, 'create'])->name('create');
-    Route::post('/', [PermissionController::class, 'store'])->name('store');
     Route::get('/{permission}', [PermissionController::class, 'show'])->name('show');
-    Route::get('/{permission}/edit', [PermissionController::class, 'edit'])->name('edit');
-    Route::put('/{permission}', [PermissionController::class, 'update'])->name('update');
-    Route::delete('/{permission}', [PermissionController::class, 'destroy'])->name('destroy');
 });

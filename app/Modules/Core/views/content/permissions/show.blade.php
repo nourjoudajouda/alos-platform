@@ -10,7 +10,6 @@
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
     <h4 class="fw-bold mb-0"><code>{{ $permission->name }}</code></h4>
     <div class="d-flex gap-2">
-      <a href="{{ route('admin.core.permissions.edit', $permission) }}" class="btn btn-warning btn-sm">{{ __('Edit') }}</a>
       <a href="{{ route('admin.core.permissions.index') }}" class="btn btn-outline-secondary btn-sm">{{ __('Back to list') }}</a>
     </div>
   </div>

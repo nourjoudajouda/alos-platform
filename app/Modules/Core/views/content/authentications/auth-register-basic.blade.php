@@ -4,7 +4,7 @@ $customizerHidden = 'customizer-hide';
 
 @extends('core::layouts.layoutMaster')
 
-@section('title', 'Register Basic - Pages')
+@section('title', __('Register') . ' — ' . config('app.name'))
 
 @section('vendor-style')
 <link rel="stylesheet" href="{{ asset('assets/vendor/libs/@form-validation/form-validation.css') }}" />
