@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 /**
  * مدير النظام — مصادقة لوحة الإدارة (/admin).
  * منفصل عن جدول users (يوزرز التيننت والبوابة).
+ * Platform admins have full access; no Spatie roles needed.
  */
 class Admin extends Authenticatable
 {
@@ -34,5 +34,11 @@ class Admin extends Authenticatable
     public function isClientPortalUser(): bool
     {
         return false;
+    }
+
+    /** Platform admins have full access; satisfy Spatie permission middleware without using HasRoles. */
+    public function hasAnyPermission(...$permissions): bool
+    {
+        return true;
     }
 }
