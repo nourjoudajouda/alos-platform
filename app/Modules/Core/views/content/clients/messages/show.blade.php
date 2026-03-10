@@ -12,8 +12,8 @@
     <div>
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb mb-1">
-          <li class="breadcrumb-item"><a href="{{ route('core.clients.show', $client) }}">{{ $client->name }}</a></li>
-          <li class="breadcrumb-item"><a href="{{ route('core.clients.threads.index', $client) }}">{{ __('Messages') }}</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('admin.core.clients.show', $client) }}">{{ $client->name }}</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('admin.core.clients.threads.index', $client) }}">{{ __('Messages') }}</a></li>
           <li class="breadcrumb-item active">{{ Str::limit($thread->subject, 40) }}</li>
         </ol>
       </nav>
@@ -23,8 +23,8 @@
       @endif
     </div>
     <div class="d-flex gap-2">
-      <a href="{{ route('core.clients.threads.index', $client) }}" class="btn btn-outline-secondary btn-sm">{{ __('Back to list') }}</a>
-      <form action="{{ route('core.clients.threads.archive', [$client, $thread]) }}" method="post" class="d-inline">
+      <a href="{{ route('admin.core.clients.threads.index', $client) }}" class="btn btn-outline-secondary btn-sm">{{ __('Back to list') }}</a>
+      <form action="{{ route('admin.core.clients.threads.archive', [$client, $thread]) }}" method="post" class="d-inline">
         @csrf
         <button type="submit" class="btn btn-outline-secondary btn-sm">
           {{ $thread->archived_at ? __('Restore') : __('Archive') }}
@@ -55,7 +55,7 @@
           @foreach ($allAttachments as $item)
             @php $att = $item->attachment; @endphp
             <div class="col-12 col-sm-6 col-md-4">
-              <a href="{{ route('core.clients.threads.attachments.download', [$client, $thread, $att]) }}" class="d-flex align-items-center gap-2 p-2 rounded bg-light text-body text-decoration-none border border-secondary" target="_blank" rel="noopener">
+              <a href="{{ route('admin.core.clients.threads.attachments.download', [$client, $thread, $att]) }}" class="d-flex align-items-center gap-2 p-2 rounded bg-light text-body text-decoration-none border border-secondary" target="_blank" rel="noopener">
                 <i class="icon-base ti tabler-file flex-shrink-0 text-muted"></i>
                 <div class="min-w-0 flex-grow-1">
                   <span class="d-block text-truncate small fw-medium" title="{{ $att->name }}">{{ $att->name }}</span>
@@ -100,7 +100,7 @@
                 <div class="mt-2 small">
                   <span class="text-muted {{ $contentDir === 'rtl' ? 'ms-2' : 'me-2' }}">{{ __('Attachments') }}:</span>
                   @foreach ($msg->attachments as $att)
-                    <a href="{{ route('core.clients.threads.attachments.download', [$client, $thread, $att]) }}" class="d-inline-flex align-items-center gap-1 rounded px-2 py-1 bg-white border border-secondary text-body text-decoration-none {{ $contentDir === 'rtl' ? 'ms-1' : 'me-1' }} mb-1" target="_blank" rel="noopener" title="{{ $att->name }}">
+                    <a href="{{ route('admin.core.clients.threads.attachments.download', [$client, $thread, $att]) }}" class="d-inline-flex align-items-center gap-1 rounded px-2 py-1 bg-white border border-secondary text-body text-decoration-none {{ $contentDir === 'rtl' ? 'ms-1' : 'me-1' }} mb-1" target="_blank" rel="noopener" title="{{ $att->name }}">
                       <i class="icon-base ti tabler-file-download"></i>
                       <span class="text-truncate" style="max-width: 180px;">{{ $att->name }}</span>
                     </a>
@@ -123,7 +123,7 @@
         <h5 class="card-title mb-0">{{ __('Reply') }}</h5>
       </div>
       <div class="card-body">
-        <form action="{{ route('core.clients.threads.messages.store', [$client, $thread]) }}" method="post" enctype="multipart/form-data">
+        <form action="{{ route('admin.core.clients.threads.messages.store', [$client, $thread]) }}" method="post" enctype="multipart/form-data">
           @csrf
           <div class="mb-3">
             <label for="body" class="form-label">{{ __('Message') }}</label>

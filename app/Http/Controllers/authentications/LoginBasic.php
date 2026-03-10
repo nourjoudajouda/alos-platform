@@ -11,7 +11,7 @@ class LoginBasic extends Controller
 {
     public function index()
     {
-        $pageConfigs = ['myLayout' => 'blank'];
+        $pageConfigs = ['myLayout' => 'front', 'customizerHide' => true];
         return view('core::content.authentications.auth-login-basic', ['pageConfigs' => $pageConfigs]);
     }
 
@@ -38,8 +38,31 @@ class LoginBasic extends Controller
             ]);
         }
 
+        // ALOS-S1-18 — هذه الصفحة للمستخدمين الداخليين فقط (tenant_staff)
+        if (! Auth::user()->isTenantStaff()) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            throw ValidationException::withMessages([
+                'email' => [__('Use the admin panel login for this account.')],
+            ]);
+        }
+
+        $user = Auth::user();
+        $tenant = $user->tenant;
+
+        // التحقق من حالة Tenant: غير نشط => منع الدخول
+        if (! $tenant || ! $tenant->isActive()) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            throw ValidationException::withMessages([
+                'email' => [__('Your office account is currently disabled. Please contact support.')],
+            ]);
+        }
+
         $request->session()->regenerate();
-        return redirect()->intended(route('core.dashboard'));
+        return redirect()->intended(route('company.dashboard'));
     }
 
     public function destroy(Request $request)
@@ -47,6 +70,6 @@ class LoginBasic extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect()->route('login');
+        return redirect()->route('home');
     }
 }

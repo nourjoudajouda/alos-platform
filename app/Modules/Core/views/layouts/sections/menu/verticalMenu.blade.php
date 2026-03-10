@@ -10,7 +10,7 @@ $configData = Helper::appClasses();
   <!-- ! Hide app brand if navbar-full -->
   @if (!isset($navbarFull))
   <div class="app-brand demo">
-    <a href="{{ url('/') }}" class="app-brand-link">
+    <a href="{{ route('admin.core.dashboard') }}" class="app-brand-link">
       <span class="app-brand-logo demo">@include('core::_partials.macros')</span>
     </a>
 

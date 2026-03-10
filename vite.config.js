@@ -10,6 +10,7 @@ const input = [
   'resources/assets/vendor/libs/node-waves/node-waves.scss',
   'resources/assets/vendor/libs/pickr/pickr-themes.scss',
   'resources/assets/vendor/scss/core.scss',
+  'resources/assets/vendor/scss/pages/front-page.scss',
   'resources/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.scss',
   'resources/assets/vendor/libs/typeahead-js/typeahead.scss',
   'resources/assets/vendor/libs/jquery/jquery.js',

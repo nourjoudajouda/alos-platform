@@ -1,13 +1,13 @@
 @php
   $crudIndexId = 'roles';
   $crudIndexTitle = __('Roles') . ' — ' . config('app.name');
-  $crudIndexFiltersAction = route('core.roles.index');
+  $crudIndexFiltersAction = route('admin.core.roles.index');
   $crudIndexPerPage = $perPage;
   $crudIndexTableTitle = __('Roles');
-  $crudIndexAddUrl = route('core.roles.create');
+  $crudIndexAddUrl = route('admin.core.roles.create');
   $crudIndexAddLabel = __('Add Role');
   $crudIndexEmptyMessage = __('No roles yet.');
-  $crudIndexEmptyLink = route('core.roles.create');
+  $crudIndexEmptyLink = route('admin.core.roles.create');
   $crudIndexEmptyLinkText = __('Add Role');
   $crudIndexShowViewToggle = true;
   $items = $roles;
@@ -22,7 +22,7 @@
 @endsection
 
 @section('crud_offcanvas')
-  <form action="{{ route('core.roles.index') }}" method="get" id="rolesFiltersFormSide">
+  <form action="{{ route('admin.core.roles.index') }}" method="get" id="rolesFiltersFormSide">
     <input type="hidden" name="per_page" value="{{ $perPage }}">
     <input type="hidden" name="search" value="{{ request('search') }}">
     @if(request('view'))<input type="hidden" name="view" value="{{ request('view') }}">@endif
@@ -63,10 +63,10 @@
       <td><span class="badge bg-label-info">{{ $role->permissions_count }}</span></td>
       <td class="text-nowrap">
         <div class="table-actions">
-          <a href="{{ route('core.roles.show', $role) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('View') }}"><i class="icon-base ti tabler-eye"></i></a>
-          <a href="{{ route('core.roles.edit', $role) }}" class="btn btn-icon btn-sm btn-text-warning rounded" title="{{ __('Edit') }}"><i class="icon-base ti tabler-pencil"></i></a>
+          <a href="{{ route('admin.core.roles.show', $role) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('View') }}"><i class="icon-base ti tabler-eye"></i></a>
+          <a href="{{ route('admin.core.roles.edit', $role) }}" class="btn btn-icon btn-sm btn-text-warning rounded" title="{{ __('Edit') }}"><i class="icon-base ti tabler-pencil"></i></a>
           @if (!in_array($role->name, $systemRoleNames, true))
-            <form action="{{ route('core.roles.destroy', $role) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Delete this role?') }}');">
+            <form action="{{ route('admin.core.roles.destroy', $role) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Delete this role?') }}');">
               @csrf
               @method('DELETE')
               <button type="submit" class="btn btn-icon btn-sm btn-text-danger rounded" title="{{ __('Delete') }}"><i class="icon-base ti tabler-trash"></i></button>

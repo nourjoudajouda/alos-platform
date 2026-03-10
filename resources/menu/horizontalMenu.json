@@ -1,34 +1,46 @@
 {
   "menu": [
     {
-      "url": "/core/dashboard",
+      "url": "/admin/dashboard",
       "name": "Dashboard",
       "icon": "menu-icon icon-base ti tabler-layout-dashboard",
       "slug": "core.dashboard"
     },
     {
-      "url": "/core/tenants",
+      "url": "/admin/tenants",
       "name": "Tenants",
       "icon": "menu-icon icon-base ti tabler-building-store",
       "slug": "core.tenants"
     },
     {
-      "url": "/core/clients",
+      "url": "/admin/clients",
       "name": "Clients",
       "icon": "menu-icon icon-base ti tabler-users-group",
       "slug": "core.clients"
     },
     {
-      "url": "/core/roles",
+      "url": "/admin/consultations",
+      "name": "Consultations",
+      "icon": "menu-icon icon-base ti tabler-calendar-event",
+      "slug": "core.consultations"
+    },
+    {
+      "url": "/admin/roles",
       "name": "Roles",
       "icon": "menu-icon icon-base ti tabler-shield",
       "slug": "core.roles"
     },
     {
-      "url": "/core/permissions",
+      "url": "/admin/permissions",
       "name": "Permissions",
       "icon": "menu-icon icon-base ti tabler-key",
       "slug": "core.permissions"
+    },
+    {
+      "url": "/admin/reminder-rules",
+      "name": "Reminder Rules",
+      "icon": "menu-icon icon-base ti tabler-bell",
+      "slug": "core.reminder-rules"
     },
     {
       "url": "/identity/users",

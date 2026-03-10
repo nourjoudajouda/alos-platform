@@ -77,19 +77,48 @@ class TenantController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'string', 'max:255', 'unique:tenants,slug', 'regex:/^[a-z0-9\-]+$/'],
+            'username' => ['nullable', 'string', 'min:3', 'max:64', 'regex:/^[a-zA-Z0-9_-]+$/', 'unique:tenants,username'],
+            'domain' => ['nullable', 'string', 'max:255'],
             'plan' => ['nullable', 'string', 'in:'.implode(',', Tenant::PLANS)],
+            'is_active' => ['nullable', 'boolean'],
+            'public_site_enabled' => ['nullable', 'boolean'],
+            'logo' => ['nullable', 'string', 'max:500'],
+            'description' => ['nullable', 'string', 'max:2000'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:64'],
+            'city' => ['nullable', 'string', 'max:128'],
         ]);
 
+        if (!empty($validated['username'])) {
+            $validated['domain'] = \Illuminate\Support\Str::lower(\Illuminate\Support\Str::slug(trim($validated['username']), '-'));
+        } else {
+            $validated['username'] = null;
+        }
+        if (!isset($validated['domain'])) {
+            $validated['domain'] = null;
+        }
+        $validated['is_active'] = $request->boolean('is_active', true);
+        $validated['public_site_enabled'] = $request->boolean('public_site_enabled', true);
+        $validated['logo'] = $validated['logo'] ?? null;
+        $validated['description'] = $validated['description'] ?? null;
+        $validated['email'] = $validated['email'] ?? null;
+        $validated['phone'] = $validated['phone'] ?? null;
+        $validated['city'] = $validated['city'] ?? null;
         Tenant::create($validated);
 
         return redirect()
-            ->route('core.tenants.index')
+            ->route('admin.core.tenants.index')
             ->with('success', __('Tenant created successfully.'));
     }
 
     public function show(Tenant $tenant): View
     {
-        return view('core::content.tenants.show', ['tenant' => $tenant]);
+        $tenant->loadCount(['users', 'clients']);
+        $settings = $tenant->getSettingsOrCreate();
+        return view('core::content.tenants.show', [
+            'tenant' => $tenant,
+            'settings' => $settings,
+        ]);
     }
 
     public function edit(Tenant $tenant): View
@@ -102,13 +131,32 @@ class TenantController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'string', 'max:255', 'unique:tenants,slug,' . $tenant->id, 'regex:/^[a-z0-9\-]+$/'],
+            'username' => ['nullable', 'string', 'min:3', 'max:64', 'regex:/^[a-zA-Z0-9_-]+$/', 'unique:tenants,username,' . $tenant->id],
+            'domain' => ['nullable', 'string', 'max:255'],
             'plan' => ['nullable', 'string', 'in:'.implode(',', Tenant::PLANS)],
+            'is_active' => ['nullable', 'boolean'],
+            'public_site_enabled' => ['nullable', 'boolean'],
+            'logo' => ['nullable', 'string', 'max:500'],
+            'description' => ['nullable', 'string', 'max:2000'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:64'],
+            'city' => ['nullable', 'string', 'max:128'],
         ]);
 
+        if (!empty($validated['username'])) {
+            $validated['domain'] = \Illuminate\Support\Str::lower(\Illuminate\Support\Str::slug(trim($validated['username']), '-'));
+        }
+        $validated['is_active'] = $request->boolean('is_active', true);
+        $validated['public_site_enabled'] = $request->boolean('public_site_enabled', true);
+        $validated['logo'] = $validated['logo'] ?? null;
+        $validated['description'] = $validated['description'] ?? null;
+        $validated['email'] = $validated['email'] ?? null;
+        $validated['phone'] = $validated['phone'] ?? null;
+        $validated['city'] = $validated['city'] ?? null;
         $tenant->update($validated);
 
         return redirect()
-            ->route('core.tenants.index')
+            ->route('admin.core.tenants.index')
             ->with('success', __('Tenant updated successfully.'));
     }
 
@@ -116,14 +164,14 @@ class TenantController extends Controller
     {
         if ($tenant->users()->exists()) {
             return redirect()
-                ->route('core.tenants.index')
+                ->route('admin.core.tenants.index')
                 ->with('error', __('Cannot delete tenant with existing users.'));
         }
 
         $tenant->delete();
 
         return redirect()
-            ->route('core.tenants.index')
+            ->route('admin.core.tenants.index')
             ->with('success', __('Tenant deleted successfully.'));
     }
 }

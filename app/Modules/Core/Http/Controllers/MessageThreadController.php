@@ -84,7 +84,7 @@ class MessageThreadController extends Controller
         ]);
 
         return redirect()
-            ->route('core.clients.threads.show', [$client, $thread])
+            ->route('admin.core.clients.threads.show', [$client, $thread])
             ->with('success', __('Conversation started.'));
     }
 
@@ -96,7 +96,7 @@ class MessageThreadController extends Controller
         }
         if ($thread->archived_at) {
             return redirect()
-                ->route('core.clients.threads.show', [$client, $thread])
+                ->route('admin.core.clients.threads.show', [$client, $thread])
                 ->with('error', __('This conversation is archived.'));
         }
 
@@ -164,7 +164,7 @@ class MessageThreadController extends Controller
         }
 
         return redirect()
-            ->route('core.clients.threads.show', [$client, $thread])
+            ->route('admin.core.clients.threads.show', [$client, $thread])
             ->with('success', __('Message sent.'));
     }
 
@@ -179,7 +179,7 @@ class MessageThreadController extends Controller
         $status = $thread->archived_at ? __('archived') : __('restored');
 
         return redirect()
-            ->route('core.clients.threads.index', $client)
+            ->route('admin.core.clients.threads.index', $client)
             ->with('success', __('Conversation :status.', ['status' => $status]));
     }
 

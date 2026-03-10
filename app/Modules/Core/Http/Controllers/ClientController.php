@@ -3,6 +3,7 @@
 namespace App\Modules\Core\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Admin;
 use App\Models\Client;
 use App\Models\Tenant;
 use App\Models\User;
@@ -71,7 +72,7 @@ class ClientController extends Controller
         Client::create($validated);
 
         return redirect()
-            ->route('core.clients.index')
+            ->route('admin.core.clients.index')
             ->with('success', __('Client created successfully.'));
     }
 
@@ -84,11 +85,25 @@ class ClientController extends Controller
         $leadLawyer = $client->leadLawyer();
         $assignedUserIds = $client->teamAccess->pluck('id')->all();
 
+        $isAdmin = auth()->user() instanceof Admin;
+        $userHasClientAccess = $isAdmin
+            || (! auth()->user()->isClientPortalUser()
+                && $client->teamAccess()->where('user_id', auth()->id())->exists());
+        $clientCases = $userHasClientAccess
+            ? $client->cases()->with('responsibleLawyer')->orderByDesc('updated_at')->get()
+            : collect();
+        $clientConsultations = ($userHasClientAccess && auth()->user()->can('consultations.view'))
+            ? $client->consultations()->with('responsibleUser')->orderByDesc('consultation_date')->orderByDesc('updated_at')->get()
+            : collect();
+
         return view('core::content.clients.show', [
             'client' => $client,
             'assignableUsers' => $assignableUsers,
             'leadLawyer' => $leadLawyer,
             'assignedUserIds' => $assignedUserIds,
+            'userHasClientAccess' => $userHasClientAccess,
+            'clientCases' => $clientCases,
+            'clientConsultations' => $clientConsultations,
         ]);
     }
 
@@ -110,7 +125,7 @@ class ClientController extends Controller
         $client->update($validated);
 
         return redirect()
-            ->route('core.clients.index')
+            ->route('admin.core.clients.index')
             ->with('success', __('Client updated successfully.'));
     }
 
@@ -119,7 +134,7 @@ class ClientController extends Controller
         $client->delete();
 
         return redirect()
-            ->route('core.clients.index')
+            ->route('admin.core.clients.index')
             ->with('success', __('Client deleted successfully.'));
     }
 
@@ -160,7 +175,7 @@ class ClientController extends Controller
         $client->teamAccess()->sync($sync);
 
         return redirect()
-            ->route('core.clients.show', [$client, 'tab' => 'team-access'])
+            ->route('admin.core.clients.show', [$client, 'tab' => 'team-access'])
             ->with('success', __('Team access updated successfully.'));
     }
 
@@ -171,7 +186,7 @@ class ClientController extends Controller
     {
         if ($client->portalUser) {
             return redirect()
-                ->route('core.clients.show', [$client, 'tab' => 'portal'])
+                ->route('admin.core.clients.show', [$client, 'tab' => 'portal'])
                 ->with('error', __('This client already has a portal account.'));
         }
 
@@ -193,13 +208,14 @@ class ClientController extends Controller
             'password' => Hash::make($validated['password']),
             'tenant_id' => $client->tenant_id ?? 1,
             'client_id' => $client->id,
+            'user_type' => User::USER_TYPE_CLIENT,
             'portal_permission' => $validated['portal_permission'],
             'portal_active' => $request->boolean('portal_active', true),
         ]);
         $user->save();
 
         return redirect()
-            ->route('core.clients.show', [$client, 'tab' => 'portal'])
+            ->route('admin.core.clients.show', [$client, 'tab' => 'portal'])
             ->with('success', __('Portal account created successfully.'));
     }
 
@@ -211,7 +227,7 @@ class ClientController extends Controller
         $portalUser = $client->portalUser;
         if (! $portalUser) {
             return redirect()
-                ->route('core.clients.show', [$client, 'tab' => 'portal'])
+                ->route('admin.core.clients.show', [$client, 'tab' => 'portal'])
                 ->with('error', __('No portal account for this client.'));
         }
 
@@ -238,7 +254,7 @@ class ClientController extends Controller
         $portalUser->save();
 
         return redirect()
-            ->route('core.clients.show', [$client, 'tab' => 'portal'])
+            ->route('admin.core.clients.show', [$client, 'tab' => 'portal'])
             ->with('success', __('Portal account updated successfully.'));
     }
 
@@ -250,7 +266,7 @@ class ClientController extends Controller
         $portalUser = $client->portalUser;
         if (! $portalUser) {
             return redirect()
-                ->route('core.clients.show', [$client, 'tab' => 'portal'])
+                ->route('admin.core.clients.show', [$client, 'tab' => 'portal'])
                 ->with('error', __('No portal account for this client.'));
         }
 
@@ -259,7 +275,7 @@ class ClientController extends Controller
 
         $status = $portalUser->portal_active ? __('activated') : __('deactivated');
         return redirect()
-            ->route('core.clients.show', [$client, 'tab' => 'portal'])
+            ->route('admin.core.clients.show', [$client, 'tab' => 'portal'])
             ->with('success', __('Portal account :status.', ['status' => $status]));
     }
 }

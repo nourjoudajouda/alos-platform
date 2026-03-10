@@ -1,13 +1,13 @@
 @php
   $crudIndexId = 'clients';
   $crudIndexTitle = __('Clients') . ' — ' . config('app.name');
-  $crudIndexFiltersAction = route('core.clients.index');
+  $crudIndexFiltersAction = route('admin.core.clients.index');
   $crudIndexPerPage = $perPage;
   $crudIndexTableTitle = __('Clients');
-  $crudIndexAddUrl = route('core.clients.create');
+  $crudIndexAddUrl = route('admin.core.clients.create');
   $crudIndexAddLabel = __('Add Client');
   $crudIndexEmptyMessage = __('No clients yet.');
-  $crudIndexEmptyLink = route('core.clients.create');
+  $crudIndexEmptyLink = route('admin.core.clients.create');
   $crudIndexEmptyLinkText = __('Add Client');
   $crudIndexShowViewToggle = true;
   $items = $clients;
@@ -32,7 +32,7 @@
 @endsection
 
 @section('crud_offcanvas')
-  <form action="{{ route('core.clients.index') }}" method="get" id="filtersFormSideClients">
+  <form action="{{ route('admin.core.clients.index') }}" method="get" id="filtersFormSideClients">
     <input type="hidden" name="per_page" value="{{ $perPage }}">
     <input type="hidden" name="search" value="{{ request('search') }}">
     @if(request('view'))<input type="hidden" name="view" value="{{ request('view') }}">@endif
@@ -86,13 +86,13 @@
       <td><span class="text-nowrap">{{ $client->created_at?->format('Y-m-d') }}</span></td>
       <td class="text-nowrap">
         <div class="table-actions">
-          <a href="{{ route('core.clients.show', $client) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('View') }}">
+          <a href="{{ route('admin.core.clients.show', $client) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('View') }}">
             <i class="icon-base ti tabler-eye"></i>
           </a>
-          <a href="{{ route('core.clients.edit', $client) }}" class="btn btn-icon btn-sm btn-text-warning rounded" title="{{ __('Edit') }}">
+          <a href="{{ route('admin.core.clients.edit', $client) }}" class="btn btn-icon btn-sm btn-text-warning rounded" title="{{ __('Edit') }}">
             <i class="icon-base ti tabler-pencil"></i>
           </a>
-          <form action="{{ route('core.clients.destroy', $client) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Delete this client?') }}');">
+          <form action="{{ route('admin.core.clients.destroy', $client) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Delete this client?') }}');">
             @csrf
             @method('DELETE')
             <button type="submit" class="btn btn-icon btn-sm btn-text-danger rounded" title="{{ __('Delete') }}">

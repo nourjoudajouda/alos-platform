@@ -13,5 +13,9 @@
               ? 'core::layouts.blankLayout'
               : ($configData['layout'] === 'front'
                   ? 'core::layouts.layoutFront'
-                  : 'core::layouts.contentNavbarLayout')))
+                  : ($configData['layout'] === 'office'
+                      ? 'core::layouts.officeLayout'
+                      : ($configData['layout'] === 'tenant-public'
+                          ? 'core::layouts.layoutTenantPublic'
+                          : 'core::layouts.contentNavbarLayout')))))
 @endisset

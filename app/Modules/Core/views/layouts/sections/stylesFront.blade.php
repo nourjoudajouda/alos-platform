@@ -1,23 +1,37 @@
-<!-- BEGIN: Theme CSS-->
+<!-- BEGIN: Theme CSS (public assets, no Vite) -->
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link
-  href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&ampdisplay=swap"
+  href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Cairo:wght@200;300;400;500;600;700;800;900&display=swap"
   rel="stylesheet" />
 
-@vite(['resources/assets/vendor/fonts/iconify/iconify.css'])
+<link rel="stylesheet" href="{{ asset('assets/vendor/fonts/iconify-icons.css') }}" />
 
-@if ($configData['hasCustomizer'])
-  @vite(['resources/assets/vendor/libs/pickr/pickr-themes.scss'])
+@if ($configData['hasCustomizer'] ?? true)
+  <link rel="stylesheet" href="{{ asset('assets/vendor/libs/pickr/pickr-themes.css') }}" />
 @endif
 
 <!-- Vendor Styles -->
 @yield('vendor-style')
-@vite(['resources/assets/vendor/libs/node-waves/node-waves.scss'])
+<link rel="stylesheet" href="{{ asset('assets/vendor/libs/node-waves/node-waves.css') }}" />
 
 <!-- Core CSS -->
-@vite(['resources/assets/vendor/scss/core.scss', 'resources/assets/css/demo.css', 'resources/assets/vendor/scss/pages/front-page.scss'])
+<link rel="stylesheet" href="{{ asset('assets/vendor/css/core.css') }}" />
+<link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}" />
+<link rel="stylesheet" href="{{ asset('assets/vendor/css/pages/front-page.css') }}" />
 
 <!-- Page Styles -->
 @yield('page-style')
+
+<!-- ALOS Public: لون أساسي #0D9394 (أزرق/تركواز هادئ) -->
+<style>
+  html[data-template*="front"] {
+    --bs-primary: #0D9394;
+    --bs-primary-rgb: 13, 147, 148;
+    --bs-primary-bg-subtle: rgba(13, 147, 148, 0.1);
+    --bs-primary-border-subtle: rgba(13, 147, 148, 0.3);
+    --bs-primary-contrast: #fff;
+  }
+  html[data-template*="front"] .landing-footer .footer-top { background-color: #0D9394 !important; }
+</style>

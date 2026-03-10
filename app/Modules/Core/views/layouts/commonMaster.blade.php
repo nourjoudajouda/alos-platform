@@ -3,23 +3,24 @@
   use Illuminate\Support\Str;
   use App\Helpers\Helpers;
 
+  $isFrontLayout = in_array($configData['layout'] ?? '', ['front', 'tenant-public'], true);
   $menuFixed =
       $configData['layout'] === 'vertical'
           ? $menuFixed ?? ''
-          : ($configData['layout'] === 'front'
+          : ($isFrontLayout
               ? ''
               : $configData['headerType']);
   $navbarType =
       $configData['layout'] === 'vertical'
           ? $configData['navbarType']
-          : ($configData['layout'] === 'front'
+          : ($isFrontLayout
               ? 'layout-navbar-fixed'
               : '');
   $isFront = ($isFront ?? '') == true ? 'Front' : '';
   $contentLayout = isset($container) ? ($container === 'container-xxl' ? 'layout-compact' : 'layout-wide') : '';
 
   // Get skin name from configData - only applies to admin layouts
-  $isAdminLayout = !Str::contains($configData['layout'] ?? '', 'front');
+  $isAdminLayout = !in_array($configData['layout'] ?? '', ['front', 'tenant-public'], true);
   $skinName = $isAdminLayout ? $configData['skinName'] ?? 'default' : 'default';
 
   // Get semiDark value from configData - only applies to admin layouts
@@ -66,7 +67,11 @@
   <!-- Canonical SEO -->
   <link rel="canonical" href="{{ config('variables.productPage') ? config('variables.productPage') : '' }}" />
   <!-- Favicon -->
+  @hasSection('favicon')
+    @yield('favicon')
+  @else
   <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon/favicon.png') }}" />
+  @endif
 
   <!-- Include Styles -->
   <!-- $isFront is used to append the front layout styles only on the front layout otherwise the variable will be blank -->
@@ -80,6 +85,10 @@
     html:not([data-bs-theme="dark"]) .alos-logo-dark { display: none !important; }
     [data-bs-theme="dark"] .alos-logo-light { display: none !important; }
     [data-bs-theme="dark"] .alos-logo-dark { display: block !important; }
+  </style>
+  <!-- Cairo font for Arabic — كل النظام باللغة العربية -->
+  <style>
+    html[lang="ar"] { --bs-font-sans-serif: "Cairo", "Public Sans", -apple-system, blinkmacsystemfont, "Segoe UI", sans-serif; }
   </style>
   <!-- Sidebar: لون أيقونات القائمة = لون الثيم، وفصل المجموعات -->
   <style>

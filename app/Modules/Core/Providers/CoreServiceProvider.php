@@ -3,7 +3,6 @@
 namespace App\Modules\Core\Providers;
 
 use App\Modules\Core\Module;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -18,20 +17,12 @@ class CoreServiceProvider extends ServiceProvider
     }
 
     /**
-     * Bootstrap the Core module: routes + view namespace.
+     * Bootstrap the Core module: view namespace only.
+     * Core routes are loaded in routes/web.php under prefix('admin') so all admin panel URLs have /admin.
      */
     public function boot(): void
     {
-        $this->loadRoutes();
         $this->registerViews();
-    }
-
-    private function loadRoutes(): void
-    {
-        $path = Module::routesPath();
-        if (is_file($path)) {
-            Route::middleware('web')->group($path);
-        }
     }
 
     private function registerViews(): void

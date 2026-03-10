@@ -25,12 +25,17 @@ class User extends Authenticatable
     public const PORTAL_PERMISSION_MESSAGING = 'messaging';
     public const PORTAL_PERMISSION_MESSAGING_UPLOAD = 'messaging_upload';
 
+    /** تمييز يوزر التيننت (مكتب) عن العميل (بوابة العملاء) */
+    public const USER_TYPE_TENANT_STAFF = 'tenant_staff';
+    public const USER_TYPE_CLIENT = 'client';
+
     protected $fillable = [
         'name',
         'email',
         'password',
         'tenant_id',
         'client_id',
+        'user_type',
         'portal_permission',
         'portal_active',
     ];
@@ -88,7 +93,13 @@ class User extends Authenticatable
     /** Whether this user is a client portal user (linked to a single client). */
     public function isClientPortalUser(): bool
     {
-        return $this->client_id !== null;
+        return $this->client_id !== null || $this->user_type === self::USER_TYPE_CLIENT;
+    }
+
+    /** Whether this user is tenant staff (office user). */
+    public function isTenantStaff(): bool
+    {
+        return $this->user_type === self::USER_TYPE_TENANT_STAFF && $this->tenant_id !== null;
     }
 
     /** Whether portal account is active and can log in. */

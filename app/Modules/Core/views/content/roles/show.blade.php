@@ -11,8 +11,8 @@
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
     <h4 class="fw-bold mb-0">{{ __('Role') }}: {{ $roleDisplayName }}</h4>
     <div class="d-flex gap-2">
-      <a href="{{ route('core.roles.edit', $role) }}" class="btn btn-warning btn-sm">{{ __('Edit') }}</a>
-      <a href="{{ route('core.roles.index') }}" class="btn btn-outline-secondary btn-sm">{{ __('Back to list') }}</a>
+      <a href="{{ route('admin.core.roles.edit', $role) }}" class="btn btn-warning btn-sm">{{ __('Edit') }}</a>
+      <a href="{{ route('admin.core.roles.index') }}" class="btn btn-outline-secondary btn-sm">{{ __('Back to list') }}</a>
     </div>
   </div>
 

@@ -42,6 +42,7 @@ class UserController extends Controller
 
         $query = User::query()
             ->where('tenant_id', $tenantId)
+            ->whereNull('client_id')
             ->with('tenant')
             ->orderBy('name');
 
@@ -60,7 +61,7 @@ class UserController extends Controller
 
         $users = $query->paginate($perPage)->withQueryString();
 
-        $totalUsers = User::where('tenant_id', $tenantId)->count();
+        $totalUsers = User::where('tenant_id', $tenantId)->whereNull('client_id')->count();
 
         $internalRoles = Role::whereIn('name', Module::internalRoleNames())
             ->orderBy('name')
@@ -118,6 +119,9 @@ class UserController extends Controller
     public function edit(User $user): View|RedirectResponse
     {
         $this->ensureSameTenant($user);
+        if ($user->isClientPortalUser()) {
+            abort(404);
+        }
 
         $internalRoles = Role::whereIn('name', Module::internalRoleNames())
             ->orderBy('name')
@@ -132,6 +136,9 @@ class UserController extends Controller
     public function update(Request $request, User $user): RedirectResponse
     {
         $this->ensureSameTenant($user);
+        if ($user->isClientPortalUser()) {
+            abort(404);
+        }
 
         $tenantId = $this->tenantId();
 

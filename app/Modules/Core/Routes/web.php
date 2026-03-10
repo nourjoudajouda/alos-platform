@@ -1,9 +1,14 @@
 <?php
 
+use App\Modules\Core\Http\Controllers\CaseController;
+use App\Modules\Core\Http\Controllers\CaseSessionController;
 use App\Modules\Core\Http\Controllers\ClientController;
+use App\Modules\Core\Http\Controllers\ConsultationController;
 use App\Modules\Core\Http\Controllers\DashboardController;
+use App\Modules\Core\Http\Controllers\DocumentController;
 use App\Modules\Core\Http\Controllers\MessageThreadController;
 use App\Modules\Core\Http\Controllers\PermissionController;
+use App\Modules\Core\Http\Controllers\ReminderRuleController;
 use App\Modules\Core\Http\Controllers\RoleController;
 use App\Modules\Core\Http\Controllers\TenantController;
 use Illuminate\Support\Facades\Route;
@@ -24,12 +29,13 @@ Route::get('/module-core', function () {
     ]);
 })->name('module.core.check');
 
-Route::get('/core/dashboard', DashboardController::class)
+// لوحة الإدارة العليا — للأدمن فقط (جدول admins)
+Route::get('/dashboard', DashboardController::class)
     ->name('core.dashboard')
-    ->middleware(['auth', 'not_client_portal']);
+    ->middleware(['auth:admin']);
 
 // Clients CRUD — ALOS-S1-06; ALOS-S1-07 Team Access (lead lawyer + assigned users); ALOS-S1-08 Portal
-Route::middleware(['auth', 'not_client_portal'])->prefix('core/clients')->name('core.clients.')->group(function () {
+Route::middleware(['auth:admin'])->prefix('clients')->name('core.clients.')->group(function () {
     Route::get('/', [ClientController::class, 'index'])->name('index');
     Route::get('/create', [ClientController::class, 'create'])->name('create');
     Route::post('/', [ClientController::class, 'store'])->name('store');
@@ -49,10 +55,61 @@ Route::middleware(['auth', 'not_client_portal'])->prefix('core/clients')->name('
     Route::post('/{client}/threads/{thread}/messages', [MessageThreadController::class, 'storeMessage'])->name('threads.messages.store');
     Route::post('/{client}/threads/{thread}/archive', [MessageThreadController::class, 'archive'])->name('threads.archive');
     Route::get('/{client}/threads/{thread}/attachments/{attachment}', [MessageThreadController::class, 'downloadAttachment'])->name('threads.attachments.download');
+
+    // ALOS-S1-10 — Client Document Center (office)
+    Route::get('/{client}/documents', [DocumentController::class, 'index'])->name('documents.index');
+    Route::post('/{client}/documents', [DocumentController::class, 'store'])->name('documents.store');
+    Route::put('/{client}/documents/{document}/visibility', [DocumentController::class, 'updateVisibility'])->name('documents.visibility');
+    Route::get('/{client}/documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
+});
+
+// ALOS-S1-14 — Consultations CRUD; scoped by client team access; permissions: consultations.view, consultations.manage
+Route::middleware(['auth:admin'])->prefix('consultations')->name('core.consultations.')->group(function () {
+    Route::get('/', [ConsultationController::class, 'index'])->name('index')->middleware('permission:consultations.view');
+    Route::get('/create', [ConsultationController::class, 'create'])->name('create')->middleware('permission:consultations.manage');
+    Route::post('/', [ConsultationController::class, 'store'])->name('store')->middleware('permission:consultations.manage');
+    Route::get('/{consultation}', [ConsultationController::class, 'show'])->name('show')->middleware('permission:consultations.view');
+    Route::get('/{consultation}/edit', [ConsultationController::class, 'edit'])->name('edit')->middleware('permission:consultations.manage');
+    Route::put('/{consultation}', [ConsultationController::class, 'update'])->name('update')->middleware('permission:consultations.manage');
+    Route::delete('/{consultation}', [ConsultationController::class, 'destroy'])->name('destroy')->middleware('permission:consultations.manage');
+    Route::post('/{consultation}/link-thread', [ConsultationController::class, 'linkThread'])->name('link-thread')->middleware('permission:consultations.manage');
+    Route::post('/{consultation}/unlink-thread/{thread}', [ConsultationController::class, 'unlinkThread'])->name('unlink-thread')->middleware('permission:consultations.manage');
+    Route::post('/{consultation}/create-thread', [ConsultationController::class, 'createThread'])->name('create-thread')->middleware('permission:consultations.manage');
+});
+
+// Cases CRUD — scoped by client team access; permissions: cases.view, cases.manage
+Route::middleware(['auth:admin'])->prefix('cases')->name('core.cases.')->group(function () {
+    Route::get('/', [CaseController::class, 'index'])->name('index')->middleware('permission:cases.view');
+    Route::get('/create', [CaseController::class, 'create'])->name('create')->middleware('permission:cases.manage');
+    Route::post('/', [CaseController::class, 'store'])->name('store')->middleware('permission:cases.manage');
+    Route::get('/{case}', [CaseController::class, 'show'])->name('show')->middleware('permission:cases.view');
+    Route::get('/{case}/edit', [CaseController::class, 'edit'])->name('edit')->middleware('permission:cases.manage');
+    Route::put('/{case}', [CaseController::class, 'update'])->name('update')->middleware('permission:cases.manage');
+    Route::delete('/{case}', [CaseController::class, 'destroy'])->name('destroy')->middleware('permission:cases.manage');
+
+    // ALOS-S1-12 — Case Sessions & Calendar (Court Hearings)
+    Route::get('/{case}/sessions', [CaseSessionController::class, 'index'])->name('sessions.index')->middleware('permission:cases.view');
+    Route::get('/{case}/sessions/calendar', [CaseSessionController::class, 'calendar'])->name('sessions.calendar')->middleware('permission:cases.view');
+    Route::get('/{case}/sessions/events', [CaseSessionController::class, 'events'])->name('sessions.events')->middleware('permission:cases.view');
+    Route::get('/{case}/sessions/create', [CaseSessionController::class, 'create'])->name('sessions.create')->middleware('permission:cases.manage');
+    Route::post('/{case}/sessions', [CaseSessionController::class, 'store'])->name('sessions.store')->middleware('permission:cases.manage');
+    Route::get('/{case}/sessions/{session}/edit', [CaseSessionController::class, 'edit'])->name('sessions.edit')->middleware('permission:cases.manage');
+    Route::put('/{case}/sessions/{session}', [CaseSessionController::class, 'update'])->name('sessions.update')->middleware('permission:cases.manage');
+    Route::delete('/{case}/sessions/{session}', [CaseSessionController::class, 'destroy'])->name('sessions.destroy')->middleware('permission:cases.manage');
+});
+
+// ALOS-S1-13 — Session Reminder Rules (Admin)
+Route::middleware(['auth:admin'])->prefix('reminder-rules')->name('core.reminder-rules.')->group(function () {
+    Route::get('/', [ReminderRuleController::class, 'index'])->name('index');
+    Route::get('/create', [ReminderRuleController::class, 'create'])->name('create');
+    Route::post('/', [ReminderRuleController::class, 'store'])->name('store');
+    Route::get('/{reminderRule}/edit', [ReminderRuleController::class, 'edit'])->name('edit');
+    Route::put('/{reminderRule}', [ReminderRuleController::class, 'update'])->name('update');
+    Route::delete('/{reminderRule}', [ReminderRuleController::class, 'destroy'])->name('destroy');
 });
 
 // Tenants CRUD — بنفس آلية Advocate SaaS Companies
-Route::middleware(['auth', 'not_client_portal'])->prefix('core/tenants')->name('core.tenants.')->group(function () {
+Route::middleware(['auth:admin'])->prefix('tenants')->name('core.tenants.')->group(function () {
     Route::get('/', [TenantController::class, 'index'])->name('index');
     Route::get('/create', [TenantController::class, 'create'])->name('create');
     Route::post('/', [TenantController::class, 'store'])->name('store');
@@ -63,7 +120,7 @@ Route::middleware(['auth', 'not_client_portal'])->prefix('core/tenants')->name('
 });
 
 // Roles & Permissions (Spatie)
-Route::middleware(['auth', 'not_client_portal'])->prefix('core/roles')->name('core.roles.')->group(function () {
+Route::middleware(['auth:admin'])->prefix('roles')->name('core.roles.')->group(function () {
     Route::get('/', [RoleController::class, 'index'])->name('index');
     Route::get('/create', [RoleController::class, 'create'])->name('create');
     Route::post('/', [RoleController::class, 'store'])->name('store');
@@ -73,7 +130,7 @@ Route::middleware(['auth', 'not_client_portal'])->prefix('core/roles')->name('co
     Route::delete('/{role}', [RoleController::class, 'destroy'])->name('destroy');
 });
 
-Route::middleware(['auth', 'not_client_portal'])->prefix('core/permissions')->name('core.permissions.')->group(function () {
+Route::middleware(['auth:admin'])->prefix('permissions')->name('core.permissions.')->group(function () {
     Route::get('/', [PermissionController::class, 'index'])->name('index');
     Route::get('/create', [PermissionController::class, 'create'])->name('create');
     Route::post('/', [PermissionController::class, 'store'])->name('store');

@@ -74,4 +74,28 @@ class Client extends Model
     {
         return $this->hasMany(MessageThread::class);
     }
+
+    /**
+     * Documents (ALOS-S1-10): internal or shared with client.
+     */
+    public function documents(): HasMany
+    {
+        return $this->hasMany(Document::class);
+    }
+
+    /**
+     * Cases linked to this client.
+     */
+    public function cases(): HasMany
+    {
+        return $this->hasMany(CaseModel::class, 'client_id');
+    }
+
+    /**
+     * ALOS-S1-14 — Consultations linked to this client.
+     */
+    public function consultations(): HasMany
+    {
+        return $this->hasMany(Consultation::class);
+    }
 }

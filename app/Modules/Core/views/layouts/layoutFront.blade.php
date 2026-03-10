@@ -1,6 +1,7 @@
 @php
   $configData = Helper::appClasses();
   $isFront = true;
+  $customizerHidden = (config('custom.custom.customizerHide') ?? false) ? 'customizer-hide' : '';
 @endphp
 
 @section('layoutContent')

@@ -4,15 +4,33 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\language\LanguageController;
 use App\Http\Controllers\authentications\LoginBasic;
 use App\Http\Controllers\authentications\RegisterBasic;
+use App\Http\Controllers\Public\LandingController;
 use App\Http\Controllers\Portal\PortalAuthController;
 use App\Http\Controllers\Portal\PortalDashboardController;
+use App\Http\Controllers\Portal\PortalConsultationController;
+use App\Http\Controllers\Portal\PortalDocumentController;
 use App\Http\Controllers\Portal\PortalMessageController;
+use App\Http\Controllers\Admin\AdminAuthController;
 
-// Authentication (guest)
-Route::get('/login', [LoginBasic::class, 'index'])->name('login');
-Route::post('/login', [LoginBasic::class, 'store'])->name('login.store');
+// ALOS-S1-16 — Public Website: Landing page (guests) | redirect (authenticated)
+Route::get('/', [LandingController::class, 'index'])->name('home');
+
+// تسجيل الدخول والتسجيل للتيننت (الموقع العام) — روابط مختلفة عن الأدمن
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [LoginBasic::class, 'index'])->name('login');
+    Route::post('/login', [LoginBasic::class, 'store'])->name('login.store');
+    Route::get('/register', [RegisterBasic::class, 'index'])->name('register');
+    Route::post('/register', [RegisterBasic::class, 'store'])->name('register.store');
+});
 Route::post('/logout', [LoginBasic::class, 'destroy'])->name('logout')->middleware('auth');
-Route::get('/register', [RegisterBasic::class, 'index'])->name('register');
+
+// لوحة التيننت (مكتب/شركة) — منفصلة عن الأدمن؛ الرابط /company
+Route::prefix('company')->name('company.')->middleware(['auth', 'tenant_staff'])->group(function () {
+    Route::get('/', \App\Http\Controllers\Office\OfficeDashboardController::class)->name('dashboard');
+    // ALOS-S1-21 — Branding Settings
+    Route::get('/settings/branding', [\App\Http\Controllers\Office\BrandingSettingsController::class, 'edit'])->name('settings.branding.edit');
+    Route::put('/settings/branding', [\App\Http\Controllers\Office\BrandingSettingsController::class, 'update'])->name('settings.branding.update');
+});
 
 // ALOS-S1-08 — Client Portal (separate login + dashboard)
 Route::prefix('portal')->name('portal.')->group(function () {
@@ -27,17 +45,30 @@ Route::prefix('portal')->name('portal.')->group(function () {
     Route::get('/messages/{thread}', [PortalMessageController::class, 'show'])->name('messages.show')->middleware(['auth', 'portal_client']);
     Route::post('/messages/{thread}/reply', [PortalMessageController::class, 'storeMessage'])->name('messages.reply')->middleware(['auth', 'portal_client']);
     Route::get('/messages/{thread}/attachments/{attachment}', [PortalMessageController::class, 'downloadAttachment'])->name('messages.attachments.download')->middleware(['auth', 'portal_client']);
-});
 
-// Home: dashboard if authenticated, else login (ALOS-S1-08: client portal users go to portal)
-Route::get('/', function () {
-    if (! auth()->check()) {
-        return redirect()->route('login');
-    }
-    return auth()->user()->isClientPortalUser()
-        ? redirect()->route('portal.dashboard')
-        : redirect()->route('core.dashboard');
-})->name('home');
+    // ALOS-S1-14 — Consultations (client portal: shared only)
+    Route::get('/consultations', [PortalConsultationController::class, 'index'])->name('consultations.index')->middleware(['auth', 'portal_client']);
+    Route::get('/consultations/{consultation}', [PortalConsultationController::class, 'show'])->name('consultations.show')->middleware(['auth', 'portal_client']);
+    Route::get('/consultations/{consultation}/documents/{documentId}/download', [PortalConsultationController::class, 'downloadDocument'])->name('consultations.download-document')->middleware(['auth', 'portal_client']);
+
+    // ALOS-S1-10 — Document Center (client portal: shared only + upload)
+    Route::get('/documents', [PortalDocumentController::class, 'index'])->name('documents.index')->middleware(['auth', 'portal_client']);
+    Route::post('/documents', [PortalDocumentController::class, 'store'])->name('documents.store')->middleware(['auth', 'portal_client']);
+    Route::get('/documents/{document}/download', [PortalDocumentController::class, 'download'])->name('documents.download')->middleware(['auth', 'portal_client']);
+});
 
 // Locale (public)
 Route::get('/lang/{locale}', [LanguageController::class, 'swap']);
+
+// لوحة الإدارة — كل الروابط تحت البادئة admin (تسجيل دخول الأدمن منفصل)
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::middleware('guest')->group(function () {
+        Route::get('/login', [AdminAuthController::class, 'index'])->name('login');
+        Route::post('/login', [AdminAuthController::class, 'store'])->name('login.store');
+    });
+    Route::post('/logout', [AdminAuthController::class, 'destroy'])->name('logout')->middleware('auth:admin');
+    require base_path('app/Modules/Core/Routes/web.php');
+});
+
+// ALOS-S1-19 / ALOS-S1-20 — Tenant public site: /{tenant_slug}
+Route::get('/{slug}', [\App\Http\Controllers\Public\TenantPublicSiteController::class, 'show'])->name('public.tenant');

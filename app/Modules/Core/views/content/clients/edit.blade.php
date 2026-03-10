@@ -10,14 +10,14 @@
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
     <h4 class="fw-bold mb-0">{{ __('Edit Client') }}</h4>
     <div class="d-flex gap-2">
-      <a href="{{ route('core.clients.show', $client) }}" class="btn btn-outline-secondary btn-sm">{{ __('View') }}</a>
-      <a href="{{ route('core.clients.index') }}" class="btn btn-outline-secondary btn-sm">{{ __('Back to list') }}</a>
+      <a href="{{ route('admin.core.clients.show', $client) }}" class="btn btn-outline-secondary btn-sm">{{ __('View') }}</a>
+      <a href="{{ route('admin.core.clients.index') }}" class="btn btn-outline-secondary btn-sm">{{ __('Back to list') }}</a>
     </div>
   </div>
 
   <div class="card">
     <div class="card-body">
-      <form action="{{ route('core.clients.update', $client) }}" method="post">
+      <form action="{{ route('admin.core.clients.update', $client) }}" method="post">
         @csrf
         @method('PUT')
         <div class="mb-3">
@@ -55,7 +55,7 @@
         </div>
         <div class="d-flex gap-2">
           <button type="submit" class="btn btn-primary">{{ __('Update Client') }}</button>
-          <a href="{{ route('core.clients.index') }}" class="btn btn-outline-secondary">{{ __('Cancel') }}</a>
+          <a href="{{ route('admin.core.clients.index') }}" class="btn btn-outline-secondary">{{ __('Cancel') }}</a>
         </div>
       </form>
     </div>

@@ -51,13 +51,13 @@
       </div>
     </div>
     <div class="col-md-6 col-lg-4 mb-4">
-      <div class="card h-100">
+      <a href="{{ route('portal.documents.index') }}" class="card h-100 text-decoration-none text-body">
         <div class="card-body text-center py-5">
           <i class="icon-base ti tabler-file-text icon-32px text-muted d-block mb-3"></i>
           <h6 class="mb-2">{{ __('Shared documents') }}</h6>
-          <p class="text-muted small mb-0">{{ __('This section will be available in a future release.') }}</p>
+          <p class="text-muted small mb-0">{{ __('View and upload documents.') }}</p>
         </div>
-      </div>
+      </a>
     </div>
     <div class="col-md-6 col-lg-4 mb-4">
       <a href="{{ route('portal.messages.index') }}" class="card h-100 text-decoration-none text-body">

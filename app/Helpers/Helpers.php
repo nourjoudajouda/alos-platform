@@ -2,11 +2,25 @@
 
 namespace App\Helpers;
 
+use App\Models\Tenant;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 
 class Helpers
 {
+    /**
+     * Generate public site URL for a tenant (ALOS-S1-19, ALOS-S1-20).
+     * MVP: /f/{slug}. Later extensible for subdomain or custom domain.
+     *
+     * @param  Tenant  $tenant
+     * @return string
+     */
+    public static function tenantPublicUrl(Tenant $tenant): string
+    {
+        // Future: subdomain → https://{slug}.app.com
+        // Future: custom domain → https://{tenant->domain}
+        return url('/' . $tenant->slug);
+    }
   /**
    * Generate menu attributes for semi-dark mode
    *
@@ -65,7 +79,7 @@ class Helpers
 
     // All options available in the template
     $allOptions = [
-      'myLayout' => ['vertical', 'horizontal', 'blank', 'front'],
+      'myLayout' => ['vertical', 'horizontal', 'blank', 'front', 'office', 'tenant-public'],
       'menuCollapsed' => [true, false],
       'hasCustomizer' => [true, false],
       'showDropdownOnHover' => [true, false],

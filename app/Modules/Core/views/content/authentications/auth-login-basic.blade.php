@@ -33,15 +33,15 @@ $customizerHidden = 'customizer-hide';
         <div class="card-body">
           <!-- Logo -->
           <div class="app-brand justify-content-center mb-6">
-            <a href="{{ url('/') }}" class="app-brand-link">
+            <a href="{{ isset($isAdminLogin) && $isAdminLogin ? route('admin.login') : route('home') }}" class="app-brand-link">
               <span class="app-brand-logo demo">@include('core::_partials.macros')</span>
             </a>
           </div>
           <!-- /Logo -->
-          <h4 class="mb-1">Welcome to {{ config('variables.templateName') }}! 👋</h4>
-          <p class="mb-6">Please sign-in to your account and start the adventure</p>
+          <h4 class="mb-1">{{ __('Welcome back') }} 👋</h4>
+          <p class="mb-6">{{ isset($isAdminLogin) && $isAdminLogin ? __('Sign in to the admin panel.') : __('Sign in to your account to access the dashboard.') }}</p>
 
-          <form id="formAuthentication" class="mb-4" action="{{ route('login.store') }}" method="POST">
+          <form id="formAuthentication" class="mb-4" action="{{ isset($isAdminLogin) && $isAdminLogin ? route('admin.login.store') : route('login.store') }}" method="POST">
             @csrf
             <div class="mb-6 form-control-validation">
               <label for="email" class="form-label">Email</label>
@@ -78,12 +78,15 @@ $customizerHidden = 'customizer-hide';
           </form>
 
           <p class="text-center">
-            <span>New on our platform?</span>
-            <a href="{{ route('register') }}">
-              <span>Create an account</span>
-            </a>
+            @if (isset($isAdminLogin) && $isAdminLogin)
+              <a href="{{ route('home') }}">{{ __('Back to site') }}</a>
+            @else
+              <span>{{ __('New on our platform?') }}</span>
+              <a href="{{ route('register') }}"><span>{{ __('Create an account') }}</span></a>
+            @endif
           </p>
 
+          @if (empty($isAdminLogin))
           <div class="divider my-6">
             <div class="divider-text">or</div>
           </div>
@@ -105,6 +108,7 @@ $customizerHidden = 'customizer-hide';
               <i class="icon-base ti tabler-brand-google-filled icon-20px"></i>
             </a>
           </div>
+          @endif
         </div>
       </div>
       <!-- /Login -->

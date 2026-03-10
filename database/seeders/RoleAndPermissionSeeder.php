@@ -44,6 +44,10 @@ class RoleAndPermissionSeeder extends Seeder
             'create permissions',
             'edit permissions',
             'delete permissions',
+            'cases.view',
+            'cases.manage',
+            'consultations.view',
+            'consultations.manage',
         ];
 
         foreach ($permissions as $name) {
@@ -63,17 +67,23 @@ class RoleAndPermissionSeeder extends Seeder
         $lawyer->syncPermissions([
             'view tenants', 'create tenants', 'edit tenants',
             'view roles', 'view permissions',
+            'cases.view', 'cases.manage',
+            'consultations.view', 'consultations.manage',
         ]);
 
         $assistant = Role::firstOrCreate(['name' => 'assistant', 'guard_name' => $guard]);
         $assistant->syncPermissions([
             'view tenants', 'create tenants', 'edit tenants',
             'view roles', 'view permissions',
+            'cases.view', 'cases.manage',
+            'consultations.view', 'consultations.manage',
         ]);
 
         $finance = Role::firstOrCreate(['name' => 'finance', 'guard_name' => $guard]);
         $finance->syncPermissions([
             'view tenants', 'view roles', 'view permissions',
+            'cases.view',
+            'consultations.view',
         ]);
 
         // ب) مستخدمو العملاء (External Client Users) — يرى المستخدم بيانات عميله فقط (يُطبّق لاحقاً في الواجهة)

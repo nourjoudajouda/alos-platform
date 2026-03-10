@@ -2,20 +2,31 @@
 
 namespace Database\Seeders;
 
+use App\Models\Admin;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 /**
- * ALOS — مستخدمون افتراضيون للتطوير والدخول (Office Users).
- * ALOS-S1-01: إنشاء Tenant افتراضي وربط المستخدمين به.
+ * ALOS — مستخدمون افتراضيون للتطوير والدخول.
+ * - جدول admins: تسجيل الدخول من /admin/login (لوحة الإدارة العليا).
+ * - جدول users + tenants: يوزرز المكاتب والتسجيل من /login.
  * تشغيل: php artisan db:seed --class=AdminSeeder
  */
 class AdminSeeder extends Seeder
 {
     public function run(): void
     {
+        // أدمن لوحة الإدارة (جدول admins) — الدخول من /admin/login
+        Admin::firstOrCreate(
+            ['email' => 'admin@alos.local'],
+            [
+                'name' => 'Admin',
+                'password' => Hash::make('password'),
+            ]
+        );
+
         $tenant = Tenant::firstOrCreate(
             ['slug' => 'default'],
             ['name' => 'Default']

@@ -14,11 +14,11 @@
       <p class="text-muted small mb-0">{{ __('Secure conversations with :name', ['name' => $client->name]) }}</p>
     </div>
     <div class="d-flex gap-2">
-      <a href="{{ route('core.clients.show', [$client, 'tab' => 'messages']) }}" class="btn btn-outline-secondary btn-sm">
+      <a href="{{ route('admin.core.clients.show', [$client, 'tab' => 'messages']) }}" class="btn btn-outline-secondary btn-sm">
         <i class="icon-base ti tabler-arrow-left {{ $contentDir === 'rtl' ? 'ms-1' : 'me-1' }}"></i>
         {{ __('Back to client') }}
       </a>
-      <a href="{{ $showArchived ? route('core.clients.threads.index', $client) : route('core.clients.threads.index', [$client, 'archived' => 1]) }}" class="btn btn-outline-secondary btn-sm">
+      <a href="{{ $showArchived ? route('admin.core.clients.threads.index', $client) : route('admin.core.clients.threads.index', [$client, 'archived' => 1]) }}" class="btn btn-outline-secondary btn-sm">
         {{ $showArchived ? __('Active conversations') : __('Archived') }}
       </a>
     </div>
@@ -31,7 +31,7 @@
   {{-- New conversation --}}
   <div class="card mb-4">
     <div class="card-body">
-      <form action="{{ route('core.clients.threads.store', $client) }}" method="post" class="row g-2 align-items-end">
+      <form action="{{ route('admin.core.clients.threads.store', $client) }}" method="post" class="row g-2 align-items-end">
         @csrf
         <div class="col-md-8">
           <label for="subject" class="form-label small">{{ __('New conversation subject') }}</label>
@@ -61,7 +61,7 @@
         @endphp
         <div class="border-bottom border-secondary p-3 d-flex align-items-center gap-3 flex-wrap">
           <div class="flex-grow-1 min-w-0">
-            <a href="{{ route('core.clients.threads.show', [$client, $thread]) }}" class="fw-medium text-body d-block text-decoration-none">
+            <a href="{{ route('admin.core.clients.threads.show', [$client, $thread]) }}" class="fw-medium text-body d-block text-decoration-none">
               {{ $thread->subject }}
             </a>
             @if ($lastMsg)
@@ -73,8 +73,8 @@
             @endif
           </div>
           <div class="d-flex gap-2">
-            <a href="{{ route('core.clients.threads.show', [$client, $thread]) }}" class="btn btn-sm btn-outline-primary">{{ __('Open') }}</a>
-            <form action="{{ route('core.clients.threads.archive', [$client, $thread]) }}" method="post" class="d-inline">
+            <a href="{{ route('admin.core.clients.threads.show', [$client, $thread]) }}" class="btn btn-sm btn-outline-primary">{{ __('Open') }}</a>
+            <form action="{{ route('admin.core.clients.threads.archive', [$client, $thread]) }}" method="post" class="d-inline">
               @csrf
               <button type="submit" class="btn btn-sm btn-outline-secondary">
                 {{ $thread->archived_at ? __('Restore') : __('Archive') }}

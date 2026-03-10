@@ -36,7 +36,12 @@ use Illuminate\Support\Facades\Route;
       <div id="autocomplete" class="position-relative w-100"></div>
     </div>
   </div>
-  <ul class="navbar-nav flex-row align-items-center ms-auto">
+  @php
+  $tenantUser = Auth::guard('admin')->check() ? null : Auth::user();
+  $tenant = $tenantUser?->tenant;
+  $showPublicSiteLink = $tenant && $tenant->getSettingsOrCreate()->hasPublicSiteEnabled();
+@endphp
+<ul class="navbar-nav flex-row align-items-center ms-auto">
     <!-- Language -->
     @php $currentLocale = app()->getLocale(); $locales = config('localization.supported', ['en' => 'English', 'ar' => 'العربية']); @endphp
     <li class="nav-item navbar-dropdown dropdown me-2 me-xl-0">
@@ -89,6 +94,14 @@ use Illuminate\Support\Facades\Route;
         </li>
       </ul>
     </li>
+    @if ($showPublicSiteLink)
+    <!-- Visit My Website -->
+    <li class="nav-item me-2 me-xl-0">
+      <a class="nav-link hide-arrow p-0" href="{{ Helper::tenantPublicUrl($tenant) }}" target="_blank" rel="noopener" aria-label="{{ __('Visit My Website') }}" title="{{ __('Visit My Website') }}">
+        @include('core::_partials.navbar-icons', ['name' => 'world', 'class' => 'icon-md'])
+      </a>
+    </li>
+    @endif
     <!-- Notifications -->
     <li class="nav-item navbar-dropdown dropdown-notifications dropdown me-2 me-xl-0">
       <a class="nav-link dropdown-toggle hide-arrow p-0 position-relative" href="javascript:void(0);" data-bs-toggle="dropdown" aria-label="Notifications">
@@ -115,14 +128,18 @@ use Illuminate\Support\Facades\Route;
         <li class="dropdown-menu-footer border-top"><a class="dropdown-item d-flex justify-content-center py-2" href="javascript:void(0);">View all notifications</a></li>
       </ul>
     </li>
-    <!-- User -->
+    <!-- User (أدمن من جدول admins أو يوزر تيننت من جدول users) -->
+    @php
+      $currentUser = Auth::guard('admin')->user() ?? Auth::user();
+      $logoutRoute = Auth::guard('admin')->check() ? route('admin.logout') : route('logout');
+    @endphp
     <li class="nav-item navbar-dropdown dropdown-user dropdown">
       <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);" data-bs-toggle="dropdown">
         <div class="avatar avatar-online">
-          @if (Auth::check() && Auth::user()->profile_photo_url)
-          <img src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" class="rounded-circle" />
+          @if ($currentUser && isset($currentUser->profile_photo_url) && $currentUser->profile_photo_url)
+          <img src="{{ $currentUser->profile_photo_url }}" alt="{{ $currentUser->name }}" class="rounded-circle" />
           @else
-          <span class="avatar-initial rounded-circle bg-label-primary">{{ strtoupper(mb_substr(Auth::user()->name ?? 'U', 0, 1)) }}</span>
+          <span class="avatar-initial rounded-circle bg-label-primary">{{ $currentUser ? strtoupper(mb_substr($currentUser->name ?? 'U', 0, 1)) : 'U' }}</span>
           @endif
         </div>
       </a>
@@ -133,22 +150,16 @@ use Illuminate\Support\Facades\Route;
             <div class="d-flex align-items-center">
               <div class="flex-shrink-0 me-2">
                 <div class="avatar avatar-online">
-                  @if (Auth::check() && Auth::user()->profile_photo_url)
-                  <img src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" class="rounded-circle" />
+                  @if ($currentUser && isset($currentUser->profile_photo_url) && $currentUser->profile_photo_url)
+                  <img src="{{ $currentUser->profile_photo_url }}" alt="{{ $currentUser->name }}" class="rounded-circle" />
                   @else
-                  <span class="avatar-initial rounded-circle bg-label-primary">{{ strtoupper(mb_substr(Auth::user()->name ?? 'U', 0, 1)) }}</span>
+                  <span class="avatar-initial rounded-circle bg-label-primary">{{ $currentUser ? strtoupper(mb_substr($currentUser->name ?? 'U', 0, 1)) : 'U' }}</span>
                   @endif
                 </div>
               </div>
               <div class="flex-grow-1">
-                <h6 class="mb-0">
-                  @if (Auth::check())
-                  {{ Auth::user()->name }}
-                  @else
-                  John Doe
-                  @endif
-                </h6>
-                <small class="text-body-secondary">Admin</small>
+                <h6 class="mb-0">{{ $currentUser->name ?? 'User' }}</h6>
+                <small class="text-body-secondary">{{ Auth::guard('admin')->check() ? __('Admin') : __('Office') }}</small>
               </div>
             </div>
           </a>
@@ -161,6 +172,13 @@ use Illuminate\Support\Facades\Route;
             href="{{ Route::has('profile.show') ? route('profile.show') : 'javascript:void(0);' }}">
             <i class="icon-base ti tabler-user me-3 icon-md"></i><span class="align-middle">My Profile</span> </a>
         </li>
+        @if ($showPublicSiteLink)
+        <li>
+          <a class="dropdown-item" href="{{ Helper::tenantPublicUrl($tenant) }}" target="_blank" rel="noopener">
+            <i class="icon-base ti tabler-world me-3 icon-md"></i><span class="align-middle">{{ __('Visit My Website') }}</span>
+          </a>
+        </li>
+        @endif
         <li>
           <a class="dropdown-item" href="javascript:void(0);">
             <span class="d-flex align-items-center align-middle">
@@ -173,21 +191,21 @@ use Illuminate\Support\Facades\Route;
         <li>
           <div class="dropdown-divider my-1 mx-n2"></div>
         </li>
-        @if (Auth::check())
+        @if ($currentUser)
         <li>
-          <a class="dropdown-item" href="{{ route('logout') }}"
+          <a class="dropdown-item" href="{{ $logoutRoute }}"
             onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
             <i class="icon-base ti tabler-logout icon-md me-3"></i><span>Logout</span>
           </a>
         </li>
-        <form method="POST" id="logout-form" action="{{ route('logout') }}">
+        <form method="POST" id="logout-form" action="{{ $logoutRoute }}">
           @csrf
         </form>
         @else
         <li>
           <div class="d-grid px-2 pt-2 pb-1">
             <a class="btn btn-sm btn-danger d-flex"
-              href="{{ route('login') }}">
+              href="{{ route('admin.login') }}">
               <small class="align-middle">Login</small>
               <i class="icon-base ti tabler-login ms-2 icon-14px"></i>
             </a>

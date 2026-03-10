@@ -1,13 +1,13 @@
 @php
   $crudIndexId = 'tenants';
   $crudIndexTitle = __('Tenants') . ' — ' . config('app.name');
-  $crudIndexFiltersAction = route('core.tenants.index');
+  $crudIndexFiltersAction = route('admin.core.tenants.index');
   $crudIndexPerPage = $perPage;
   $crudIndexTableTitle = __('Tenants');
-  $crudIndexAddUrl = route('core.tenants.create');
+  $crudIndexAddUrl = route('admin.core.tenants.create');
   $crudIndexAddLabel = __('Add Tenant');
   $crudIndexEmptyMessage = __('No tenants yet.');
-  $crudIndexEmptyLink = route('core.tenants.create');
+  $crudIndexEmptyLink = route('admin.core.tenants.create');
   $crudIndexEmptyLinkText = __('Add Tenant');
   $crudIndexShowViewToggle = true;
   $items = $tenants;
@@ -39,7 +39,7 @@
 @endsection
 
 @section('crud_offcanvas')
-  <form action="{{ route('core.tenants.index') }}" method="get" id="filtersFormSide">
+  <form action="{{ route('admin.core.tenants.index') }}" method="get" id="filtersFormSide">
     <input type="hidden" name="per_page" value="{{ $perPage }}">
     <input type="hidden" name="search" value="{{ request('search') }}">
     @if(request('view'))<input type="hidden" name="view" value="{{ request('view') }}">@endif
@@ -122,13 +122,13 @@
       </td>
       <td class="text-nowrap">
         <div class="table-actions">
-          <a href="{{ route('core.tenants.show', $tenant) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('View') }}">
+          <a href="{{ route('admin.core.tenants.show', $tenant) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('View') }}">
             <i class="icon-base ti tabler-eye"></i>
           </a>
-          <a href="{{ route('core.tenants.edit', $tenant) }}" class="btn btn-icon btn-sm btn-text-warning rounded" title="{{ __('Edit') }}">
+          <a href="{{ route('admin.core.tenants.edit', $tenant) }}" class="btn btn-icon btn-sm btn-text-warning rounded" title="{{ __('Edit') }}">
             <i class="icon-base ti tabler-pencil"></i>
           </a>
-          <form action="{{ route('core.tenants.destroy', $tenant) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Delete this tenant?') }}');">
+          <form action="{{ route('admin.core.tenants.destroy', $tenant) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Delete this tenant?') }}');">
             @csrf
             @method('DELETE')
             <button type="submit" class="btn btn-icon btn-sm btn-text-danger rounded" title="{{ __('Delete') }}">

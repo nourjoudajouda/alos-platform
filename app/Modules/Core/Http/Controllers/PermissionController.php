@@ -60,7 +60,7 @@ class PermissionController extends Controller
         ]);
 
         return redirect()
-            ->route('core.permissions.index')
+            ->route('admin.core.permissions.index')
             ->with('success', __('Permission created successfully.'));
     }
 
@@ -85,7 +85,7 @@ class PermissionController extends Controller
         $permission->update(['name' => $validated['name']]);
 
         return redirect()
-            ->route('core.permissions.index')
+            ->route('admin.core.permissions.index')
             ->with('success', __('Permission updated successfully.'));
     }
 
@@ -94,7 +94,7 @@ class PermissionController extends Controller
         $permission->delete();
 
         return redirect()
-            ->route('core.permissions.index')
+            ->route('admin.core.permissions.index')
             ->with('success', __('Permission deleted successfully.'));
     }
 }

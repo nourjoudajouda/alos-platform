@@ -9,12 +9,12 @@
 <div class="container-xxl flex-grow-1 container-p-y">
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
     <h4 class="fw-bold mb-0">{{ __('Add Permission') }}</h4>
-    <a href="{{ route('core.permissions.index') }}" class="btn btn-outline-secondary btn-sm">{{ __('Back to list') }}</a>
+    <a href="{{ route('admin.core.permissions.index') }}" class="btn btn-outline-secondary btn-sm">{{ __('Back to list') }}</a>
   </div>
 
   <div class="card">
     <div class="card-body">
-      <form action="{{ route('core.permissions.store') }}" method="post">
+      <form action="{{ route('admin.core.permissions.store') }}" method="post">
         @csrf
         <div class="mb-3">
           <label for="name" class="form-label">{{ __('Name') }} <span class="text-danger">*</span></label>
@@ -24,7 +24,7 @@
         </div>
         <div class="d-flex gap-2">
           <button type="submit" class="btn btn-primary">{{ __('Create Permission') }}</button>
-          <a href="{{ route('core.permissions.index') }}" class="btn btn-outline-secondary">{{ __('Cancel') }}</a>
+          <a href="{{ route('admin.core.permissions.index') }}" class="btn btn-outline-secondary">{{ __('Cancel') }}</a>
         </div>
       </form>
     </div>

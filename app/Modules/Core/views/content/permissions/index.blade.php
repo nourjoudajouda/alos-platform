@@ -1,13 +1,13 @@
 @php
   $crudIndexId = 'permissions';
   $crudIndexTitle = __('Permissions') . ' — ' . config('app.name');
-  $crudIndexFiltersAction = route('core.permissions.index');
+  $crudIndexFiltersAction = route('admin.core.permissions.index');
   $crudIndexPerPage = $perPage;
   $crudIndexTableTitle = __('Permissions');
-  $crudIndexAddUrl = route('core.permissions.create');
+  $crudIndexAddUrl = route('admin.core.permissions.create');
   $crudIndexAddLabel = __('Add Permission');
   $crudIndexEmptyMessage = __('No permissions yet.');
-  $crudIndexEmptyLink = route('core.permissions.create');
+  $crudIndexEmptyLink = route('admin.core.permissions.create');
   $crudIndexEmptyLinkText = __('Add Permission');
   $crudIndexShowViewToggle = true;
   $items = $permissions;
@@ -23,7 +23,7 @@
 @endsection
 
 @section('crud_offcanvas')
-  <form action="{{ route('core.permissions.index') }}" method="get" id="permissionsFiltersFormSide">
+  <form action="{{ route('admin.core.permissions.index') }}" method="get" id="permissionsFiltersFormSide">
     <input type="hidden" name="per_page" value="{{ $perPage }}">
     <input type="hidden" name="search" value="{{ request('search') }}">
     @if(request('view'))<input type="hidden" name="view" value="{{ request('view') }}">@endif
@@ -57,9 +57,9 @@
       <td><span class="text-nowrap">{{ $permission->created_at?->format('Y-m-d') }}</span></td>
       <td class="text-nowrap">
         <div class="table-actions">
-          <a href="{{ route('core.permissions.show', $permission) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('View') }}"><i class="icon-base ti tabler-eye"></i></a>
-          <a href="{{ route('core.permissions.edit', $permission) }}" class="btn btn-icon btn-sm btn-text-warning rounded" title="{{ __('Edit') }}"><i class="icon-base ti tabler-pencil"></i></a>
-          <form action="{{ route('core.permissions.destroy', $permission) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Delete this permission?') }}');">
+          <a href="{{ route('admin.core.permissions.show', $permission) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('View') }}"><i class="icon-base ti tabler-eye"></i></a>
+          <a href="{{ route('admin.core.permissions.edit', $permission) }}" class="btn btn-icon btn-sm btn-text-warning rounded" title="{{ __('Edit') }}"><i class="icon-base ti tabler-pencil"></i></a>
+          <form action="{{ route('admin.core.permissions.destroy', $permission) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Delete this permission?') }}');">
             @csrf
             @method('DELETE')
             <button type="submit" class="btn btn-icon btn-sm btn-text-danger rounded" title="{{ __('Delete') }}"><i class="icon-base ti tabler-trash"></i></button>

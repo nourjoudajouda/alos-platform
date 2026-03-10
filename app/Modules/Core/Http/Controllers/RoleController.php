@@ -57,7 +57,7 @@ class RoleController extends Controller
         $role->syncPermissions($request->input('permissions', []));
 
         return redirect()
-            ->route('core.roles.index')
+            ->route('admin.core.roles.index')
             ->with('success', __('Role created successfully.'));
     }
 
@@ -89,7 +89,7 @@ class RoleController extends Controller
         $role->syncPermissions($request->input('permissions', []));
 
         return redirect()
-            ->route('core.roles.index')
+            ->route('admin.core.roles.index')
             ->with('success', __('Role updated successfully.'));
     }
 
@@ -98,14 +98,14 @@ class RoleController extends Controller
         $systemRoles = config('roles.system_role_names', ['admin']);
         if (in_array($role->name, $systemRoles, true)) {
             return redirect()
-                ->route('core.roles.index')
+                ->route('admin.core.roles.index')
                 ->with('error', __('Cannot delete system role.'));
         }
 
         $role->delete();
 
         return redirect()
-            ->route('core.roles.index')
+            ->route('admin.core.roles.index')
             ->with('success', __('Role deleted successfully.'));
     }
 }

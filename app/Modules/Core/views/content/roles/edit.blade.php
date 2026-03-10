@@ -11,14 +11,14 @@
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
     <h4 class="fw-bold mb-0">{{ __('Edit Role') }}</h4>
     <div class="d-flex gap-2">
-      <a href="{{ route('core.roles.show', $role) }}" class="btn btn-outline-secondary btn-sm">{{ __('View') }}</a>
-      <a href="{{ route('core.roles.index') }}" class="btn btn-outline-secondary btn-sm">{{ __('Back to list') }}</a>
+      <a href="{{ route('admin.core.roles.show', $role) }}" class="btn btn-outline-secondary btn-sm">{{ __('View') }}</a>
+      <a href="{{ route('admin.core.roles.index') }}" class="btn btn-outline-secondary btn-sm">{{ __('Back to list') }}</a>
     </div>
   </div>
 
   <div class="card">
     <div class="card-body">
-      <form action="{{ route('core.roles.update', $role) }}" method="post">
+      <form action="{{ route('admin.core.roles.update', $role) }}" method="post">
         @csrf
         @method('PUT')
         <div class="mb-3">
@@ -46,7 +46,7 @@
         </div>
         <div class="d-flex gap-2">
           <button type="submit" class="btn btn-primary">{{ __('Update Role') }}</button>
-          <a href="{{ route('core.roles.index') }}" class="btn btn-outline-secondary">{{ __('Cancel') }}</a>
+          <a href="{{ route('admin.core.roles.index') }}" class="btn btn-outline-secondary">{{ __('Cancel') }}</a>
         </div>
       </form>
     </div>

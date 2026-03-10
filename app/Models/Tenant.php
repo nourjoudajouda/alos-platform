@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * ALOS-S1-01 — Multi-Tenant SaaS: Tenant entity.
@@ -13,11 +14,37 @@ class Tenant extends Model
     protected $fillable = [
         'name',
         'slug',
+        'username',
+        'domain',
         'plan',
+        'is_active',
+        'public_site_enabled',
+        'logo',
+        'description',
+        'email',
+        'phone',
+        'city',
     ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+        'public_site_enabled' => 'boolean',
+    ];
+
+    /** Whether the public site (/f/{slug}) is enabled for this tenant. */
+    public function hasPublicSiteEnabled(): bool
+    {
+        return (bool) ($this->public_site_enabled ?? true);
+    }
 
     /** Plans available for filter (and for future use). */
     public const PLANS = ['free', 'starter', 'professional'];
+
+    /** Whether this tenant is active and its users can log in from /login. */
+    public function isActive(): bool
+    {
+        return $this->is_active;
+    }
 
     /**
      * Users belonging to this tenant.
@@ -33,5 +60,25 @@ class Tenant extends Model
     public function clients(): HasMany
     {
         return $this->hasMany(Client::class);
+    }
+
+    /**
+     * Branding settings (ALOS-S1-21).
+     */
+    public function settings(): HasOne
+    {
+        return $this->hasOne(TenantSettings::class);
+    }
+
+    /** Get branding settings (create if not exists) */
+    public function getSettingsOrCreate(): TenantSettings
+    {
+        return $this->settings()->firstOrCreate(
+            ['tenant_id' => $this->id],
+            [
+                'display_name' => $this->name,
+                'public_site_enabled' => $this->public_site_enabled ?? true,
+            ]
+        );
     }
 }

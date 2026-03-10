@@ -31,6 +31,16 @@ class MessageThread extends Model
         return $this->belongsTo(Client::class);
     }
 
+    public function case(): BelongsTo
+    {
+        return $this->belongsTo(CaseModel::class, 'case_id');
+    }
+
+    public function consultation(): BelongsTo
+    {
+        return $this->belongsTo(Consultation::class);
+    }
+
     public function messages(): HasMany
     {
         return $this->hasMany(Message::class)->orderBy('created_at');

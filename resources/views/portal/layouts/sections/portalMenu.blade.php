@@ -31,5 +31,17 @@
         <div>{{ __('Messages') }}</div>
       </a>
     </li>
+    <li class="menu-item {{ str_starts_with($currentRouteName ?? '', 'portal.consultations') ? 'active' : '' }}">
+      <a href="{{ route('portal.consultations.index') }}" class="menu-link">
+        <i class="icon-base ti tabler-calendar-event"></i>
+        <div>{{ __('Consultations') }}</div>
+      </a>
+    </li>
+    <li class="menu-item {{ str_starts_with($currentRouteName ?? '', 'portal.documents') ? 'active' : '' }}">
+      <a href="{{ route('portal.documents.index') }}" class="menu-link">
+        <i class="icon-base ti tabler-file-text"></i>
+        <div>{{ __('Documents') }}</div>
+      </a>
+    </li>
   </ul>
 </aside>

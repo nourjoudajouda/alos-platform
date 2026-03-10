@@ -33,43 +33,60 @@ $customizerHidden = 'customizer-hide';
         <div class="card-body">
           <!-- Logo -->
           <div class="app-brand justify-content-center mb-6">
-            <a href="{{ url('/') }}" class="app-brand-link">
+            <a href="{{ route('home') }}" class="app-brand-link">
               <span class="app-brand-logo demo">@include('core::_partials.macros')</span>
             </a>
           </div>
           <!-- /Logo -->
-          <h4 class="mb-1">Adventure starts here 🚀</h4>
-          <p class="mb-6">Make your app management easy and fun!</p>
+          <h4 class="mb-1">{{ __('Create your account') }} 🚀</h4>
+          <p class="mb-6">{{ __('Register as a new tenant (office/company) to start using ALOS.') }}</p>
 
-          <form id="formAuthentication" class="mb-6" action="{{ url('/') }}" method="GET">
-            <div class="mb-6 form-control-validation">
-              <label for="username" class="form-label">Username</label>
-              <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username"
-                autofocus />
+          <form id="formAuthentication" class="mb-6" action="{{ route('register.store') }}" method="POST">
+            @csrf
+            <div class="mb-3 form-control-validation">
+              <label for="username" class="form-label">{{ __('Username') }}</label>
+              <input type="text" class="form-control" id="username" name="username" value="{{ old('username') }}" placeholder="{{ __('e.g. myoffice or law-firm-xyz') }}" required />
+              <div class="form-text">{{ __('Unique. Letters, numbers, dash and underscore only. Your domain will be created from this.') }}</div>
+              @error('username')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
             </div>
-            <div class="mb-6 form-control-validation">
-              <label for="email" class="form-label">Email</label>
-              <input type="text" class="form-control" id="email" name="email" placeholder="Enter your email" />
+            <div class="mb-3 form-control-validation">
+              <label for="name" class="form-label">{{ __('Office/Company name') }}</label>
+              <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}" placeholder="{{ __('e.g. Law Office XYZ') }}" required />
+              @error('name')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
             </div>
-            <div class="mb-6 form-password-toggle form-control-validation">
-              <label class="form-label" for="password">Password</label>
+            <div class="mb-3 form-control-validation">
+              <label for="admin_name" class="form-label">{{ __('Admin name') }}</label>
+              <input type="text" class="form-control" id="admin_name" name="admin_name" value="{{ old('admin_name') }}" placeholder="{{ __('Your full name') }}" required />
+              <div class="form-text">{{ __('First admin user for this office.') }}</div>
+              @error('admin_name')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+            </div>
+            <div class="mb-3 form-control-validation">
+              <label for="email" class="form-label">{{ __('Email') }}</label>
+              <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}" placeholder="{{ __('Enter your email') }}" required />
+              @error('email')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+            </div>
+            <div class="mb-3 form-password-toggle form-control-validation">
+              <label class="form-label" for="password">{{ __('Password') }}</label>
               <div class="input-group input-group-merge">
-                <input type="password" id="password" class="form-control" name="password"
-                  placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
-                  aria-describedby="password" />
+                <input type="password" id="password" class="form-control" name="password" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" required />
+                <span class="input-group-text cursor-pointer"><i class="icon-base ti tabler-eye-off"></i></span>
+              </div>
+              @error('password')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+            </div>
+            <div class="mb-3 form-control-validation">
+              <label class="form-label" for="password_confirmation">{{ __('Confirm Password') }}</label>
+              <div class="input-group input-group-merge">
+                <input type="password" id="password_confirmation" class="form-control" name="password_confirmation" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" />
                 <span class="input-group-text cursor-pointer"><i class="icon-base ti tabler-eye-off"></i></span>
               </div>
             </div>
-            <div class="my-8 form-control-validation">
+            <div class="my-4 form-control-validation">
               <div class="form-check mb-0 ms-2">
-                <input class="form-check-input" type="checkbox" id="terms-conditions" name="terms" />
-                <label class="form-check-label" for="terms-conditions">
-                  I agree to
-                  <a href="javascript:void(0);">privacy policy & terms</a>
-                </label>
+                <input class="form-check-input" type="checkbox" id="terms-conditions" name="terms" value="1" />
+                <label class="form-check-label" for="terms-conditions">{{ __('I agree to privacy policy & terms') }}</label>
               </div>
             </div>
-            <button class="btn btn-primary d-grid w-100">Sign up</button>
+            <button class="btn btn-primary d-grid w-100" type="submit">{{ __('Sign up') }}</button>
           </form>
 
           <p class="text-center">
