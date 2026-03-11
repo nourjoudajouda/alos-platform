@@ -1,7 +1,10 @@
 <?php
 
+use App\Modules\Core\Http\Controllers\AuditLogController;
 use App\Modules\Core\Http\Controllers\CaseController;
+use App\Modules\Core\Http\Controllers\ComplianceLogController;
 use App\Modules\Core\Http\Controllers\CaseSessionController;
+use App\Modules\Core\Http\Controllers\ClientReportController;
 use App\Modules\Core\Http\Controllers\ClientController;
 use App\Modules\Core\Http\Controllers\ConsultationController;
 use App\Modules\Core\Http\Controllers\DashboardController;
@@ -61,6 +64,11 @@ Route::middleware(['auth:admin'])->prefix('clients')->name('core.clients.')->gro
     Route::post('/{client}/documents', [DocumentController::class, 'store'])->name('documents.store');
     Route::put('/{client}/documents/{document}/visibility', [DocumentController::class, 'updateVisibility'])->name('documents.visibility');
     Route::get('/{client}/documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
+
+    // ALOS-S1-15.7 — Client reports (settings + generated reports list)
+    Route::get('/{client}/reports', [ClientReportController::class, 'index'])->name('reports.index')->middleware('permission:reports.view');
+    Route::put('/{client}/reports/settings', [ClientReportController::class, 'updateSettings'])->name('reports.settings.update')->middleware('permission:reports.manage');
+    Route::get('/{client}/reports/{report}', [ClientReportController::class, 'show'])->name('reports.show')->middleware('permission:reports.view');
 });
 
 // ALOS-S1-14 — Consultations CRUD; scoped by client team access; permissions: consultations.view, consultations.manage
@@ -133,4 +141,14 @@ Route::middleware(['auth:admin'])->prefix('roles')->name('core.roles.')->group(f
 Route::middleware(['auth:admin'])->prefix('permissions')->name('core.permissions.')->group(function () {
     Route::get('/', [PermissionController::class, 'index'])->name('index');
     Route::get('/{permission}', [PermissionController::class, 'show'])->name('show');
+});
+
+// ALOS-S1-25 — Audit Log & Compliance Log
+Route::middleware(['auth:admin'])->prefix('audit-logs')->name('core.audit-logs.')->group(function () {
+    Route::get('/', [AuditLogController::class, 'index'])->name('index');
+    Route::get('/{audit_log}', [AuditLogController::class, 'show'])->name('show');
+});
+Route::middleware(['auth:admin'])->prefix('compliance-logs')->name('core.compliance-logs.')->group(function () {
+    Route::get('/', [ComplianceLogController::class, 'index'])->name('index');
+    Route::get('/{compliance_log}', [ComplianceLogController::class, 'show'])->name('show');
 });

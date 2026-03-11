@@ -4,9 +4,12 @@ namespace App\Modules\Core\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
+use App\Models\AuditLog;
 use App\Models\Client;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Services\AuditLogService;
+use Illuminate\Support\Facades\App;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -69,7 +72,8 @@ class ClientController extends Controller
             'phone' => ['nullable', 'string', 'max:50'],
         ]);
 
-        Client::create($validated);
+        $client = Client::create($validated);
+        App::make(AuditLogService::class)->recordAudit(AuditLog::ACTION_CREATE_CLIENT, AuditLog::ENTITY_CLIENT, $client->id, [], [], $client->tenant_id);
 
         return redirect()
             ->route('admin.core.clients.index')
@@ -78,6 +82,15 @@ class ClientController extends Controller
 
     public function show(Client $client): View
     {
+        $user = auth()->user();
+        $isAdmin = $user instanceof Admin;
+        $userHasClientAccess = $isAdmin
+            || (! $user->isClientPortalUser() && $client->teamAccess()->where('user_id', $user->id)->exists());
+        if (! $userHasClientAccess) {
+            App::make(AuditLogService::class)->recordCompliance('access_client', __('Attempted access to client outside team.'), 'client', $client->id, $client->tenant_id);
+            abort(404, __('Not found.'));
+        }
+
         $client->load(['tenant', 'teamAccess', 'portalUser']);
         $assignableUsers = $client->tenant_id
             ? User::where('tenant_id', $client->tenant_id)->whereNull('client_id')->orderBy('name')->get()
@@ -85,10 +98,6 @@ class ClientController extends Controller
         $leadLawyer = $client->leadLawyer();
         $assignedUserIds = $client->teamAccess->pluck('id')->all();
 
-        $isAdmin = auth()->user() instanceof Admin;
-        $userHasClientAccess = $isAdmin
-            || (! auth()->user()->isClientPortalUser()
-                && $client->teamAccess()->where('user_id', auth()->id())->exists());
         $clientCases = $userHasClientAccess
             ? $client->cases()->with('responsibleLawyer')->orderByDesc('updated_at')->get()
             : collect();
@@ -123,6 +132,7 @@ class ClientController extends Controller
         ]);
 
         $client->update($validated);
+        App::make(AuditLogService::class)->recordAudit(AuditLog::ACTION_UPDATE_CLIENT, AuditLog::ENTITY_CLIENT, $client->id, [], [], $client->tenant_id);
 
         return redirect()
             ->route('admin.core.clients.index')
@@ -131,6 +141,8 @@ class ClientController extends Controller
 
     public function destroy(Client $client): RedirectResponse
     {
+        $oldValues = $client->only(['name', 'email', 'tenant_id']);
+        App::make(AuditLogService::class)->recordAudit(AuditLog::ACTION_DELETE, AuditLog::ENTITY_CLIENT, $client->id, $oldValues, [], $client->tenant_id);
         $client->delete();
 
         return redirect()

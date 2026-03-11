@@ -3,8 +3,12 @@
 namespace App\Modules\Core\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\ProcessMajorUpdateReportJob;
+use App\Models\AuditLog;
 use App\Models\Client;
 use App\Models\Document;
+use App\Services\AuditLogService;
+use Illuminate\Support\Facades\App;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -21,9 +25,11 @@ class DocumentController extends Controller
     {
         $user = auth()->user();
         if ($user->isClientPortalUser()) {
+            App::make(AuditLogService::class)->recordCompliance('access_document', __('Client portal user attempted office document access.'), 'client', $client->id, $client->tenant_id);
             abort(403, __('Access denied. Use the client portal for documents.'));
         }
         if (! $client->teamAccess()->where('user_id', $user->id)->exists()) {
+            App::make(AuditLogService::class)->recordCompliance('access_document', __('Attempted document access for client outside team.'), 'client', $client->id, $client->tenant_id);
             abort(403, __('You do not have access to this client.'));
         }
     }
@@ -107,7 +113,12 @@ class DocumentController extends Controller
                 $data['case_id'] = $case->id;
             }
         }
-        $client->documents()->create($data);
+        $doc = $client->documents()->create($data);
+        $actionType = $data['visibility'] === Document::VISIBILITY_SHARED ? AuditLog::ACTION_SHARE_DOCUMENT : AuditLog::ACTION_UPLOAD_DOCUMENT;
+        App::make(AuditLogService::class)->recordAudit($actionType, AuditLog::ENTITY_DOCUMENT, $doc->id, [], ['visibility' => $data['visibility'], 'name' => $doc->name], $client->tenant_id);
+        if ($data['visibility'] === Document::VISIBILITY_SHARED) {
+            ProcessMajorUpdateReportJob::dispatch($client->id, 'document_shared');
+        }
 
         $redirect = route('admin.core.clients.documents.index', $client);
         $params = [];
@@ -133,7 +144,13 @@ class DocumentController extends Controller
             'visibility' => ['required', Rule::in([Document::VISIBILITY_INTERNAL, Document::VISIBILITY_SHARED])],
         ]);
 
+        $oldValues = $document->only(['visibility']);
         $document->update(['visibility' => $validated['visibility']]);
+        $newValues = $document->only(['visibility']);
+        App::make(AuditLogService::class)->recordAuditWithChanges(AuditLog::ACTION_SHARE_DOCUMENT, AuditLog::ENTITY_DOCUMENT, $document->id, $oldValues, $newValues, $document->tenant_id);
+        if ($validated['visibility'] === Document::VISIBILITY_SHARED) {
+            ProcessMajorUpdateReportJob::dispatch($document->client_id, 'document_shared');
+        }
 
         return redirect()
             ->route('admin.core.clients.documents.index', $client)

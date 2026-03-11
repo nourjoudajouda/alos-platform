@@ -3,8 +3,11 @@
 namespace App\Modules\Core\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\Tenant;
+use App\Services\AuditLogService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\App;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -104,7 +107,8 @@ class TenantController extends Controller
         $validated['email'] = $validated['email'] ?? null;
         $validated['phone'] = $validated['phone'] ?? null;
         $validated['city'] = $validated['city'] ?? null;
-        Tenant::create($validated);
+        $tenant = Tenant::create($validated);
+        App::make(AuditLogService::class)->recordAudit(AuditLog::ACTION_CREATE_TENANT, AuditLog::ENTITY_TENANT, $tenant->id, [], [], $tenant->id);
 
         return redirect()
             ->route('admin.core.tenants.index')
@@ -168,6 +172,8 @@ class TenantController extends Controller
                 ->with('error', __('Cannot delete tenant with existing users.'));
         }
 
+        $oldValues = $tenant->only(['name', 'slug', 'domain']);
+        App::make(AuditLogService::class)->recordAudit(AuditLog::ACTION_DELETE, AuditLog::ENTITY_TENANT, $tenant->id, $oldValues, [], $tenant->id);
         $tenant->delete();
 
         return redirect()

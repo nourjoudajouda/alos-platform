@@ -3,10 +3,13 @@
 namespace App\Modules\Core\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\Client;
 use App\Models\Message;
 use App\Models\MessageAttachment;
 use App\Models\MessageThread;
+use App\Services\AuditLogService;
+use Illuminate\Support\Facades\App;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -24,10 +27,12 @@ class MessageThreadController extends Controller
     {
         $user = auth()->user();
         if ($user->isClientPortalUser()) {
+            App::make(AuditLogService::class)->recordCompliance('access_message', __('Client portal user attempted office messaging.'), 'client', $client->id, $client->tenant_id);
             abort(403, __('Access denied. Use the client portal for messaging.'));
         }
         $hasAccess = $client->teamAccess()->where('user_id', $user->id)->exists();
         if (! $hasAccess) {
+            App::make(AuditLogService::class)->recordCompliance('access_message', __('Attempted message access for client outside team.'), 'client', $client->id, $client->tenant_id);
             abort(403, __('You do not have access to this client.'));
         }
     }
@@ -109,6 +114,8 @@ class MessageThreadController extends Controller
             'user_id' => auth()->id(),
             'body' => $validated['body'],
         ]);
+
+        App::make(AuditLogService::class)->recordAudit(AuditLog::ACTION_SEND_MESSAGE, AuditLog::ENTITY_MESSAGE, $message->id, [], ['thread_id' => $thread->id], $client->tenant_id);
 
         if ($request->hasFile('attachments')) {
             $files = is_array($request->file('attachments')) ? $request->file('attachments') : [$request->file('attachments')];

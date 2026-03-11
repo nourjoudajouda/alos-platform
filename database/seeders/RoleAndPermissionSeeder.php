@@ -48,6 +48,10 @@ class RoleAndPermissionSeeder extends Seeder
             'cases.manage',
             'consultations.view',
             'consultations.manage',
+            'reports.view',
+            'reports.manage',
+            'audit.view',
+            'compliance.view',
         ];
 
         foreach ($permissions as $name) {
@@ -69,6 +73,7 @@ class RoleAndPermissionSeeder extends Seeder
             'view roles', 'view permissions',
             'cases.view', 'cases.manage',
             'consultations.view', 'consultations.manage',
+            'reports.view', 'reports.manage',
         ]);
 
         $assistant = Role::firstOrCreate(['name' => 'assistant', 'guard_name' => $guard]);
@@ -77,6 +82,7 @@ class RoleAndPermissionSeeder extends Seeder
             'view roles', 'view permissions',
             'cases.view', 'cases.manage',
             'consultations.view', 'consultations.manage',
+            'reports.view', 'reports.manage',
         ]);
 
         $finance = Role::firstOrCreate(['name' => 'finance', 'guard_name' => $guard]);
@@ -84,6 +90,7 @@ class RoleAndPermissionSeeder extends Seeder
             'view tenants', 'view roles', 'view permissions',
             'cases.view',
             'consultations.view',
+            'reports.view',
         ]);
 
         // ب) مستخدمو العملاء (External Client Users) — يرى المستخدم بيانات عميله فقط (يُطبّق لاحقاً في الواجهة)

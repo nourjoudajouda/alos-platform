@@ -55,6 +55,21 @@
       "slug": "core.reminder-rules"
     },
     {
+      "menuHeader": "System"
+    },
+    {
+      "url": "/admin/audit-logs",
+      "name": "Audit Log",
+      "icon": "menu-icon icon-base ti tabler-history",
+      "slug": "core.audit-logs"
+    },
+    {
+      "url": "/admin/compliance-logs",
+      "name": "Compliance Log",
+      "icon": "menu-icon icon-base ti tabler-shield-exclamation",
+      "slug": "core.compliance-logs"
+    },
+    {
       "menuHeader": "Identity"
     },
     {

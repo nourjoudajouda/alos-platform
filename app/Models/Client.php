@@ -98,4 +98,20 @@ class Client extends Model
     {
         return $this->hasMany(Consultation::class);
     }
+
+    /**
+     * ALOS-S1-15.1 — Report settings for this client.
+     */
+    public function reportSettings(): HasOne
+    {
+        return $this->hasOne(ClientReportSetting::class);
+    }
+
+    /**
+     * ALOS-S1-15.2 — Generated reports for this client.
+     */
+    public function generatedReports(): HasMany
+    {
+        return $this->hasMany(GeneratedReport::class);
+    }
 }

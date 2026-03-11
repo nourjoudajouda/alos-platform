@@ -43,5 +43,11 @@
         <div>{{ __('Documents') }}</div>
       </a>
     </li>
+    <li class="menu-item {{ str_starts_with($currentRouteName ?? '', 'portal.reports') ? 'active' : '' }}">
+      <a href="{{ route('portal.reports.index') }}" class="menu-link">
+        <i class="icon-base ti tabler-file-report"></i>
+        <div>{{ __('Reports') }}</div>
+      </a>
+    </li>
   </ul>
 </aside>

@@ -4,7 +4,7 @@ $customizerHidden = 'customizer-hide';
 
 @extends('core::layouts.layoutMaster')
 
-@section('title', __('Register') . ' — ' . config('app.name'))
+@section('title', __('Create your account') . ' — ALOS')
 
 @section('vendor-style')
 <link rel="stylesheet" href="{{ asset('assets/vendor/libs/@form-validation/form-validation.css') }}" />
@@ -31,15 +31,21 @@ $customizerHidden = 'customizer-hide';
       <!-- Register Card -->
       <div class="card">
         <div class="card-body">
-          <!-- Logo -->
-          <div class="app-brand justify-content-center mb-6">
-            <a href="{{ route('home') }}" class="app-brand-link">
-              <span class="app-brand-logo demo">@include('core::_partials.macros')</span>
+          <!-- ALOS Logo & Branding -->
+          <div class="text-center mb-6">
+            <a href="{{ route('home') }}" class="d-inline-block">
+              @if(file_exists(public_path('landing/assets/images/logo-dark-2.png')))
+                <img src="{{ asset('landing/assets/images/logo-dark-2.png') }}" alt="ALOS" width="160" class="mb-2" onerror="this.style.display='none'" />
+              @else
+                <span class="app-brand-logo demo">@include('core::_partials.macros')</span>
+              @endif
             </a>
+            <h4 class="mb-1 mt-2">ALOS — {{ __('Legal Office Management') }}</h4>
+            <p class="text-muted small mb-0">{{ __('Create your tenant account and start managing your office in one place.') }}</p>
           </div>
           <!-- /Logo -->
-          <h4 class="mb-1">{{ __('Create your account') }} 🚀</h4>
-          <p class="mb-6">{{ __('Register as a new tenant (office/company) to start using ALOS.') }}</p>
+          <h4 class="mb-1">{{ __('Create your account') }}</h4>
+          <p class="mb-6">{{ __('Register your office (tenant) to get started. You will be the first admin user.') }}</p>
 
           <form id="formAuthentication" class="mb-6" action="{{ route('register.store') }}" method="POST">
             @csrf
@@ -55,9 +61,9 @@ $customizerHidden = 'customizer-hide';
               @error('name')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
             </div>
             <div class="mb-3 form-control-validation">
-              <label for="admin_name" class="form-label">{{ __('Admin name') }}</label>
+              <label for="admin_name" class="form-label">{{ __('Managing partner name') }}</label>
               <input type="text" class="form-control" id="admin_name" name="admin_name" value="{{ old('admin_name') }}" placeholder="{{ __('Your full name') }}" required />
-              <div class="form-text">{{ __('First admin user for this office.') }}</div>
+              <div class="form-text">{{ __('First admin user for this tenant (office).') }}</div>
               @error('admin_name')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
             </div>
             <div class="mb-3 form-control-validation">

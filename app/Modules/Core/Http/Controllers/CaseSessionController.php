@@ -3,9 +3,13 @@
 namespace App\Modules\Core\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\ProcessMajorUpdateReportJob;
+use App\Models\AuditLog;
 use App\Models\CaseModel;
 use App\Models\CaseSession;
 use App\Models\User;
+use App\Services\AuditLogService;
+use Illuminate\Support\Facades\App;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,9 +25,11 @@ class CaseSessionController extends Controller
     {
         $user = auth()->user();
         if ($user->isClientPortalUser()) {
+            App::make(AuditLogService::class)->recordCompliance('access_case', __('Client portal user attempted office case access.'), 'case', $case->id, $case->tenant_id);
             abort(403, __('Access denied.'));
         }
         if (! $case->client->teamAccess()->where('user_id', $user->id)->exists()) {
+            App::make(AuditLogService::class)->recordCompliance('access_case', __('Attempted access to case outside team.'), 'case', $case->id, $case->tenant_id);
             abort(404, __('Not found.'));
         }
     }
@@ -80,7 +86,9 @@ class CaseSessionController extends Controller
             'status' => ['required', Rule::in(array_keys(CaseSession::STATUSES))],
         ]);
 
-        $case->sessions()->create($validated);
+        $session = $case->sessions()->create($validated);
+        App::make(AuditLogService::class)->recordAudit(AuditLog::ACTION_CREATE_SESSION, AuditLog::ENTITY_CASE_SESSION, $session->id, [], $session->only(['session_date', 'session_time', 'court_name', 'status']), $case->tenant_id);
+        ProcessMajorUpdateReportJob::dispatch($case->client_id, 'session_added');
 
         return redirect()
             ->route('admin.core.cases.sessions.index', $case)
@@ -123,7 +131,11 @@ class CaseSessionController extends Controller
             'status' => ['required', Rule::in(array_keys(CaseSession::STATUSES))],
         ]);
 
+        $oldValues = $session->only(['session_date', 'session_time', 'court_name', 'status']);
         $session->update($validated);
+        $newValues = $session->only(['session_date', 'session_time', 'court_name', 'status']);
+        App::make(AuditLogService::class)->recordAuditWithChanges(AuditLog::ACTION_UPDATE_SESSION, AuditLog::ENTITY_CASE_SESSION, $session->id, $oldValues, $newValues, $case->tenant_id);
+        ProcessMajorUpdateReportJob::dispatch($case->client_id, 'session_updated');
 
         return redirect()
             ->route('admin.core.cases.sessions.index', $case)
@@ -136,6 +148,8 @@ class CaseSessionController extends Controller
         if ($session->case_id !== (int) $case->id) {
             abort(404);
         }
+        $oldValues = $session->only(['session_date', 'session_time', 'court_name', 'status']);
+        App::make(AuditLogService::class)->recordAudit(AuditLog::ACTION_DELETE, AuditLog::ENTITY_CASE_SESSION, $session->id, $oldValues, [], $case->tenant_id);
         $session->delete();
 
         return redirect()

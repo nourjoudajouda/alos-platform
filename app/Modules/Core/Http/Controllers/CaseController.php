@@ -3,10 +3,13 @@
 namespace App\Modules\Core\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\ProcessMajorUpdateReportJob;
 use App\Models\Admin;
 use App\Models\CaseModel;
 use App\Models\Client;
 use App\Models\User;
+use App\Services\AuditLogService;
+use Illuminate\Support\Facades\App;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -25,9 +28,11 @@ class CaseController extends Controller
             return;
         }
         if ($user->isClientPortalUser()) {
+            App::make(AuditLogService::class)->recordCompliance('access_client', __('Client portal user attempted office client access.'), 'client', $client->id, $client->tenant_id);
             abort(403, __('Access denied.'));
         }
         if (! $client->teamAccess()->where('user_id', $user->id)->exists()) {
+            App::make(AuditLogService::class)->recordCompliance('access_client', __('Attempted access to client outside team.'), 'client', $client->id, $client->tenant_id);
             abort(404, __('Not found.'));
         }
     }
@@ -149,6 +154,8 @@ class CaseController extends Controller
             'description' => $validated['description'] ?? null,
         ]);
 
+        App::make(AuditLogService::class)->recordAudit(\App\Models\AuditLog::ACTION_CREATE_CASE, \App\Models\AuditLog::ENTITY_CASE, $case->id, [], [], $client->tenant_id);
+
         return redirect()
             ->route('admin.core.cases.show', $case)
             ->with('success', __('Case created successfully.'));
@@ -197,6 +204,8 @@ class CaseController extends Controller
 
         $caseNumber = trim((string) $validated['case_number']);
         $caseNumberSuffix = CaseModel::parseCaseNumberSuffix($caseNumber);
+        $oldStatus = $case->status;
+        $oldValues = $case->only(['status', 'case_number', 'case_type', 'court_name', 'responsible_lawyer_id', 'description']);
 
         $case->update([
             'client_id' => $validated['client_id'],
@@ -210,6 +219,12 @@ class CaseController extends Controller
             'description' => $validated['description'] ?? null,
         ]);
 
+        $newValues = $case->only(['status', 'case_number', 'case_type', 'court_name', 'responsible_lawyer_id', 'description']);
+        App::make(AuditLogService::class)->recordAuditWithChanges(\App\Models\AuditLog::ACTION_UPDATE_CASE, \App\Models\AuditLog::ENTITY_CASE, $case->id, $oldValues, $newValues, $case->tenant_id);
+        if ($oldStatus !== $validated['status']) {
+            ProcessMajorUpdateReportJob::dispatch($case->client_id, 'case_status_change');
+        }
+
         return redirect()
             ->route('admin.core.cases.show', $case)
             ->with('success', __('Case updated successfully.'));
@@ -219,6 +234,8 @@ class CaseController extends Controller
     {
         $this->authorizeCase($case);
         $client = $case->client;
+        $oldValues = $case->only(['case_number', 'case_type', 'court_name', 'status', 'client_id', 'tenant_id']);
+        App::make(AuditLogService::class)->recordAudit(\App\Models\AuditLog::ACTION_DELETE, \App\Models\AuditLog::ENTITY_CASE, $case->id, $oldValues, [], $case->tenant_id);
         $case->delete();
 
         return redirect()

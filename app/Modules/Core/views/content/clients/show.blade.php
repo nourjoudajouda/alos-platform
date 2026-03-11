@@ -4,7 +4,7 @@
   if (mb_strlen($initials) > 2) $initials = mb_substr($initials, 0, 2);
   $contentDir = app()->getLocale() === 'ar' ? 'rtl' : 'ltr';
   $activeTab = request('tab', 'overview');
-  $tabs = ['overview', 'cases', 'consultations', 'messages', 'documents', 'team-access', 'portal'];
+  $tabs = ['overview', 'cases', 'consultations', 'messages', 'documents', 'reports', 'team-access', 'portal'];
   if (!in_array($activeTab, $tabs, true)) $activeTab = 'overview';
   $portalUser = $client->portalUser;
   $userHasClientAccess = $userHasClientAccess ?? false;
@@ -76,6 +76,9 @@
     </li>
     <li class="nav-item" role="presentation">
       <a class="nav-link {{ $activeTab === 'documents' ? 'active' : '' }}" href="{{ route('admin.core.clients.show', ['client' => $client, 'tab' => 'documents']) }}" role="tab">{{ __('Documents') }}</a>
+    </li>
+    <li class="nav-item" role="presentation">
+      <a class="nav-link {{ $activeTab === 'reports' ? 'active' : '' }}" href="{{ route('admin.core.clients.reports.index', $client) }}" role="tab">{{ __('Reports') }}</a>
     </li>
     <li class="nav-item" role="presentation">
       <a class="nav-link {{ $activeTab === 'team-access' ? 'active' : '' }}" href="{{ route('admin.core.clients.show', ['client' => $client, 'tab' => 'team-access']) }}" role="tab">{{ __('Team Access') }}</a>

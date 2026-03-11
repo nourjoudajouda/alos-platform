@@ -3,11 +3,15 @@
 namespace App\Modules\Core\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\ProcessMajorUpdateReportJob;
 use App\Models\Admin;
+use App\Models\AuditLog;
 use App\Models\Client;
 use App\Models\Consultation;
 use App\Models\MessageThread;
 use App\Models\User;
+use App\Services\AuditLogService;
+use Illuminate\Support\Facades\App;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -27,9 +31,11 @@ class ConsultationController extends Controller
             return;
         }
         if ($user->isClientPortalUser()) {
+            App::make(AuditLogService::class)->recordCompliance('access_consultation', __('Client portal user attempted office consultation access.'), 'client', $client->id, $client->tenant_id);
             abort(403, __('Access denied.'));
         }
         if (! $client->teamAccess()->where('user_id', $user->id)->exists()) {
+            App::make(AuditLogService::class)->recordCompliance('access_consultation', __('Attempted access to consultation outside team.'), 'client', $client->id, $client->tenant_id);
             abort(404, __('Not found.'));
         }
     }
@@ -137,6 +143,8 @@ class ConsultationController extends Controller
             'status' => $validated['status'],
             'is_shared_with_client' => $request->boolean('is_shared_with_client', false),
         ]);
+        App::make(AuditLogService::class)->recordAudit(AuditLog::ACTION_CREATE_CONSULTATION, AuditLog::ENTITY_CONSULTATION, $consultation->id, [], $consultation->only(['title', 'consultation_date', 'status', 'client_id']), $client->tenant_id);
+        ProcessMajorUpdateReportJob::dispatch($client->id, 'consultation_added');
 
         return redirect()
             ->route('admin.core.consultations.show', $consultation)
@@ -196,6 +204,7 @@ class ConsultationController extends Controller
         ]);
 
         $client = Client::findOrFail($validated['client_id']);
+        $oldValues = $consultation->only(['title', 'consultation_date', 'status']);
         $consultation->update([
             'client_id' => $validated['client_id'],
             'tenant_id' => $client->tenant_id,
@@ -207,6 +216,9 @@ class ConsultationController extends Controller
             'status' => $validated['status'],
             'is_shared_with_client' => $request->boolean('is_shared_with_client', false),
         ]);
+        $newValues = $consultation->only(['title', 'consultation_date', 'status']);
+        App::make(AuditLogService::class)->recordAuditWithChanges(AuditLog::ACTION_UPDATE_CONSULTATION, AuditLog::ENTITY_CONSULTATION, $consultation->id, $oldValues, $newValues, $client->tenant_id);
+        ProcessMajorUpdateReportJob::dispatch($consultation->client_id, 'consultation_updated');
 
         return redirect()
             ->route('admin.core.consultations.show', $consultation)
@@ -217,6 +229,8 @@ class ConsultationController extends Controller
     {
         $this->authorizeConsultation($consultation);
         $client = $consultation->client;
+        $oldValues = $consultation->only(['title', 'consultation_date', 'status', 'client_id']);
+        App::make(AuditLogService::class)->recordAudit(AuditLog::ACTION_DELETE, AuditLog::ENTITY_CONSULTATION, $consultation->id, $oldValues, [], $consultation->tenant_id);
         $consultation->delete();
 
         return redirect()

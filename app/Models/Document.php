@@ -53,6 +53,11 @@ class Document extends Model
         return $this->belongsTo(Client::class);
     }
 
+    public function case(): BelongsTo
+    {
+        return $this->belongsTo(CaseModel::class, 'case_id');
+    }
+
     public function consultation(): BelongsTo
     {
         return $this->belongsTo(Consultation::class);

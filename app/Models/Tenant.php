@@ -14,14 +14,23 @@ class Tenant extends Model
     protected $fillable = [
         'name',
         'slug',
+        'subdomain',
         'username',
         'domain',
         'plan',
+        'email',
+        'managing_partner',
+        'subscription_plan_id',
+        'status',
+        'user_limit',
+        'lawyer_limit',
+        'storage_limit',
+        'start_date',
+        'end_date',
         'is_active',
         'public_site_enabled',
         'logo',
         'description',
-        'email',
         'phone',
         'city',
     ];
@@ -29,6 +38,8 @@ class Tenant extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'public_site_enabled' => 'boolean',
+        'start_date' => 'date',
+        'end_date' => 'date',
     ];
 
     /** Whether the public site (/f/{slug}) is enabled for this tenant. */

@@ -55,14 +55,24 @@ Route::prefix('portal')->name('portal.')->group(function () {
     Route::get('/documents', [PortalDocumentController::class, 'index'])->name('documents.index')->middleware(['auth', 'portal_client']);
     Route::post('/documents', [PortalDocumentController::class, 'store'])->name('documents.store')->middleware(['auth', 'portal_client']);
     Route::get('/documents/{document}/download', [PortalDocumentController::class, 'download'])->name('documents.download')->middleware(['auth', 'portal_client']);
+
+    // ALOS-S1-15.7 — Reports (client portal: client sees only their reports)
+    Route::get('/reports', [\App\Http\Controllers\Portal\PortalReportController::class, 'index'])->name('reports.index')->middleware(['auth', 'portal_client']);
+    Route::get('/reports/{report}', [\App\Http\Controllers\Portal\PortalReportController::class, 'show'])->name('reports.show')->middleware(['auth', 'portal_client']);
 });
+
+// ALOS-S1-15.8 — Signed URL to view generated report (from email link)
+Route::get('/reports/{report}/view', [\App\Http\Controllers\ReportViewController::class, 'show'])
+    ->name('report.show.signed')
+    ->middleware('signed');
 
 // Locale (public)
 Route::get('/lang/{locale}', [LanguageController::class, 'swap']);
 
 // لوحة الإدارة — كل الروابط تحت البادئة admin (تسجيل دخول الأدمن منفصل)
+// guest:admin = لا تعتبر المستخدم مسجلاً إلا بغارد الأدمن، فلا إعادة توجيه لمستخدم web إلى الداشبورد → يمنع ERR_TOO_MANY_REDIRECTS
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::middleware('guest')->group(function () {
+    Route::middleware('guest:admin')->group(function () {
         Route::get('/login', [AdminAuthController::class, 'index'])->name('login');
         Route::post('/login', [AdminAuthController::class, 'store'])->name('login.store');
     });
