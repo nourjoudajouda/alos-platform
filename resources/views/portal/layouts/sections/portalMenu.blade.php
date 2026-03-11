@@ -49,5 +49,11 @@
         <div>{{ __('Reports') }}</div>
       </a>
     </li>
+    <li class="menu-item {{ str_starts_with($currentRouteName ?? '', 'portal.notifications') ? 'active' : '' }}">
+      <a href="{{ route('portal.notifications.index') }}" class="menu-link">
+        <i class="icon-base ti tabler-bell-ringing"></i>
+        <div>{{ __('Notifications') }}</div>
+      </a>
+    </li>
   </ul>
 </aside>

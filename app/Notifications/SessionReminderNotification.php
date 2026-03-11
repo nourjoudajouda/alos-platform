@@ -24,9 +24,7 @@ class SessionReminderNotification extends Notification implements ShouldQueue
     public function via(object $notifiable): array
     {
         $channels = [];
-        if ($this->rule->channel_database) {
-            $channels[] = 'database';
-        }
+        // In-app uses ALOS-S1-26 notifications table; only mail here
         if ($this->rule->channel_mail && $notifiable->email) {
             $channels[] = 'mail';
         }

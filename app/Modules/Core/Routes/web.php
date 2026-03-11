@@ -2,6 +2,7 @@
 
 use App\Modules\Core\Http\Controllers\AuditLogController;
 use App\Modules\Core\Http\Controllers\CaseController;
+use App\Modules\Core\Http\Controllers\NotificationController;
 use App\Modules\Core\Http\Controllers\ComplianceLogController;
 use App\Modules\Core\Http\Controllers\CaseSessionController;
 use App\Modules\Core\Http\Controllers\ClientReportController;
@@ -141,6 +142,13 @@ Route::middleware(['auth:admin'])->prefix('roles')->name('core.roles.')->group(f
 Route::middleware(['auth:admin'])->prefix('permissions')->name('core.permissions.')->group(function () {
     Route::get('/', [PermissionController::class, 'index'])->name('index');
     Route::get('/{permission}', [PermissionController::class, 'show'])->name('show');
+});
+
+// ALOS-S1-26 — In-app notifications (current user only)
+Route::middleware(['auth:admin'])->prefix('notifications')->name('core.notifications.')->group(function () {
+    Route::get('/', [NotificationController::class, 'index'])->name('index');
+    Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all');
+    Route::post('/{notification}/read', [NotificationController::class, 'markAsRead'])->name('read');
 });
 
 // ALOS-S1-25 — Audit Log & Compliance Log

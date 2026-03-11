@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Models\Admin;
 use App\Models\CaseModel;
 use App\Models\CaseSession;
+use App\Models\InAppNotification;
+use App\Models\User;
 use App\Services\TenantContext;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
@@ -39,6 +41,30 @@ class AppServiceProvider extends ServiceProvider
         });
 
         View::addNamespace('portal', resource_path('views/portal'));
+
+        // ALOS-S1-26 — Notifications for navbar (only for User, not Admin)
+        View::composer('core::layouts.sections.navbar.navbar-partial', function ($view) {
+            $current = \Illuminate\Support\Facades\Auth::guard('admin')->user() ?? \Illuminate\Support\Facades\Auth::user();
+            $unread = 0;
+            $recent = collect([]);
+            if ($current instanceof User) {
+                $unread = InAppNotification::forUser($current->id)->forTenant($current->tenant_id)->unread()->count();
+                $recent = InAppNotification::forUser($current->id)->forTenant($current->tenant_id)->orderByDesc('created_at')->limit(8)->get();
+            }
+            $view->with('notificationUnreadCount', $unread);
+            $view->with('notificationsRecent', $recent);
+        });
+        View::composer('portal::layouts.sections.portalNavbar', function ($view) {
+            $user = \Illuminate\Support\Facades\Auth::user();
+            $unread = 0;
+            $recent = collect([]);
+            if ($user instanceof User) {
+                $unread = InAppNotification::forUser($user->id)->forTenant($user->tenant_id)->unread()->count();
+                $recent = InAppNotification::forUser($user->id)->forTenant($user->tenant_id)->orderByDesc('created_at')->limit(6)->get();
+            }
+            $view->with('notificationUnreadCount', $unread);
+            $view->with('notificationsRecent', $recent);
+        });
 
         // Route model binding
         Route::bind('case', fn (string $value) => CaseModel::findOrFail($value));

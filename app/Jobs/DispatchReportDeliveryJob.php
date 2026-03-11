@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\GeneratedReport;
+use App\Notifications\InApp\ReportGeneratedNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -35,12 +36,11 @@ class DispatchReportDeliveryJob implements ShouldQueue
         }
 
         try {
+            ReportGeneratedNotification::send($report);
             if ($settings->shouldSendEmail()) {
                 SendReportEmailJob::dispatch($report);
-                $report->markSent();
-            } else {
-                $report->markSent();
             }
+            $report->markSent();
         } catch (\Throwable $e) {
             report($e);
             $report->markFailed();

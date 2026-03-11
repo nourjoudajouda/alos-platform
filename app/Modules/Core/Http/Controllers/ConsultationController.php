@@ -145,6 +145,7 @@ class ConsultationController extends Controller
         ]);
         App::make(AuditLogService::class)->recordAudit(AuditLog::ACTION_CREATE_CONSULTATION, AuditLog::ENTITY_CONSULTATION, $consultation->id, [], $consultation->only(['title', 'consultation_date', 'status', 'client_id']), $client->tenant_id);
         ProcessMajorUpdateReportJob::dispatch($client->id, 'consultation_added');
+        \App\Notifications\InApp\ConsultationNotification::send($consultation, true);
 
         return redirect()
             ->route('admin.core.consultations.show', $consultation)
@@ -219,6 +220,7 @@ class ConsultationController extends Controller
         $newValues = $consultation->only(['title', 'consultation_date', 'status']);
         App::make(AuditLogService::class)->recordAuditWithChanges(AuditLog::ACTION_UPDATE_CONSULTATION, AuditLog::ENTITY_CONSULTATION, $consultation->id, $oldValues, $newValues, $client->tenant_id);
         ProcessMajorUpdateReportJob::dispatch($consultation->client_id, 'consultation_updated');
+        \App\Notifications\InApp\ConsultationNotification::send($consultation, false);
 
         return redirect()
             ->route('admin.core.consultations.show', $consultation)

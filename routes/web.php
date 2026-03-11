@@ -59,6 +59,11 @@ Route::prefix('portal')->name('portal.')->group(function () {
     // ALOS-S1-15.7 — Reports (client portal: client sees only their reports)
     Route::get('/reports', [\App\Http\Controllers\Portal\PortalReportController::class, 'index'])->name('reports.index')->middleware(['auth', 'portal_client']);
     Route::get('/reports/{report}', [\App\Http\Controllers\Portal\PortalReportController::class, 'show'])->name('reports.show')->middleware(['auth', 'portal_client']);
+
+    // ALOS-S1-26 — In-app notifications (portal)
+    Route::get('/notifications', [\App\Http\Controllers\Portal\PortalNotificationController::class, 'index'])->name('notifications.index')->middleware(['auth', 'portal_client']);
+    Route::post('/notifications/read-all', [\App\Http\Controllers\Portal\PortalNotificationController::class, 'markAllAsRead'])->name('notifications.read-all')->middleware(['auth', 'portal_client']);
+    Route::post('/notifications/{notification}/read', [\App\Http\Controllers\Portal\PortalNotificationController::class, 'markAsRead'])->name('notifications.read')->middleware(['auth', 'portal_client']); // {notification} = id
 });
 
 // ALOS-S1-15.8 — Signed URL to view generated report (from email link)

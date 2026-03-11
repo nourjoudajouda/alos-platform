@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Client;
 use App\Models\Message;
+use App\Notifications\InApp\NewMessageNotification;
 use App\Models\MessageAttachment;
 use App\Models\MessageThread;
 use App\Services\AuditLogService;
@@ -114,8 +115,10 @@ class MessageThreadController extends Controller
             'user_id' => auth()->id(),
             'body' => $validated['body'],
         ]);
+        $message->load('user');
 
         App::make(AuditLogService::class)->recordAudit(AuditLog::ACTION_SEND_MESSAGE, AuditLog::ENTITY_MESSAGE, $message->id, [], ['thread_id' => $thread->id], $client->tenant_id);
+        NewMessageNotification::send($thread, $message);
 
         if ($request->hasFile('attachments')) {
             $files = is_array($request->file('attachments')) ? $request->file('attachments') : [$request->file('attachments')];

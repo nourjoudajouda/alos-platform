@@ -224,6 +224,7 @@ class CaseController extends Controller
         if ($oldStatus !== $validated['status']) {
             ProcessMajorUpdateReportJob::dispatch($case->client_id, 'case_status_change');
         }
+        \App\Notifications\InApp\CaseUpdatedNotification::send($case, $oldStatus !== $validated['status'] ? __('Case status changed to :status.', ['status' => $validated['status']]) : '');
 
         return redirect()
             ->route('admin.core.cases.show', $case)

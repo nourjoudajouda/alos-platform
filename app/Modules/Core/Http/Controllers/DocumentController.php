@@ -150,6 +150,7 @@ class DocumentController extends Controller
         App::make(AuditLogService::class)->recordAuditWithChanges(AuditLog::ACTION_SHARE_DOCUMENT, AuditLog::ENTITY_DOCUMENT, $document->id, $oldValues, $newValues, $document->tenant_id);
         if ($validated['visibility'] === Document::VISIBILITY_SHARED) {
             ProcessMajorUpdateReportJob::dispatch($document->client_id, 'document_shared');
+            \App\Notifications\InApp\DocumentSharedNotification::send($document);
         }
 
         return redirect()

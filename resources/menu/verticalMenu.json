@@ -55,6 +55,12 @@
       "slug": "core.reminder-rules"
     },
     {
+      "url": "/admin/notifications",
+      "name": "Notifications",
+      "icon": "menu-icon icon-base ti tabler-bell-ringing",
+      "slug": "core.notifications"
+    },
+    {
       "menuHeader": "System"
     },
     {

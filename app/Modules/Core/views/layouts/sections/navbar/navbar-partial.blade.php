@@ -102,30 +102,44 @@ use Illuminate\Support\Facades\Route;
       </a>
     </li>
     @endif
-    <!-- Notifications -->
+    <!-- Notifications (ALOS-S1-26) -->
     <li class="nav-item navbar-dropdown dropdown-notifications dropdown me-2 me-xl-0">
-      <a class="nav-link dropdown-toggle hide-arrow p-0 position-relative" href="javascript:void(0);" data-bs-toggle="dropdown" aria-label="Notifications">
+      <a class="nav-link dropdown-toggle hide-arrow p-0 position-relative" href="javascript:void(0);" data-bs-toggle="dropdown" aria-label="{{ __('Notifications') }}">
         @include('core::_partials.navbar-icons', ['name' => 'bell', 'class' => 'icon-md'])
-        <span class="badge rounded-pill bg-danger position-absolute top-0 end-0 translate-middle-y me-1">5</span>
+        @if(($notificationUnreadCount ?? 0) > 0)
+        <span class="badge rounded-pill bg-danger position-absolute top-0 end-0 translate-middle-y me-1">{{ $notificationUnreadCount > 99 ? '99+' : $notificationUnreadCount }}</span>
+        @endif
       </a>
       <ul class="dropdown-menu dropdown-menu-end py-0 mt-2">
         <li class="dropdown-menu-header border-bottom">
           <div class="dropdown-header d-flex align-items-center py-3">
-            <h6 class="mb-0 me-auto">Notifications</h6>
-            <span class="badge bg-label-primary rounded-pill">5 New</span>
+            <h6 class="mb-0 me-auto">{{ __('Notifications') }}</h6>
+            @if(($notificationUnreadCount ?? 0) > 0)
+            <span class="badge bg-label-primary rounded-pill">{{ $notificationUnreadCount }} {{ __('New') }}</span>
+            @endif
           </div>
         </li>
         <li class="dropdown-notifications-list scrollable-area">
           <ul class="list-group list-group-flush">
+            @forelse($notificationsRecent ?? [] as $n)
             <li class="list-group-item list-group-item-action dropdown-notifications-item">
-              <div class="d-flex">
+              <a href="{{ $n->link ?? route('admin.core.notifications.index') }}" class="text-body text-decoration-none d-flex">
                 <div class="flex-shrink-0 me-3"><span class="avatar avatar-online">@include('core::_partials.navbar-icons', ['name' => 'bell', 'class' => 'icon-lg'])</span></div>
-                <div class="flex-grow-1"><h6 class="mb-0">Notification title</h6><small class="text-body">Notification content</small></div>
-              </div>
+                <div class="flex-grow-1">
+                  <h6 class="mb-0 {{ $n->read_status ? '' : 'fw-semibold' }}">{{ $n->title }}</h6>
+                  <small class="text-body">{{ Str::limit($n->message, 50) }}</small>
+                  <small class="d-block text-muted mt-1">{{ $n->created_at?->diffForHumans() }}</small>
+                </div>
+              </a>
             </li>
+            @empty
+            <li class="list-group-item dropdown-notifications-item">
+              <small class="text-muted">{{ __('No notifications') }}</small>
+            </li>
+            @endforelse
           </ul>
         </li>
-        <li class="dropdown-menu-footer border-top"><a class="dropdown-item d-flex justify-content-center py-2" href="javascript:void(0);">View all notifications</a></li>
+        <li class="dropdown-menu-footer border-top"><a class="dropdown-item d-flex justify-content-center py-2" href="{{ route('admin.core.notifications.index') }}">{{ __('View all notifications') }}</a></li>
       </ul>
     </li>
     <!-- User (أدمن من جدول admins أو يوزر تيننت من جدول users) -->

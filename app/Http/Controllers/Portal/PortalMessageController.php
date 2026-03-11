@@ -150,6 +150,8 @@ class PortalMessageController extends Controller
             'user_id' => $user->id,
             'body' => $validated['body'],
         ]);
+        $message->load('user');
+        \App\Notifications\InApp\NewMessageNotification::send($thread, $message);
 
         if ($canUpload && $request->hasFile('attachments')) {
             $files = is_array($request->file('attachments')) ? $request->file('attachments') : [$request->file('attachments')];

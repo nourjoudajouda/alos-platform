@@ -6,6 +6,7 @@ use App\Models\CaseSession;
 use App\Models\ReminderRule;
 use App\Models\SessionReminderLog;
 use App\Models\User;
+use App\Notifications\InApp\SessionReminderInAppNotification;
 use App\Notifications\SessionReminderNotification;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
@@ -113,7 +114,12 @@ class SendSessionRemindersJob implements ShouldQueue
             return;
         }
 
-        $user->notify(new SessionReminderNotification($session, $rule));
+        if ($rule->channel_database) {
+            SessionReminderInAppNotification::sendToUser($session, $user, $rule->label ?? '');
+        }
+        if ($rule->channel_mail) {
+            $user->notify(new SessionReminderNotification($session, $rule));
+        }
         $this->logSent($session, $rule, $user, $recipientType);
     }
 
