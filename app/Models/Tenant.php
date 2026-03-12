@@ -39,7 +39,15 @@ class Tenant extends Model
         'description',
         'phone',
         'city',
+        'country',
     ];
+
+    /** ALOS-S1-33 — Law firm status (platform admin). */
+    public const STATUS_ACTIVE = 'active';
+    public const STATUS_SUSPENDED = 'suspended';
+    public const STATUS_INACTIVE = 'inactive';
+
+    public const STATUSES = [self::STATUS_ACTIVE, self::STATUS_SUSPENDED, self::STATUS_INACTIVE];
 
     protected $casts = [
         'is_active' => 'boolean',

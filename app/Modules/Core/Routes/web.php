@@ -55,7 +55,7 @@ Route::middleware(['auth:admin'])->prefix('subscription-plans')->name('core.subs
     Route::delete('/{subscription_plan}', [SubscriptionPlanController::class, 'destroy'])->name('destroy');
 });
 
-// Tenants CRUD — بنفس آلية Advocate SaaS Companies
+// ALOS-S1-33 — Law Firms Management (Platform Admin)
 Route::middleware(['auth:admin'])->prefix('tenants')->name('core.tenants.')->group(function () {
     Route::get('/', [TenantController::class, 'index'])->name('index');
     Route::get('/create', [TenantController::class, 'create'])->name('create');
@@ -64,6 +64,8 @@ Route::middleware(['auth:admin'])->prefix('tenants')->name('core.tenants.')->gro
     Route::get('/{tenant}/edit', [TenantController::class, 'edit'])->name('edit');
     Route::put('/{tenant}', [TenantController::class, 'update'])->name('update');
     Route::delete('/{tenant}', [TenantController::class, 'destroy'])->name('destroy');
+    Route::post('/{tenant}/suspend', [TenantController::class, 'suspend'])->name('suspend');
+    Route::post('/{tenant}/activate', [TenantController::class, 'activate'])->name('activate');
 });
 
 // Roles & Permissions (Spatie)

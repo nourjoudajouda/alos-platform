@@ -3,15 +3,15 @@
 @endphp
 @extends('core::layouts.layoutMaster')
 
-@section('title', __('Edit Tenant') . ' — ' . config('app.name'))
+@section('title', __('Edit Law Firm') . ' — ' . config('app.name'))
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-    <h4 class="fw-bold mb-0">Edit Tenant</h4>
+    <h4 class="fw-bold mb-0">{{ __('Edit Law Firm') }}</h4>
     <div class="d-flex gap-2">
-      <a href="{{ route('admin.core.tenants.show', $tenant) }}" class="btn btn-outline-secondary btn-sm">View</a>
-      <a href="{{ route('admin.core.tenants.index') }}" class="btn btn-outline-secondary btn-sm">Back to list</a>
+      <a href="{{ route('admin.core.tenants.show', $tenant) }}" class="btn btn-outline-secondary btn-sm">{{ __('View') }}</a>
+      <a href="{{ route('admin.core.tenants.index') }}" class="btn btn-outline-secondary btn-sm">{{ __('Back to list') }}</a>
     </div>
   </div>
 
@@ -61,15 +61,26 @@
           </select>
           @error('subscription_plan_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
-        <div class="mb-3">
-          <label for="subscription_status" class="form-label">{{ __('Subscription status') }}</label>
-          <select name="subscription_status" id="subscription_status" class="form-select">
-            <option value="active" {{ old('subscription_status', $tenant->subscription_status ?? 'active') === 'active' ? 'selected' : '' }}>{{ __('Active') }}</option>
-            <option value="trial" {{ old('subscription_status', $tenant->subscription_status) === 'trial' ? 'selected' : '' }}>{{ __('Trial') }}</option>
-            <option value="suspended" {{ old('subscription_status', $tenant->subscription_status) === 'suspended' ? 'selected' : '' }}>{{ __('Suspended') }}</option>
-            <option value="expired" {{ old('subscription_status', $tenant->subscription_status) === 'expired' ? 'selected' : '' }}>{{ __('Expired') }}</option>
-          </select>
-          @error('subscription_status')<div class="invalid-feedback">{{ $message }}</div>@enderror
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="subscription_status" class="form-label">{{ __('Subscription status') }}</label>
+            <select name="subscription_status" id="subscription_status" class="form-select">
+              <option value="active" {{ old('subscription_status', $tenant->subscription_status ?? 'active') === 'active' ? 'selected' : '' }}>{{ __('Active') }}</option>
+              <option value="trial" {{ old('subscription_status', $tenant->subscription_status) === 'trial' ? 'selected' : '' }}>{{ __('Trial') }}</option>
+              <option value="suspended" {{ old('subscription_status', $tenant->subscription_status) === 'suspended' ? 'selected' : '' }}>{{ __('Suspended') }}</option>
+              <option value="expired" {{ old('subscription_status', $tenant->subscription_status) === 'expired' ? 'selected' : '' }}>{{ __('Expired') }}</option>
+            </select>
+            @error('subscription_status')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="status" class="form-label">{{ __('Status') }}</label>
+            <select name="status" id="status" class="form-select">
+              @foreach(\App\Models\Tenant::STATUSES as $s)
+                <option value="{{ $s }}" {{ old('status', $tenant->status ?? \App\Models\Tenant::STATUS_ACTIVE) === $s ? 'selected' : '' }}>{{ __(ucfirst($s)) }}</option>
+              @endforeach
+            </select>
+            @error('status')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
         </div>
         <div class="row">
           <div class="col-md-6 mb-3">
@@ -142,14 +153,21 @@
             @error('phone')<div class="invalid-feedback">{{ $message }}</div>@enderror
           </div>
         </div>
-        <div class="mb-3">
-          <label for="city" class="form-label">{{ __('City') }}</label>
-          <input type="text" name="city" id="city" class="form-control @error('city') is-invalid @enderror" value="{{ old('city', $tenant->city) }}" maxlength="128">
-          @error('city')<div class="invalid-feedback">{{ $message }}</div>@enderror
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="city" class="form-label">{{ __('City') }}</label>
+            <input type="text" name="city" id="city" class="form-control @error('city') is-invalid @enderror" value="{{ old('city', $tenant->city) }}" maxlength="128">
+            @error('city')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="country" class="form-label">{{ __('Country') }}</label>
+            <input type="text" name="country" id="country" class="form-control @error('country') is-invalid @enderror" value="{{ old('country', $tenant->country) }}" maxlength="100">
+            @error('country')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
         </div>
         <div class="d-flex gap-2">
-          <button type="submit" class="btn btn-primary">Update Tenant</button>
-          <a href="{{ route('admin.core.tenants.index') }}" class="btn btn-outline-secondary">Cancel</a>
+          <button type="submit" class="btn btn-primary">{{ __('Update Law Firm') }}</button>
+          <a href="{{ route('admin.core.tenants.index') }}" class="btn btn-outline-secondary">{{ __('Cancel') }}</a>
         </div>
       </form>
     </div>

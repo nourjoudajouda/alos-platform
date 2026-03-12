@@ -10,8 +10,20 @@
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-    <h4 class="fw-bold mb-0">{{ __('Tenant Details') }}</h4>
-    <div class="d-flex gap-2">
+    <h4 class="fw-bold mb-0">{{ __('Law Firm Details') }}</h4>
+    <div class="d-flex flex-wrap gap-2">
+      @php $status = $tenant->status ?? \App\Models\Tenant::STATUS_ACTIVE; @endphp
+      @if($status !== 'suspended')
+        <form action="{{ route('admin.core.tenants.suspend', $tenant) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Suspend this law firm?') }}');">
+          @csrf
+          <button type="submit" class="btn btn-outline-warning btn-sm">{{ __('Suspend') }}</button>
+        </form>
+      @else
+        <form action="{{ route('admin.core.tenants.activate', $tenant) }}" method="post" class="d-inline">
+          @csrf
+          <button type="submit" class="btn btn-outline-success btn-sm">{{ __('Activate') }}</button>
+        </form>
+      @endif
       <a href="{{ Helper::tenantPublicUrl($tenant) }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">
         <i class="icon-base ti tabler-external-link me-1"></i>{{ __('View Public Site') }}
       </a>
@@ -23,7 +35,7 @@
   </div>
 
   <div class="row g-4">
-    {{-- بطاقة المعلومات الأساسية --}}
+    {{-- Basic info --}}
     <div class="col-lg-6">
       <div class="card h-100">
         <div class="card-header d-flex align-items-center gap-2">
@@ -40,13 +52,18 @@
             <div>
               <h5 class="mb-1">{{ $tenant->name }}</h5>
               <p class="text-muted mb-0 small"><code>{{ $tenant->slug }}</code></p>
-              <span class="badge {{ $tenant->is_active ? 'bg-label-success' : 'bg-label-danger' }} mt-1">
-                {{ $tenant->is_active ? __('Active') : __('Inactive') }}
-              </span>
+              @php $status = $tenant->status ?? \App\Models\Tenant::STATUS_ACTIVE; @endphp
+              @if($status === 'active')
+                <span class="badge bg-label-success mt-1">{{ __('Active') }}</span>
+              @elseif($status === 'suspended')
+                <span class="badge bg-label-warning mt-1">{{ __('Suspended') }}</span>
+              @else
+                <span class="badge bg-label-secondary mt-1">{{ __('Inactive') }}</span>
+              @endif
             </div>
           </div>
           <dl class="row mb-0">
-            <dt class="col-sm-4">{{ __('Name') }}</dt>
+            <dt class="col-sm-4">{{ __('Company name') }}</dt>
             <dd class="col-sm-8">{{ $tenant->name }}</dd>
             <dt class="col-sm-4">{{ __('Slug') }}</dt>
             <dd class="col-sm-8"><code>{{ $tenant->slug }}</code> <a href="{{ Helper::tenantPublicUrl($tenant) }}" target="_blank" rel="noopener" class="ms-1 small">/{{ $tenant->slug }}</a></dd>
@@ -54,8 +71,6 @@
             <dd class="col-sm-8">{{ $tenant->username ?? '—' }}</dd>
             <dt class="col-sm-4">{{ __('Domain') }}</dt>
             <dd class="col-sm-8">{{ $tenant->domain ?? '—' }}</dd>
-            <dt class="col-sm-4">{{ __('Plan') }}</dt>
-            <dd class="col-sm-8">{{ $tenant->plan ? __(ucfirst($tenant->plan)) : '—' }}</dd>
             <dt class="col-sm-4">{{ __('Public site enabled') }}</dt>
             <dd class="col-sm-8">
               <span class="badge {{ $settings->hasPublicSiteEnabled() ? 'bg-label-success' : 'bg-label-secondary' }}">
@@ -73,7 +88,42 @@
       </div>
     </div>
 
-    {{-- بطاقة الموقع العام والعلامة التجارية --}}
+    {{-- Subscription plan & contract --}}
+    <div class="col-lg-6">
+      <div class="card h-100">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="icon-base ti tabler-credit-card"></i>
+          <h5 class="mb-0">{{ __('Subscription & contract') }}</h5>
+        </div>
+        <div class="card-body">
+          <dl class="row mb-0">
+            <dt class="col-sm-4">{{ __('Subscription plan') }}</dt>
+            <dd class="col-sm-8">
+              @if($tenant->subscriptionPlan)
+                <span class="badge bg-label-primary">{{ $tenant->subscriptionPlan->plan_name }}</span>
+                @if($tenant->subscriptionPlan->price !== null)
+                  <span class="ms-1">{{ number_format($tenant->subscriptionPlan->price, 2) }}</span>
+                @endif
+              @else
+                —
+              @endif
+            </dd>
+            <dt class="col-sm-4">{{ __('Contract start') }}</dt>
+            <dd class="col-sm-8">{{ $tenant->contract_start_date?->format('Y-m-d') ?? '—' }}</dd>
+            <dt class="col-sm-4">{{ __('Contract end') }}</dt>
+            <dd class="col-sm-8">{{ $tenant->contract_end_date?->format('Y-m-d') ?? '—' }}</dd>
+            <dt class="col-sm-4">{{ __('Billing cycle') }}</dt>
+            <dd class="col-sm-8">{{ $tenant->billing_cycle ? __(ucfirst($tenant->billing_cycle)) : '—' }}</dd>
+            <dt class="col-sm-4">{{ __('Plan price') }}</dt>
+            <dd class="col-sm-8">{{ $tenant->plan_price !== null ? number_format($tenant->plan_price, 2) : '—' }}</dd>
+            <dt class="col-sm-4">{{ __('Subscription status') }}</dt>
+            <dd class="col-sm-8">{{ $tenant->subscription_status ? __(ucfirst($tenant->subscription_status)) : '—' }}</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    {{-- Public site / branding --}}
     <div class="col-lg-6">
       <div class="card h-100">
         <div class="card-header d-flex align-items-center gap-2">
@@ -107,8 +157,8 @@
       </div>
     </div>
 
-    {{-- بطاقة معلومات التواصل --}}
-    <div class="col-12">
+    {{-- Contact info --}}
+    <div class="col-lg-6">
       <div class="card">
         <div class="card-header d-flex align-items-center gap-2">
           <i class="icon-base ti tabler-phone"></i>
@@ -132,11 +182,50 @@
               <label class="form-label small text-muted">{{ __('City') }}</label>
               <p class="mb-0">{{ $settings->city ?? $tenant->city ?? '—' }}</p>
             </div>
+            <div class="col-md-6">
+              <label class="form-label small text-muted">{{ __('Country') }}</label>
+              <p class="mb-0">{{ $tenant->country ?? '—' }}</p>
+            </div>
             <div class="col-12">
               <label class="form-label small text-muted">{{ __('Address') }}</label>
               <p class="mb-0">{{ $settings->address ?? '—' }}</p>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    {{-- Activity summary --}}
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="icon-base ti tabler-history"></i>
+          <h5 class="mb-0">{{ __('Recent activity') }}</h5>
+          <a href="{{ route('admin.core.audit-logs.index', ['tenant_id' => $tenant->id, 'entity_type' => 'tenant']) }}" class="btn btn-sm btn-outline-primary ms-auto">{{ __('View all') }}</a>
+        </div>
+        <div class="card-body">
+          @if(isset($activityLogs) && $activityLogs->isNotEmpty())
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>{{ __('Date') }}</th>
+                    <th>{{ __('Action') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @foreach($activityLogs as $log)
+                    <tr>
+                      <td class="text-nowrap">{{ $log->created_at?->format('Y-m-d H:i') }}</td>
+                      <td>{{ $log->action ?? '—' }}</td>
+                    </tr>
+                  @endforeach
+                </tbody>
+              </table>
+            </div>
+          @else
+            <p class="text-muted mb-0 small">{{ __('No recent activity recorded.') }}</p>
+          @endif
         </div>
       </div>
     </div>
