@@ -37,6 +37,7 @@ class PlatformDashboardSummaryService
             'metrics' => $this->getMetrics(),
             'recently_registered_firms' => $this->getRecentlyRegisteredFirms(),
             'expiring_contracts_list' => $this->getExpiringContractsList(),
+            'expired_contracts_list' => $this->getExpiredContractsList(),
             'recent_platform_activity' => $this->getRecentPlatformActivity(),
         ];
     }
@@ -55,11 +56,15 @@ class PlatformDashboardSummaryService
             ->count();
 
         $expiringContracts = 0;
+        $expiredContracts = 0;
         if (Schema::hasColumn('tenants', 'contract_end_date')) {
             $expiringContracts = Tenant::where('is_active', true)
                 ->whereNotNull('contract_end_date')
                 ->where('contract_end_date', '>=', now()->startOfDay())
                 ->where('contract_end_date', '<=', now()->addDays(self::EXPIRING_DAYS)->endOfDay())
+                ->count();
+            $expiredContracts = Tenant::whereNotNull('contract_end_date')
+                ->whereDate('contract_end_date', '<', now()->startOfDay())
                 ->count();
         }
 
@@ -71,6 +76,7 @@ class PlatformDashboardSummaryService
             'suspended_law_firms' => $suspendedLawFirms,
             'active_subscriptions' => $activeSubscriptions,
             'expiring_contracts' => $expiringContracts,
+            'expired_contracts' => $expiredContracts,
             'total_subscription_plans' => $totalSubscriptionPlans,
         ];
     }
@@ -111,10 +117,10 @@ class PlatformDashboardSummaryService
 
         return Tenant::query()
             ->with('subscriptionPlan')
-            ->where('is_active', true)
             ->whereNotNull('contract_end_date')
             ->where('contract_end_date', '>=', now()->startOfDay())
             ->where('contract_end_date', '<=', now()->addDays(self::EXPIRING_SOON_DAYS)->endOfDay())
+            ->whereNotIn('subscription_status', [Tenant::SUBSCRIPTION_STATUS_EXPIRED])
             ->orderBy('contract_end_date')
             ->limit(self::EXPIRING_LIST_LIMIT)
             ->get()
@@ -125,8 +131,36 @@ class PlatformDashboardSummaryService
                     'contract_end_date' => $t->contract_end_date?->format('Y-m-d'),
                     'contract_end_date_human' => $t->contract_end_date?->diffForHumans(),
                     'plan_name' => $t->subscriptionPlan?->plan_name ?? 'N/A',
-                    'status' => $t->is_active ? __('Active') : __('Suspended'),
+                    'status' => $t->subscription_status ?? $t->status ?? 'active',
                     'is_active' => (bool) $t->is_active,
+                ];
+            })
+            ->all();
+    }
+
+    /**
+     * Tenants whose contract_end_date has passed (expired).
+     */
+    public function getExpiredContractsList(): array
+    {
+        if (! Schema::hasColumn('tenants', 'contract_end_date')) {
+            return [];
+        }
+
+        return Tenant::query()
+            ->with('subscriptionPlan')
+            ->whereNotNull('contract_end_date')
+            ->whereDate('contract_end_date', '<', now()->startOfDay())
+            ->orderByDesc('contract_end_date')
+            ->limit(self::EXPIRING_LIST_LIMIT)
+            ->get()
+            ->map(function (Tenant $t) {
+                return [
+                    'id' => $t->id,
+                    'name' => $t->name ?? '—',
+                    'contract_end_date' => $t->contract_end_date?->format('Y-m-d'),
+                    'plan_name' => $t->subscriptionPlan?->plan_name ?? 'N/A',
+                    'status' => $t->subscription_status ?? $t->status ?? 'expired',
                 ];
             })
             ->all();

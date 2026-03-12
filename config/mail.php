@@ -115,4 +115,13 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Contract expiry notification (ALOS-S1-36)
+    |--------------------------------------------------------------------------
+    | Optional email to notify when a tenant contract is expiring soon.
+    | Set CONTRACT_EXPIRY_NOTIFY_ADMIN in .env to enable.
+    */
+    'contract_expiry_notify_admin' => env('CONTRACT_EXPIRY_NOTIFY_ADMIN'),
+
 ];

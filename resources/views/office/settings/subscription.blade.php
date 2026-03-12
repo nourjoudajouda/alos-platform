@@ -98,7 +98,6 @@
             <strong>{{ $contractEndDate ? (\Carbon\Carbon::parse($contractEndDate)->format('Y-m-d')) : '—' }}</strong>
           </div>
         </div>
-        @if ($billingCycle || $planPrice !== null)
         <div class="col-12">
           <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
             <span class="text-muted">{{ __('Billing cycle') }}</span>
@@ -111,7 +110,6 @@
             <strong>{{ $planPrice !== null ? number_format($planPrice, 2) : '—' }}</strong>
           </div>
         </div>
-        @endif
       </div>
 
       <h6 class="card-title mt-4 mb-3">{{ __('Usage metrics') }}</h6>

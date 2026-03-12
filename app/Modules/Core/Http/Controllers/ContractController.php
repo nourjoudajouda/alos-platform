@@ -17,7 +17,7 @@ class ContractController extends Controller
     public function index(Request $request): View
     {
         $perPage = (int) $request->get('per_page', 15);
-        $perPage = in_array($perPage, [10, 15, 25, 50], true) ? $perPage : 15;
+        $perPage = in_array($perPage, [10, 15, 25, 50, 100], true) ? $perPage : 15;
 
         $hasContractEndDate = Schema::hasColumn('tenants', 'contract_end_date');
 
@@ -37,7 +37,10 @@ class ContractController extends Controller
             });
         }
 
-        if ($hasContractEndDate && $request->filled('expiring') && $request->get('expiring') === '1') {
+        if ($hasContractEndDate && $request->filled('expired') && $request->get('expired') === '1') {
+            $query->whereNotNull('contract_end_date')
+                ->whereDate('contract_end_date', '<', now()->startOfDay());
+        } elseif ($hasContractEndDate && $request->filled('expiring') && $request->get('expiring') === '1') {
             $query->whereNotNull('contract_end_date')
                 ->where('contract_end_date', '>=', now()->startOfDay())
                 ->where('contract_end_date', '<=', now()->addDays(30)->endOfDay());

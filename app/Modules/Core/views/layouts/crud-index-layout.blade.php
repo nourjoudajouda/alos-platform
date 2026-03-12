@@ -66,7 +66,7 @@
             <div class="filter-field">
               <label for="crudPerPage-{{ $cid }}" class="form-label small text-muted mb-1">{{ __('Per Page') }}</label>
               <select name="per_page" id="crudPerPage-{{ $cid }}" class="form-select form-select-sm" style="width: 5rem;">
-                @foreach([10, 25, 50, 100] as $n)
+                @foreach([10, 15, 25, 50, 100] as $n)
                   <option value="{{ $n }}" {{ (int) $crudIndexPerPage === $n ? 'selected' : '' }}>{{ $n }}</option>
                 @endforeach
               </select>

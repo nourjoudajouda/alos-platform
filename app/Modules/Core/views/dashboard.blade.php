@@ -101,6 +101,22 @@
       <div class="card h-100">
         <div class="card-body d-flex align-items-start justify-content-between">
           <div class="me-3">
+            <p class="card-title mb-1 text-muted small">{{ __('Expired Contracts') }}</p>
+            <h3 class="mb-0 fw-bold">{{ $m['expired_contracts'] ?? 0 }}</h3>
+            <p class="mb-0 mt-2 small text-muted">{{ __('Past end date') }}</p>
+          </div>
+          <div class="avatar flex-shrink-0">
+            <span class="avatar-initial rounded bg-label-danger">
+              <i class="icon-base ti tabler-calendar-off icon-24px"></i>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-4 col-xxl-2">
+      <div class="card h-100">
+        <div class="card-body d-flex align-items-start justify-content-between">
+          <div class="me-3">
             <p class="card-title mb-1 text-muted small">{{ __('Subscription Plans') }}</p>
             <h3 class="mb-0 fw-bold">{{ $m['total_subscription_plans'] ?? 0 }}</h3>
             <p class="mb-0 mt-2 small text-muted">{{ __('Available plans') }}</p>
@@ -183,7 +199,7 @@
                       <td><a href="{{ route('admin.core.tenants.show', $item['id']) }}">{{ $item['name'] }}</a></td>
                       <td>{{ $item['contract_end_date'] }} <span class="text-muted small">({{ $item['contract_end_date_human'] }})</span></td>
                       <td>{{ $item['plan_name'] }}</td>
-                      <td><span class="badge bg-{{ !empty($item['is_active']) ? 'success' : 'secondary' }}">{{ $item['status'] }}</span></td>
+                      <td><span class="badge bg-{{ $item['status'] === 'active' || $item['status'] === 'trial' ? 'success' : 'secondary' }}">{{ ucfirst($item['status'] ?? '—') }}</span></td>
                     </tr>
                   @endforeach
                 </tbody>
@@ -191,6 +207,45 @@
             </div>
           @else
             <p class="text-muted mb-0 p-4">{{ __('No contracts expiring in the next 14 days.') }}</p>
+          @endif
+        </div>
+      </div>
+    </div>
+
+    {{-- B2) Expired Contracts --}}
+    @php $expiredList = $summary['expired_contracts_list'] ?? []; @endphp
+    <div class="col-12 col-lg-6">
+      <div class="card h-100">
+        <div class="card-header d-flex align-items-center justify-content-between">
+          <h5 class="card-title mb-0">{{ __('Expired Contracts') }}</h5>
+          <a href="{{ route('admin.core.contracts.index', ['expired' => '1']) }}" class="btn btn-sm btn-outline-primary">{{ __('View all') }}</a>
+        </div>
+        <div class="card-body p-0">
+          @if (count($expiredList) > 0)
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>{{ __('Company') }}</th>
+                    <th>{{ __('Plan') }}</th>
+                    <th>{{ __('Contract end') }}</th>
+                    <th>{{ __('Status') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @foreach ($expiredList as $item)
+                    <tr>
+                      <td><a href="{{ route('admin.core.tenants.show', $item['id']) }}">{{ $item['name'] }}</a></td>
+                      <td>{{ $item['plan_name'] }}</td>
+                      <td class="text-muted">{{ $item['contract_end_date'] }}</td>
+                      <td><span class="badge bg-danger">{{ ucfirst($item['status'] ?? 'expired') }}</span></td>
+                    </tr>
+                  @endforeach
+                </tbody>
+              </table>
+            </div>
+          @else
+            <p class="text-muted mb-0 p-4">{{ __('No expired contracts.') }}</p>
           @endif
         </div>
       </div>

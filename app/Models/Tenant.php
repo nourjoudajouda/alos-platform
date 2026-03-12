@@ -49,6 +49,19 @@ class Tenant extends Model
 
     public const STATUSES = [self::STATUS_ACTIVE, self::STATUS_SUSPENDED, self::STATUS_INACTIVE];
 
+    /** ALOS-S1-35 — Subscription lifecycle (contract/subscription status). */
+    public const SUBSCRIPTION_STATUS_ACTIVE = 'active';
+    public const SUBSCRIPTION_STATUS_TRIAL = 'trial';
+    public const SUBSCRIPTION_STATUS_EXPIRED = 'expired';
+    public const SUBSCRIPTION_STATUS_SUSPENDED = 'suspended';
+
+    public const SUBSCRIPTION_STATUSES = [
+        self::SUBSCRIPTION_STATUS_ACTIVE,
+        self::SUBSCRIPTION_STATUS_TRIAL,
+        self::SUBSCRIPTION_STATUS_EXPIRED,
+        self::SUBSCRIPTION_STATUS_SUSPENDED,
+    ];
+
     protected $casts = [
         'is_active' => 'boolean',
         'public_site_enabled' => 'boolean',

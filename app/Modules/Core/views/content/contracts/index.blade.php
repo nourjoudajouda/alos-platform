@@ -1,110 +1,131 @@
 @php
+  $crudIndexId = 'contracts';
+  $crudIndexTitle = __('Contracts') . ' — ' . config('app.name');
+  $crudIndexFiltersAction = route('admin.core.contracts.index');
+  $crudIndexPerPage = $perPage;
+  $crudIndexTableTitle = __('Contracts');
+  $crudIndexAddUrl = route('admin.core.tenants.index');
+  $crudIndexAddLabel = __('Law Firms');
+  $crudIndexEmptyMessage = __('No law firms found.');
+  $crudIndexEmptyLink = route('admin.core.tenants.index');
+  $crudIndexEmptyLinkText = __('Law Firms');
+  $crudIndexShowViewToggle = false;
+  $items = $tenants;
   $configData = Helper::appClasses();
+  $contentDir = app()->getLocale() === 'ar' ? 'rtl' : 'ltr';
+  $filterExpiring = request('expiring', '');
+  $filterExpired = request('expired', '');
 @endphp
-@extends('core::layouts.layoutMaster')
+@extends('core::layouts.crud-index-layout')
 
-@section('title', __('Contracts') . ' — ' . config('app.name'))
+@section('crud_description')
+  {{ __('Contract dates per law firm. Edit contract dates from Law Firms.') }}
+@endsection
 
-@section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
-  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-    <div>
-      <h4 class="fw-bold mb-0">{{ __('Contracts') }}</h4>
-      <p class="text-body mb-0 small">{{ __('Contract dates per law firm. Edit contract dates from Law Firms.') }}</p>
+@section('crud_stats')
+@endsection
+
+@section('crud_filters_hidden_inputs')
+  @if(request('expiring'))<input type="hidden" name="expiring" value="{{ request('expiring') }}">@endif
+  @if(request('expired'))<input type="hidden" name="expired" value="{{ request('expired') }}">@endif
+@endsection
+
+@section('crud_offcanvas')
+  <form action="{{ route('admin.core.contracts.index') }}" method="get" id="filtersFormContracts">
+    <input type="hidden" name="per_page" value="{{ $perPage }}">
+    <input type="hidden" name="search" value="{{ request('search') }}">
+    @if($hasContractEndDate ?? true)
+    <div class="mb-3">
+      <label for="filterExpiring" class="form-label">{{ __('Filter by expiration') }}</label>
+      <select name="expiring" id="filterExpiring" class="form-select">
+        <option value="">{{ __('All contracts') }}</option>
+        <option value="1" {{ $filterExpiring === '1' ? 'selected' : '' }}>{{ __('Expiring in 30 days') }}</option>
+      </select>
     </div>
-    <a href="{{ route('admin.core.tenants.index') }}" class="btn btn-outline-primary btn-sm">
-      <i class="icon-base ti tabler-building-store me-1"></i>
-      {{ __('Law Firms') }}
-    </a>
-  </div>
+    <div class="mb-3">
+      <label for="filterExpired" class="form-label">{{ __('Filter by status') }}</label>
+      <select name="expired" id="filterExpired" class="form-select">
+        <option value="">{{ __('All') }}</option>
+        <option value="1" {{ $filterExpired === '1' ? 'selected' : '' }}>{{ __('Expired only') }}</option>
+      </select>
+    </div>
+    @endif
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-primary flex-grow-1">{{ __('Search') }}</button>
+      <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">{{ __('Close') }}</button>
+    </div>
+  </form>
+@endsection
 
-  <div class="card">
-    <div class="card-body">
-      <form action="{{ route('admin.core.contracts.index') }}" method="get" class="d-flex flex-wrap gap-2 mb-3">
-        <input type="hidden" name="per_page" value="{{ $perPage }}">
-        <input type="text" name="search" class="form-control form-control-sm" style="max-width: 200px;" placeholder="{{ __('Search by name or slug') }}" value="{{ request('search') }}">
-        @if($hasContractEndDate ?? true)
-        <select name="expiring" class="form-select form-select-sm" style="max-width: 180px;">
-          <option value="">{{ __('All contracts') }}</option>
-          <option value="1" {{ request('expiring') === '1' ? 'selected' : '' }}>{{ __('Expiring in 30 days') }}</option>
-        </select>
+@section('crud_table_header')
+  <th>{{ __('Law Firm') }}</th>
+  <th>{{ __('Contract start') }}</th>
+  <th>{{ __('Contract end') }}</th>
+  <th>{{ __('Plan') }}</th>
+  <th>{{ __('Status') }}</th>
+  <th class="text-nowrap" style="min-width: 6rem;">{{ __('Actions') }}</th>
+@endsection
+
+@section('crud_table_body')
+  @forelse($tenants as $tenant)
+    @php
+      $end = $tenant->contract_end_date ?? $tenant->end_date;
+      $isExpiring = $end && $end->isFuture() && $end->lte(now()->addDays(30));
+    @endphp
+    <tr>
+      <td>
+        <span class="fw-medium">{{ $tenant->name }}</span>
+        <span class="text-muted small d-block">{{ $tenant->slug }}</span>
+      </td>
+      <td class="text-nowrap">{{ ($tenant->contract_start_date ?? $tenant->start_date)?->format('Y-m-d') ?? '—' }}</td>
+      <td class="text-nowrap">
+        @if($end)
+          <span class="{{ $isExpiring ? 'text-warning fw-medium' : '' }}">{{ $end->format('Y-m-d') }}</span>
+          @if($isExpiring)
+            <span class="badge bg-label-warning ms-1">{{ __('Expiring soon') }}</span>
+          @endif
+        @else
+          —
         @endif
-        <button type="submit" class="btn btn-sm btn-primary">{{ __('Search') }}</button>
-      </form>
+      </td>
+      <td>
+        @if($tenant->subscriptionPlan)
+          <span class="badge bg-label-primary">{{ $tenant->subscriptionPlan->plan_name }}</span>
+        @else
+          <span class="text-muted">—</span>
+        @endif
+      </td>
+      <td>
+        @php $subStatus = $tenant->subscription_status ?? $tenant->status ?? 'active'; @endphp
+        <span class="badge bg-{{ $subStatus === 'expired' ? 'danger' : ($subStatus === 'active' || $subStatus === 'trial' ? 'success' : 'warning') }}">
+          {{ ucfirst(__($subStatus)) }}
+        </span>
+      </td>
+      <td>
+        <a href="{{ route('admin.core.tenants.edit', $tenant) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('Edit') }}">
+          <i class="icon-base ti tabler-pencil"></i>
+        </a>
+      </td>
+    </tr>
+  @empty
+    <tr>
+      <td colspan="6" class="text-center text-muted py-5">
+        <i class="icon-base ti tabler-file-contract icon-32px d-block mb-2 opacity-50"></i>
+        {{ $crudIndexEmptyMessage }} <a href="{{ $crudIndexEmptyLink }}">{{ $crudIndexEmptyLinkText }}</a>
+      </td>
+    </tr>
+  @endforelse
+@endsection
 
-      <div class="table-responsive">
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th>{{ __('Law Firm') }}</th>
-              <th>{{ __('Contract start') }}</th>
-              <th>{{ __('Contract end') }}</th>
-              <th>{{ __('Plan') }}</th>
-              <th>{{ __('Status') }}</th>
-              <th class="text-nowrap" style="min-width: 6rem;">{{ __('Actions') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            @forelse($tenants as $tenant)
-              @php
-                $end = $tenant->contract_end_date ?? $tenant->end_date;
-                $isExpiring = $end && $end->isFuture() && $end->lte(now()->addDays(30));
-              @endphp
-              <tr>
-                <td>
-                  <span class="fw-medium">{{ $tenant->name }}</span>
-                  <span class="text-muted small d-block">{{ $tenant->slug }}</span>
-                </td>
-                <td class="text-nowrap">{{ ($tenant->contract_start_date ?? $tenant->start_date)?->format('Y-m-d') ?? '—' }}</td>
-                <td class="text-nowrap">
-                  @if($end)
-                    <span class="{{ $isExpiring ? 'text-warning fw-medium' : '' }}">{{ $end->format('Y-m-d') }}</span>
-                    @if($isExpiring)
-                      <span class="badge bg-label-warning ms-1">{{ __('Expiring soon') }}</span>
-                    @endif
-                  @else
-                    —
-                  @endif
-                </td>
-                <td>
-                  @if($tenant->subscriptionPlan)
-                    <span class="badge bg-label-primary">{{ $tenant->subscriptionPlan->plan_name }}</span>
-                  @else
-                    <span class="text-muted">—</span>
-                  @endif
-                </td>
-                <td>
-                  @if($tenant->is_active)
-                    <span class="badge bg-label-success">{{ __('Active') }}</span>
-                  @else
-                    <span class="badge bg-label-secondary">{{ __('Suspended') }}</span>
-                  @endif
-                </td>
-                <td>
-                  <a href="{{ route('admin.core.tenants.edit', $tenant) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('Edit') }}">
-                    <i class="icon-base ti tabler-pencil"></i>
-                  </a>
-                </td>
-              </tr>
-            @empty
-              <tr>
-                <td colspan="6" class="text-center text-muted py-5">
-                  <i class="icon-base ti tabler-file-contract icon-32px d-block mb-2 opacity-50"></i>
-                  {{ __('No law firms found.') }}
-                </td>
-              </tr>
-            @endforelse
-          </tbody>
-        </table>
-      </div>
-
-      @if($tenants->hasPages())
-        <div class="d-flex justify-content-between align-items-center mt-3">
-          <small class="text-muted">{{ __('Showing :from–:to of :total', ['from' => $tenants->firstItem(), 'to' => $tenants->lastItem(), 'total' => $tenants->total()]) }}</small>
-          {{ $tenants->withQueryString()->links() }}
-        </div>
-      @endif
-    </div>
-  </div>
-</div>
+@section('crud_extra_script')
+<script>
+(function() {
+  var formSide = document.getElementById('filtersFormContracts');
+  if (formSide) {
+    document.querySelectorAll('#filterExpiring, #filterExpired').forEach(function(el) {
+      if (el) el.addEventListener('change', function() { formSide.submit(); });
+    });
+  }
+})();
+</script>
 @endsection
