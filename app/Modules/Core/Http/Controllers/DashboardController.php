@@ -3,7 +3,7 @@
 namespace App\Modules\Core\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Services\PlatformDashboardService;
+use App\Services\PlatformDashboardSummaryService;
 use Illuminate\Contracts\View\View;
 
 /**
@@ -12,9 +12,9 @@ use Illuminate\Contracts\View\View;
  */
 class DashboardController extends Controller
 {
-    public function __invoke(PlatformDashboardService $platformDashboard): View
+    public function __invoke(PlatformDashboardSummaryService $platformSummary): View
     {
-        $metrics = $platformDashboard->getMetrics();
-        return view('core::dashboard', compact('metrics'));
+        $summary = $platformSummary->getSummary();
+        return view('core::dashboard', compact('summary'));
     }
 }
