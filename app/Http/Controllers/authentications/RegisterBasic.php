@@ -5,6 +5,7 @@ namespace App\Http\Controllers\authentications;
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Services\SystemSettingsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,13 +18,21 @@ use Illuminate\View\View;
  */
 class RegisterBasic extends Controller
 {
-    public function index(): View
+    public function index(SystemSettingsService $settings): View|RedirectResponse
     {
+        if (! $settings->get('allow_tenant_registration', true)) {
+            return redirect()->route('home')->with('info', __('Tenant registration is currently disabled.'));
+        }
+
         return view('core::content.authentications.auth-register-landing');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, SystemSettingsService $settings): RedirectResponse
     {
+        if (! $settings->get('allow_tenant_registration', true)) {
+            return redirect()->route('home')->with('info', __('Tenant registration is currently disabled.'));
+        }
+
         $validated = $request->validate([
             'username' => ['required', 'string', 'min:3', 'max:50', 'regex:/^[a-zA-Z0-9_-]+$/', 'unique:tenants,username'],
             'name' => ['required', 'string', 'max:100'],

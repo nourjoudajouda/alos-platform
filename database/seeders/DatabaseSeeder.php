@@ -15,6 +15,8 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             RoleAndPermissionSeeder::class,
             ReminderRuleSeeder::class,
+            SubscriptionPlanSeeder::class,
+            SystemSettingsSeeder::class,
         ]);
     }
 }

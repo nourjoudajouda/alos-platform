@@ -36,6 +36,7 @@
         @endif
         <div class="content-wrapper">
           <div class="{{ $container }} flex-grow-1 container-p-y">
+            @include('core::layouts.sections.usageWarningOffice')
             @yield('content')
           </div>
           @if ($isFooter)

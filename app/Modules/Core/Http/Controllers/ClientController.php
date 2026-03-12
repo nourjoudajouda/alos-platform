@@ -72,7 +72,25 @@ class ClientController extends Controller
             'phone' => ['nullable', 'string', 'max:50'],
         ]);
 
+        $tenantId = $validated['tenant_id'] ?? null;
+        if ($tenantId) {
+            $tenant = Tenant::find($tenantId);
+            if ($tenant) {
+                try {
+                    app(\App\Services\PlanLimitService::class)->checkClientLimit($tenant);
+                } catch (\RuntimeException $e) {
+                    return redirect()->route('admin.core.clients.create')->withInput()->with('error', $e->getMessage());
+                }
+            }
+        }
+
         $client = Client::create($validated);
+        if ($client->tenant_id) {
+            $t = Tenant::find($client->tenant_id);
+            if ($t) {
+                app(\App\Services\PlanLimitService::class)->invalidateUsageCache($t);
+            }
+        }
         App::make(AuditLogService::class)->recordAudit(AuditLog::ACTION_CREATE_CLIENT, AuditLog::ENTITY_CLIENT, $client->id, [], [], $client->tenant_id);
 
         return redirect()
@@ -141,9 +159,16 @@ class ClientController extends Controller
 
     public function destroy(Client $client): RedirectResponse
     {
+        $tenantId = $client->tenant_id;
         $oldValues = $client->only(['name', 'email', 'tenant_id']);
-        App::make(AuditLogService::class)->recordAudit(AuditLog::ACTION_DELETE, AuditLog::ENTITY_CLIENT, $client->id, $oldValues, [], $client->tenant_id);
+        App::make(AuditLogService::class)->recordAudit(AuditLog::ACTION_DELETE, AuditLog::ENTITY_CLIENT, $client->id, $oldValues, [], $tenantId);
         $client->delete();
+        if ($tenantId) {
+            $t = Tenant::find($tenantId);
+            if ($t) {
+                app(\App\Services\PlanLimitService::class)->invalidateUsageCache($t);
+            }
+        }
 
         return redirect()
             ->route('admin.core.clients.index')
@@ -196,6 +221,14 @@ class ClientController extends Controller
      */
     public function storePortalUser(Request $request, Client $client): RedirectResponse
     {
+        $tenant = $client->tenant;
+        if ($tenant) {
+            try {
+                app(\App\Services\PlanLimitService::class)->ensureFeature($tenant, \App\Services\PlanLimitService::FEATURE_CLIENT_PORTAL);
+            } catch (\RuntimeException $e) {
+                return redirect()->route('admin.core.clients.show', [$client, 'tab' => 'portal'])->with('error', $e->getMessage());
+            }
+        }
         if ($client->portalUser) {
             return redirect()
                 ->route('admin.core.clients.show', [$client, 'tab' => 'portal'])
@@ -236,6 +269,14 @@ class ClientController extends Controller
      */
     public function updatePortalUser(Request $request, Client $client): RedirectResponse
     {
+        $tenant = $client->tenant;
+        if ($tenant) {
+            try {
+                app(\App\Services\PlanLimitService::class)->ensureFeature($tenant, \App\Services\PlanLimitService::FEATURE_CLIENT_PORTAL);
+            } catch (\RuntimeException $e) {
+                return redirect()->route('admin.core.clients.show', [$client, 'tab' => 'portal'])->with('error', $e->getMessage());
+            }
+        }
         $portalUser = $client->portalUser;
         if (! $portalUser) {
             return redirect()
@@ -275,6 +316,14 @@ class ClientController extends Controller
      */
     public function togglePortalStatus(Client $client): RedirectResponse
     {
+        $tenant = $client->tenant;
+        if ($tenant) {
+            try {
+                app(\App\Services\PlanLimitService::class)->ensureFeature($tenant, \App\Services\PlanLimitService::FEATURE_CLIENT_PORTAL);
+            } catch (\RuntimeException $e) {
+                return redirect()->route('admin.core.clients.show', [$client, 'tab' => 'portal'])->with('error', $e->getMessage());
+            }
+        }
         $portalUser = $client->portalUser;
         if (! $portalUser) {
             return redirect()

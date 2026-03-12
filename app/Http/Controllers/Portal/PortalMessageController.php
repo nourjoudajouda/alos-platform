@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Message;
 use App\Models\MessageAttachment;
 use App\Models\MessageThread;
+use App\Services\PlanLimitService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -58,6 +59,14 @@ class PortalMessageController extends Controller
     {
         $user = $request->user();
         $client = $this->getClient($user);
+        $tenant = $user->tenant;
+        if ($tenant) {
+            try {
+                app(PlanLimitService::class)->ensureFeature($tenant, PlanLimitService::FEATURE_CLIENT_PORTAL);
+            } catch (\RuntimeException $e) {
+                abort(403, $e->getMessage());
+            }
+        }
 
         $query = $client->messageThreads()->with(['messages' => fn ($q) => $q->latest()->limit(1)->with('user')]);
         if (! $request->boolean('archived')) {
@@ -109,6 +118,14 @@ class PortalMessageController extends Controller
         $this->ensureCanMessage($request);
         $user = $request->user();
         $client = $this->getClient($user);
+        $tenant = $client->tenant;
+        if ($tenant) {
+            try {
+                app(PlanLimitService::class)->ensureWriteAllowed($tenant);
+            } catch (\Throwable $e) {
+                return redirect()->route('portal.messages.index')->with('error', $e->getMessage());
+            }
+        }
 
         $validated = $request->validate([
             'subject' => ['required', 'string', 'max:255'],
@@ -129,6 +146,14 @@ class PortalMessageController extends Controller
         $user = $request->user();
         $client = $this->getClient($user);
         $this->authorizeThread($thread, (int) $client->id);
+        $tenant = $client->tenant;
+        if ($tenant) {
+            try {
+                app(PlanLimitService::class)->ensureWriteAllowed($tenant);
+            } catch (\Throwable $e) {
+                return redirect()->route('portal.messages.show', $thread)->with('error', $e->getMessage());
+            }
+        }
 
         if ($thread->archived_at) {
             return redirect()

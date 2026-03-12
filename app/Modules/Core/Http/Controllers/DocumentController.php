@@ -8,6 +8,7 @@ use App\Models\AuditLog;
 use App\Models\Client;
 use App\Models\Document;
 use App\Services\AuditLogService;
+use App\Services\PlanLimitService;
 use Illuminate\Support\Facades\App;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -70,6 +71,20 @@ class DocumentController extends Controller
     {
         $this->authorizeClient($client);
 
+        $tenant = $client->tenant;
+        if ($tenant) {
+            $limitService = app(PlanLimitService::class);
+            try {
+                $limitService->checkDocumentLimit($tenant);
+                $file = $request->file('file');
+                $limitService->checkStorageLimit($tenant, $file ? $file->getSize() : 0);
+            } catch (\Throwable $e) {
+                return redirect()
+                    ->route('admin.core.clients.show', [$client, 'tab' => 'documents'])
+                    ->with('error', $e->getMessage());
+            }
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
@@ -114,6 +129,9 @@ class DocumentController extends Controller
             }
         }
         $doc = $client->documents()->create($data);
+        if ($tenant) {
+            app(PlanLimitService::class)->invalidateUsageCache($tenant);
+        }
         $actionType = $data['visibility'] === Document::VISIBILITY_SHARED ? AuditLog::ACTION_SHARE_DOCUMENT : AuditLog::ACTION_UPLOAD_DOCUMENT;
         App::make(AuditLogService::class)->recordAudit($actionType, AuditLog::ENTITY_DOCUMENT, $doc->id, [], ['visibility' => $data['visibility'], 'name' => $doc->name], $client->tenant_id);
         if ($data['visibility'] === Document::VISIBILITY_SHARED) {

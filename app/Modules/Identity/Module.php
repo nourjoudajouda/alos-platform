@@ -27,6 +27,6 @@ final class Module
     /** أدوار مستخدمي المكتب فقط (للعرض في فورم إنشاء/تعديل مستخدم) */
     public static function internalRoleNames(): array
     {
-        return ['admin', 'managing_partner', 'lawyer', 'assistant', 'finance'];
+        return ['admin', 'managing_partner', 'lawyer', 'assistant', 'finance', 'trainee'];
     }
 }

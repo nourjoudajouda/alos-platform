@@ -62,6 +62,40 @@
             <div class="invalid-feedback">{{ $message }}</div>
           @enderror
         </div>
+        <hr class="my-4">
+        <h6 class="mb-3">{{ __('Subscription') }}</h6>
+        <div class="mb-3">
+          <label for="subscription_plan_id" class="form-label">{{ __('Subscription plan') }}</label>
+          <select name="subscription_plan_id" id="subscription_plan_id" class="form-select">
+            <option value="">{{ __('— None —') }}</option>
+            @foreach($subscriptionPlans ?? [] as $plan)
+              <option value="{{ $plan->id }}" {{ old('subscription_plan_id') == $plan->id ? 'selected' : '' }}>{{ $plan->plan_name }} ({{ number_format($plan->price, 2) }})</option>
+            @endforeach
+          </select>
+          @error('subscription_plan_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+        </div>
+        <div class="mb-3">
+          <label for="subscription_status" class="form-label">{{ __('Subscription status') }}</label>
+          <select name="subscription_status" id="subscription_status" class="form-select">
+            <option value="active" {{ old('subscription_status', 'active') === 'active' ? 'selected' : '' }}>{{ __('Active') }}</option>
+            <option value="trial" {{ old('subscription_status') === 'trial' ? 'selected' : '' }}>{{ __('Trial') }}</option>
+            <option value="suspended" {{ old('subscription_status') === 'suspended' ? 'selected' : '' }}>{{ __('Suspended') }}</option>
+            <option value="expired" {{ old('subscription_status') === 'expired' ? 'selected' : '' }}>{{ __('Expired') }}</option>
+          </select>
+          @error('subscription_status')<div class="invalid-feedback">{{ $message }}</div>@enderror
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="start_date" class="form-label">{{ __('Contract start date') }}</label>
+            <input type="date" name="start_date" id="start_date" class="form-control @error('start_date') is-invalid @enderror" value="{{ old('start_date') }}">
+            @error('start_date')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="end_date" class="form-label">{{ __('Contract end date') }}</label>
+            <input type="date" name="end_date" id="end_date" class="form-control @error('end_date') is-invalid @enderror" value="{{ old('end_date') }}">
+            @error('end_date')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
+        </div>
         <div class="mb-3">
           <div class="form-check">
             <input type="checkbox" name="is_active" id="is_active" value="1" class="form-check-input" {{ old('is_active', true) ? 'checked' : '' }}>

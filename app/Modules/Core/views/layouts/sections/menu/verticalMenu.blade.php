@@ -11,7 +11,15 @@ $configData = Helper::appClasses();
   @if (!isset($navbarFull))
   <div class="app-brand demo">
     <a href="{{ route('admin.core.dashboard') }}" class="app-brand-link">
-      <span class="app-brand-logo demo">@include('core::_partials.macros')</span>
+      <span class="app-brand-logo demo">
+        @if(!empty($systemLogoUrl))
+          <span class="app-brand-logo-wrapper d-inline-block" style="height: 60px;">
+            <img src="{{ $systemLogoUrl }}" alt="{{ $systemName ?? config('app.name') }}" class="app-brand-logo-img" style="height: 60px; width: auto; max-width: 140px; object-fit: contain;" />
+          </span>
+        @else
+          @include('core::_partials.macros')
+        @endif
+      </span>
     </a>
 
     <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">

@@ -4,6 +4,7 @@ namespace App\Modules\Core\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use App\Models\SubscriptionPlan;
 use App\Models\Tenant;
 use App\Services\AuditLogService;
 use Illuminate\Http\RedirectResponse;
@@ -72,7 +73,8 @@ class TenantController extends Controller
 
     public function create(): View
     {
-        return view('core::content.tenants.create');
+        $subscriptionPlans = SubscriptionPlan::orderBy('price')->get();
+        return view('core::content.tenants.create', ['subscriptionPlans' => $subscriptionPlans]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -83,6 +85,10 @@ class TenantController extends Controller
             'username' => ['nullable', 'string', 'min:3', 'max:64', 'regex:/^[a-zA-Z0-9_-]+$/', 'unique:tenants,username'],
             'domain' => ['nullable', 'string', 'max:255'],
             'plan' => ['nullable', 'string', 'in:'.implode(',', Tenant::PLANS)],
+            'subscription_plan_id' => ['nullable', 'integer', 'exists:subscription_plans,id'],
+            'subscription_status' => ['nullable', 'string', 'in:active,suspended,expired,trial'],
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
             'is_active' => ['nullable', 'boolean'],
             'public_site_enabled' => ['nullable', 'boolean'],
             'logo' => ['nullable', 'string', 'max:500'],
@@ -102,6 +108,10 @@ class TenantController extends Controller
         }
         $validated['is_active'] = $request->boolean('is_active', true);
         $validated['public_site_enabled'] = $request->boolean('public_site_enabled', true);
+        $validated['subscription_plan_id'] = $validated['subscription_plan_id'] ?? null;
+        $validated['subscription_status'] = $validated['subscription_status'] ?? 'active';
+        $validated['start_date'] = $validated['start_date'] ?? null;
+        $validated['end_date'] = $validated['end_date'] ?? null;
         $validated['logo'] = $validated['logo'] ?? null;
         $validated['description'] = $validated['description'] ?? null;
         $validated['email'] = $validated['email'] ?? null;
@@ -127,7 +137,11 @@ class TenantController extends Controller
 
     public function edit(Tenant $tenant): View
     {
-        return view('core::content.tenants.edit', ['tenant' => $tenant]);
+        $subscriptionPlans = SubscriptionPlan::orderBy('price')->get();
+        return view('core::content.tenants.edit', [
+            'tenant' => $tenant,
+            'subscriptionPlans' => $subscriptionPlans,
+        ]);
     }
 
     public function update(Request $request, Tenant $tenant): RedirectResponse
@@ -138,6 +152,14 @@ class TenantController extends Controller
             'username' => ['nullable', 'string', 'min:3', 'max:64', 'regex:/^[a-zA-Z0-9_-]+$/', 'unique:tenants,username,' . $tenant->id],
             'domain' => ['nullable', 'string', 'max:255'],
             'plan' => ['nullable', 'string', 'in:'.implode(',', Tenant::PLANS)],
+            'subscription_plan_id' => ['nullable', 'integer', 'exists:subscription_plans,id'],
+            'subscription_status' => ['nullable', 'string', 'in:active,suspended,expired,trial'],
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'contract_start_date' => ['nullable', 'date'],
+            'contract_end_date' => ['nullable', 'date', 'after_or_equal:contract_start_date'],
+            'billing_cycle' => ['nullable', 'string', 'in:monthly,yearly'],
+            'plan_price' => ['nullable', 'numeric', 'min:0'],
             'is_active' => ['nullable', 'boolean'],
             'public_site_enabled' => ['nullable', 'boolean'],
             'logo' => ['nullable', 'string', 'max:500'],
@@ -152,6 +174,14 @@ class TenantController extends Controller
         }
         $validated['is_active'] = $request->boolean('is_active', true);
         $validated['public_site_enabled'] = $request->boolean('public_site_enabled', true);
+        $validated['subscription_plan_id'] = $validated['subscription_plan_id'] ?? null;
+        $validated['subscription_status'] = $validated['subscription_status'] ?? 'active';
+        $validated['start_date'] = $validated['start_date'] ?? null;
+        $validated['end_date'] = $validated['end_date'] ?? null;
+        $validated['contract_start_date'] = $validated['contract_start_date'] ?? null;
+        $validated['contract_end_date'] = $validated['contract_end_date'] ?? null;
+        $validated['billing_cycle'] = $validated['billing_cycle'] ?? null;
+        $validated['plan_price'] = $validated['plan_price'] ?? null;
         $validated['logo'] = $validated['logo'] ?? null;
         $validated['description'] = $validated['description'] ?? null;
         $validated['email'] = $validated['email'] ?? null;

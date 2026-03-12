@@ -4,7 +4,7 @@ $customizerHidden = 'customizer-hide';
 
 @extends('core::layouts.layoutMaster')
 
-@section('title', __('Login') . ' — ' . config('app.name'))
+@section('title', __('Login') . ' — ' . ($systemName ?? config('app.name')))
 
 @section('vendor-style')
 <link rel="stylesheet" href="{{ asset('assets/vendor/libs/@form-validation/form-validation.css') }}" />
@@ -34,7 +34,15 @@ $customizerHidden = 'customizer-hide';
           <!-- Logo -->
           <div class="app-brand justify-content-center mb-6">
             <a href="{{ isset($isAdminLogin) && $isAdminLogin ? route('admin.login') : route('home') }}" class="app-brand-link">
-              <span class="app-brand-logo demo">@include('core::_partials.macros')</span>
+              <span class="app-brand-logo demo">
+                @if(!empty($systemLogoUrl))
+                  <span class="app-brand-logo-wrapper d-inline-block" style="height: 60px;">
+                    <img src="{{ $systemLogoUrl }}" alt="{{ $systemName ?? config('app.name') }}" class="app-brand-logo-img" style="height: 60px; width: auto; max-width: 140px; object-fit: contain;" />
+                  </span>
+                @else
+                  @include('core::_partials.macros')
+                @endif
+              </span>
             </a>
           </div>
           <!-- /Logo -->

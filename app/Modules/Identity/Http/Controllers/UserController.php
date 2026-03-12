@@ -5,6 +5,7 @@ namespace App\Modules\Identity\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Modules\Identity\Module;
+use App\Services\PlanLimitService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -88,6 +89,36 @@ class UserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $tenantId = $this->tenantId();
+        $tenant = User::find(auth()->id())->tenant;
+        if (! $tenant) {
+            abort(403, __('You must belong to a tenant to manage internal users.'));
+        }
+
+        $limitService = app(PlanLimitService::class);
+        $role = $request->input('role');
+        try {
+            $limitService->checkUserLimit($tenant);
+            if ($role === 'lawyer') {
+                $limitService->checkLawyerLimit($tenant);
+            }
+            if ($role === 'admin') {
+                $limitService->checkAdminLimit($tenant);
+            }
+            if ($role === 'assistant') {
+                $limitService->checkSecretaryLimit($tenant);
+            }
+            if ($role === 'finance') {
+                $limitService->checkAccountantLimit($tenant);
+            }
+            if ($role === 'trainee') {
+                $limitService->checkTraineeLimit($tenant);
+            }
+        } catch (\Throwable $e) {
+            return redirect()
+                ->route('identity.users.create')
+                ->withInput()
+                ->with('error', $e->getMessage());
+        }
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -110,6 +141,7 @@ class UserController extends Controller
         ]);
 
         $user->syncRoles([$validated['role']]);
+        $limitService->invalidateUsageCache($tenant);
 
         return redirect()
             ->route('identity.users.index')
@@ -141,6 +173,35 @@ class UserController extends Controller
         }
 
         $tenantId = $this->tenantId();
+        $tenant = $user->tenant;
+        if (! $tenant) {
+            abort(403);
+        }
+
+        $newRole = $request->input('role');
+        $limitService = app(PlanLimitService::class);
+        try {
+            if ($newRole === 'lawyer') {
+                $limitService->checkLawyerLimit($tenant, $user->id);
+            }
+            if ($newRole === 'admin') {
+                $limitService->checkAdminLimit($tenant, $user->id);
+            }
+            if ($newRole === 'assistant') {
+                $limitService->checkSecretaryLimit($tenant, $user->id);
+            }
+            if ($newRole === 'finance') {
+                $limitService->checkAccountantLimit($tenant, $user->id);
+            }
+            if ($newRole === 'trainee') {
+                $limitService->checkTraineeLimit($tenant, $user->id);
+            }
+        } catch (\Throwable $e) {
+            return redirect()
+                ->route('identity.users.edit', $user)
+                ->withInput()
+                ->with('error', $e->getMessage());
+        }
 
         $rules = [
             'name' => ['required', 'string', 'max:255'],
@@ -168,6 +229,7 @@ class UserController extends Controller
         $user->save();
 
         $user->syncRoles([$validated['role']]);
+        app(PlanLimitService::class)->invalidateUsageCache($tenant);
 
         return redirect()
             ->route('identity.users.index')

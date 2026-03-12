@@ -13,6 +13,12 @@
       "slug": "core.tenants"
     },
     {
+      "url": "/admin/subscription-plans",
+      "name": "Subscription Plans",
+      "icon": "menu-icon icon-base ti tabler-credit-card",
+      "slug": "core.subscription-plans"
+    },
+    {
       "url": "/admin/clients",
       "name": "Clients",
       "icon": "menu-icon icon-base ti tabler-users-group",

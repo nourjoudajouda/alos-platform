@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Portal;
 
 use App\Http\Controllers\Controller;
 use App\Models\Document;
+use App\Services\PlanLimitService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -28,6 +29,14 @@ class PortalDocumentController extends Controller
     {
         $user = $request->user();
         $client = $this->getClient($user);
+        $tenant = $user->tenant;
+        if ($tenant) {
+            try {
+                app(PlanLimitService::class)->ensureFeature($tenant, PlanLimitService::FEATURE_CLIENT_PORTAL);
+            } catch (\RuntimeException $e) {
+                abort(403, $e->getMessage());
+            }
+        }
 
         $documents = $client->documents()
             ->where('visibility', Document::VISIBILITY_SHARED)
@@ -47,6 +56,19 @@ class PortalDocumentController extends Controller
     {
         $user = $request->user();
         $client = $this->getClient($user);
+        $tenant = $client->tenant;
+        if ($tenant) {
+            $limitService = app(PlanLimitService::class);
+            try {
+                $limitService->checkDocumentLimit($tenant);
+                $file = $request->file('file');
+                $limitService->checkStorageLimit($tenant, $file ? $file->getSize() : 0);
+            } catch (\Throwable $e) {
+                return redirect()
+                    ->route('portal.documents.index')
+                    ->with('error', $e->getMessage());
+            }
+        }
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -76,6 +98,9 @@ class PortalDocumentController extends Controller
             'file_size' => $file->getSize(),
             'visibility' => Document::VISIBILITY_INTERNAL, // client uploads = office only until shared
         ]);
+        if ($tenant) {
+            app(PlanLimitService::class)->invalidateUsageCache($tenant);
+        }
 
         return redirect()
             ->route('portal.documents.index')

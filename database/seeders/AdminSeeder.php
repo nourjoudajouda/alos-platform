@@ -18,12 +18,13 @@ class AdminSeeder extends Seeder
 {
     public function run(): void
     {
-        // أدمن لوحة الإدارة (جدول admins) — الدخول من /admin/login
+        // أدمن لوحة الإدارة (جدول admins / SYSTEMADMIN) — الدخول من /admin/login
         Admin::firstOrCreate(
             ['email' => 'admin@alos.local'],
             [
                 'name' => 'Admin',
                 'password' => Hash::make('password'),
+                'role' => 'super_admin',
             ]
         );
 

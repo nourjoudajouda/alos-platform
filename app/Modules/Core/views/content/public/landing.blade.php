@@ -6,12 +6,16 @@
     @php $landing = asset('landing'); @endphp
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ALOS - Legal Office Management</title>
+    <title>{{ $systemName ?? 'ALOS' }} - Legal Office Management</title>
     <!-- favicons Icons -->
+    @if(!empty($systemFaviconUrl))
+    <link rel="icon" href="{{ $systemFaviconUrl }}" />
+    @else
     <link rel="apple-touch-icon" sizes="180x180" href="{{ $landing }}/assets/images/favicons/apple-touch-icon.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="{{ $landing }}/assets/images/favicons/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="{{ $landing }}/assets/images/favicons/favicon-16x16.png" />
     <link rel="manifest" href="{{ $landing }}/assets/images/favicons/site.webmanifest" />
+    @endif
     <meta name="description" content="ProCounsel an ideal solution for all types of law firm and legal businesses. It is a professional and modern looking law HTML Template specially designed for lawyers, attorney, legal advisor, counsel, law firm, consulting business, legal office services and all other law related businesses & websites." />
 
     <!-- fonts -->
@@ -54,7 +58,11 @@
                 <div class="main-header__inner">
                     <div class="main-header__logo">
                         <a href="{{ url('/') }}">
-                            <img src="{{ $landing }}/assets/images/logo-light.png" alt="ALOS" width="160">
+                            @if(!empty($systemLogoUrl))
+                                <img src="{{ $systemLogoUrl }}" alt="{{ $systemName ?? 'ALOS' }}" width="160" style="max-height: 50px; width: auto;">
+                            @else
+                                <img src="{{ $landing }}/assets/images/logo-light.png" alt="{{ $systemName ?? 'ALOS' }}" width="160">
+                            @endif
                         </a>
                     </div><!-- /.main-header__logo -->
                     <nav class="main-header__nav main-menu">

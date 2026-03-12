@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Portal;
 use App\Http\Controllers\Controller;
 use App\Models\Consultation;
 use App\Models\Document;
+use App\Services\PlanLimitService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -28,6 +29,14 @@ class PortalConsultationController extends Controller
     {
         $user = $request->user();
         $client = $this->getClient($user);
+        $tenant = $user->tenant;
+        if ($tenant) {
+            try {
+                app(PlanLimitService::class)->ensureFeature($tenant, PlanLimitService::FEATURE_CLIENT_PORTAL);
+            } catch (\RuntimeException $e) {
+                abort(403, $e->getMessage());
+            }
+        }
 
         $consultations = $client->consultations()
             ->where('is_shared_with_client', true)
@@ -46,6 +55,14 @@ class PortalConsultationController extends Controller
     {
         $user = $request->user();
         $client = $this->getClient($user);
+        $tenant = $user->tenant;
+        if ($tenant) {
+            try {
+                app(PlanLimitService::class)->ensureFeature($tenant, PlanLimitService::FEATURE_CLIENT_PORTAL);
+            } catch (\RuntimeException $e) {
+                abort(403, $e->getMessage());
+            }
+        }
 
         if ($consultation->client_id !== (int) $client->id) {
             abort(404);

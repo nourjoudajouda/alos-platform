@@ -10,6 +10,7 @@ use App\Notifications\InApp\NewMessageNotification;
 use App\Models\MessageAttachment;
 use App\Models\MessageThread;
 use App\Services\AuditLogService;
+use App\Services\PlanLimitService;
 use Illuminate\Support\Facades\App;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -80,6 +81,14 @@ class MessageThreadController extends Controller
     public function store(Request $request, Client $client): RedirectResponse
     {
         $this->authorizeClient($client);
+        $tenant = $client->tenant;
+        if ($tenant) {
+            try {
+                app(PlanLimitService::class)->ensureFeature($tenant, PlanLimitService::FEATURE_INTERNAL_CHAT);
+            } catch (\RuntimeException $e) {
+                return redirect()->route('admin.core.clients.threads.index', $client)->with('error', $e->getMessage());
+            }
+        }
 
         $validated = $request->validate([
             'subject' => ['required', 'string', 'max:255'],
@@ -97,6 +106,14 @@ class MessageThreadController extends Controller
     public function storeMessage(Request $request, Client $client, MessageThread $thread): RedirectResponse
     {
         $this->authorizeThread($thread);
+        $tenant = $client->tenant;
+        if ($tenant) {
+            try {
+                app(PlanLimitService::class)->ensureFeature($tenant, PlanLimitService::FEATURE_INTERNAL_CHAT);
+            } catch (\RuntimeException $e) {
+                return redirect()->route('admin.core.clients.threads.show', [$client, $thread])->with('error', $e->getMessage());
+            }
+        }
         if ($thread->client_id !== (int) $client->id) {
             abort(404);
         }

@@ -5,16 +5,19 @@ namespace App\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 /**
- * مدير النظام — مصادقة لوحة الإدارة (/admin).
+ * مدير النظام (SYSTEMADMIN) — مصادقة لوحة الإدارة (/admin).
  * منفصل عن جدول users (يوزرز التيننت والبوابة).
- * Platform admins have full access; no Spatie roles needed.
+ * الحقول: id, name, email, password, role, created_at.
  */
 class Admin extends Authenticatable
 {
+    protected $table = 'admins';
+
     protected $fillable = [
         'name',
         'email',
         'password',
+        'role',
     ];
 
     protected $hidden = [
@@ -25,8 +28,9 @@ class Admin extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
         ];
     }
 

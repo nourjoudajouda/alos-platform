@@ -14,6 +14,8 @@ use App\Modules\Core\Http\Controllers\MessageThreadController;
 use App\Modules\Core\Http\Controllers\PermissionController;
 use App\Modules\Core\Http\Controllers\ReminderRuleController;
 use App\Modules\Core\Http\Controllers\RoleController;
+use App\Modules\Core\Http\Controllers\SubscriptionPlanController;
+use App\Modules\Core\Http\Controllers\SystemSettingsController;
 use App\Modules\Core\Http\Controllers\TenantController;
 use Illuminate\Support\Facades\Route;
 
@@ -117,6 +119,16 @@ Route::middleware(['auth:admin'])->prefix('reminder-rules')->name('core.reminder
     Route::delete('/{reminderRule}', [ReminderRuleController::class, 'destroy'])->name('destroy');
 });
 
+// ALOS-S1-29 — Subscription Plans (admin CRUD)
+Route::middleware(['auth:admin'])->prefix('subscription-plans')->name('core.subscription-plans.')->group(function () {
+    Route::get('/', [SubscriptionPlanController::class, 'index'])->name('index');
+    Route::get('/create', [SubscriptionPlanController::class, 'create'])->name('create');
+    Route::post('/', [SubscriptionPlanController::class, 'store'])->name('store');
+    Route::get('/{subscription_plan}/edit', [SubscriptionPlanController::class, 'edit'])->name('edit');
+    Route::put('/{subscription_plan}', [SubscriptionPlanController::class, 'update'])->name('update');
+    Route::delete('/{subscription_plan}', [SubscriptionPlanController::class, 'destroy'])->name('destroy');
+});
+
 // Tenants CRUD — بنفس آلية Advocate SaaS Companies
 Route::middleware(['auth:admin'])->prefix('tenants')->name('core.tenants.')->group(function () {
     Route::get('/', [TenantController::class, 'index'])->name('index');
@@ -149,6 +161,13 @@ Route::middleware(['auth:admin'])->prefix('notifications')->name('core.notificat
     Route::get('/', [NotificationController::class, 'index'])->name('index');
     Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all');
     Route::post('/{notification}/read', [NotificationController::class, 'markAsRead'])->name('read');
+});
+
+// ALOS-S1-30 — System Settings (platform admin only; not visible to tenant admins)
+Route::middleware(['auth:admin'])->prefix('system-settings')->name('core.system-settings.')->group(function () {
+    Route::get('/', [SystemSettingsController::class, 'index'])->name('index');
+    Route::put('/', [SystemSettingsController::class, 'update'])->name('update');
+    Route::post('/test-mail', [SystemSettingsController::class, 'testMail'])->name('test-mail');
 });
 
 // ALOS-S1-25 — Audit Log & Compliance Log

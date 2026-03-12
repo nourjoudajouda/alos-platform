@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -22,11 +23,16 @@ class Tenant extends Model
         'managing_partner',
         'subscription_plan_id',
         'status',
+        'subscription_status',
         'user_limit',
         'lawyer_limit',
         'storage_limit',
         'start_date',
         'end_date',
+        'contract_start_date',
+        'contract_end_date',
+        'billing_cycle',
+        'plan_price',
         'is_active',
         'public_site_enabled',
         'logo',
@@ -40,7 +46,16 @@ class Tenant extends Model
         'public_site_enabled' => 'boolean',
         'start_date' => 'date',
         'end_date' => 'date',
+        'contract_start_date' => 'date',
+        'contract_end_date' => 'date',
+        'plan_price' => 'decimal:2',
     ];
+
+    /** ALOS-S1-29 — Subscription plan (plan limits). */
+    public function subscriptionPlan(): BelongsTo
+    {
+        return $this->belongsTo(SubscriptionPlan::class, 'subscription_plan_id');
+    }
 
     /** Whether the public site (/f/{slug}) is enabled for this tenant. */
     public function hasPublicSiteEnabled(): bool

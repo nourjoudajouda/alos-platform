@@ -61,6 +61,56 @@
             <div class="invalid-feedback">{{ $message }}</div>
           @enderror
         </div>
+        <hr class="my-4">
+        <h6 class="mb-3">{{ __('Subscription (ALOS-S1-29)') }}</h6>
+        <div class="mb-3">
+          <label for="subscription_plan_id" class="form-label">{{ __('Subscription plan') }}</label>
+          <select name="subscription_plan_id" id="subscription_plan_id" class="form-select">
+            <option value="">{{ __('— None —') }}</option>
+            @foreach($subscriptionPlans ?? [] as $plan)
+              <option value="{{ $plan->id }}" {{ old('subscription_plan_id', $tenant->subscription_plan_id) == $plan->id ? 'selected' : '' }}>{{ $plan->plan_name }} ({{ number_format($plan->price, 2) }})</option>
+            @endforeach
+          </select>
+          @error('subscription_plan_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+        </div>
+        <div class="mb-3">
+          <label for="subscription_status" class="form-label">{{ __('Subscription status') }}</label>
+          <select name="subscription_status" id="subscription_status" class="form-select">
+            <option value="active" {{ old('subscription_status', $tenant->subscription_status ?? 'active') === 'active' ? 'selected' : '' }}>{{ __('Active') }}</option>
+            <option value="trial" {{ old('subscription_status', $tenant->subscription_status) === 'trial' ? 'selected' : '' }}>{{ __('Trial') }}</option>
+            <option value="suspended" {{ old('subscription_status', $tenant->subscription_status) === 'suspended' ? 'selected' : '' }}>{{ __('Suspended') }}</option>
+            <option value="expired" {{ old('subscription_status', $tenant->subscription_status) === 'expired' ? 'selected' : '' }}>{{ __('Expired') }}</option>
+          </select>
+          @error('subscription_status')<div class="invalid-feedback">{{ $message }}</div>@enderror
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="contract_start_date" class="form-label">{{ __('Contract start date') }}</label>
+            <input type="date" name="contract_start_date" id="contract_start_date" class="form-control @error('contract_start_date') is-invalid @enderror" value="{{ old('contract_start_date', $tenant->contract_start_date?->format('Y-m-d') ?? $tenant->start_date?->format('Y-m-d')) }}">
+            @error('contract_start_date')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="contract_end_date" class="form-label">{{ __('Contract end date') }}</label>
+            <input type="date" name="contract_end_date" id="contract_end_date" class="form-control @error('contract_end_date') is-invalid @enderror" value="{{ old('contract_end_date', $tenant->contract_end_date?->format('Y-m-d') ?? $tenant->end_date?->format('Y-m-d')) }}">
+            @error('contract_end_date')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="billing_cycle" class="form-label">{{ __('Billing cycle') }}</label>
+            <select name="billing_cycle" id="billing_cycle" class="form-select">
+              <option value="">{{ __('—') }}</option>
+              <option value="monthly" {{ old('billing_cycle', $tenant->billing_cycle) === 'monthly' ? 'selected' : '' }}>{{ __('Monthly') }}</option>
+              <option value="yearly" {{ old('billing_cycle', $tenant->billing_cycle) === 'yearly' ? 'selected' : '' }}>{{ __('Yearly') }}</option>
+            </select>
+            @error('billing_cycle')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="plan_price" class="form-label">{{ __('Plan price') }}</label>
+            <input type="number" name="plan_price" id="plan_price" class="form-control @error('plan_price') is-invalid @enderror" value="{{ old('plan_price', $tenant->plan_price) }}" min="0" step="0.01" placeholder="0.00">
+            @error('plan_price')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
+        </div>
         <div class="mb-3">
           <div class="form-check">
             <input type="checkbox" name="is_active" id="is_active" value="1" class="form-check-input" {{ old('is_active', $tenant->is_active) ? 'checked' : '' }}>

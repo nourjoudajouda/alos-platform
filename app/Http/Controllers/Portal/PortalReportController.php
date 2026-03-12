@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Portal;
 
 use App\Http\Controllers\Controller;
 use App\Models\GeneratedReport;
+use App\Services\PlanLimitService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -25,6 +26,14 @@ class PortalReportController extends Controller
     {
         $user = $request->user();
         $client = $this->getClient($user);
+        $tenant = $user->tenant;
+        if ($tenant) {
+            try {
+                app(PlanLimitService::class)->ensureFeature($tenant, PlanLimitService::FEATURE_CLIENT_PORTAL);
+            } catch (\RuntimeException $e) {
+                abort(403, $e->getMessage());
+            }
+        }
 
         $reports = $client->generatedReports()
             ->orderByDesc('generated_at')

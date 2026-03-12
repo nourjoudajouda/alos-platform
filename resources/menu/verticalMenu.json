@@ -16,6 +16,12 @@
       "slug": "core.tenants"
     },
     {
+      "url": "/admin/subscription-plans",
+      "name": "Subscription Plans",
+      "icon": "menu-icon icon-base ti tabler-credit-card",
+      "slug": "core.subscription-plans"
+    },
+    {
       "url": "/admin/clients",
       "name": "Clients",
       "icon": "menu-icon icon-base ti tabler-users-group",
@@ -62,6 +68,12 @@
     },
     {
       "menuHeader": "System"
+    },
+    {
+      "url": "/admin/system-settings",
+      "name": "System Settings",
+      "icon": "menu-icon icon-base ti tabler-settings",
+      "slug": "core.system-settings"
     },
     {
       "url": "/admin/audit-logs",

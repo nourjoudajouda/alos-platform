@@ -9,6 +9,7 @@ use App\Models\CaseModel;
 use App\Models\CaseSession;
 use App\Models\User;
 use App\Services\AuditLogService;
+use App\Services\PlanLimitService;
 use Illuminate\Support\Facades\App;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -75,6 +76,14 @@ class CaseSessionController extends Controller
     public function store(Request $request, CaseModel $case): RedirectResponse
     {
         $this->authorizeCase($case);
+        $tenant = $case->client->tenant;
+        if ($tenant) {
+            try {
+                app(PlanLimitService::class)->ensureFeature($tenant, PlanLimitService::FEATURE_CALENDAR);
+            } catch (\RuntimeException $e) {
+                return redirect()->route('admin.core.cases.sessions.index', $case)->with('error', $e->getMessage());
+            }
+        }
 
         $validated = $request->validate([
             'session_date' => ['required', 'date'],
@@ -119,6 +128,14 @@ class CaseSessionController extends Controller
         $this->authorizeCase($case);
         if ($session->case_id !== (int) $case->id) {
             abort(404);
+        }
+        $tenant = $case->client->tenant;
+        if ($tenant) {
+            try {
+                app(PlanLimitService::class)->ensureFeature($tenant, PlanLimitService::FEATURE_CALENDAR);
+            } catch (\RuntimeException $e) {
+                return redirect()->route('admin.core.cases.sessions.edit', [$case, $session])->withInput()->with('error', $e->getMessage());
+            }
         }
 
         $validated = $request->validate([

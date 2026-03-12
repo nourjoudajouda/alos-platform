@@ -22,6 +22,7 @@ class RoleAndPermissionSeeder extends Seeder
         'lawyer',
         'assistant',
         'finance',
+        'trainee',
         'client_user',
     ];
 
@@ -87,6 +88,14 @@ class RoleAndPermissionSeeder extends Seeder
 
         $finance = Role::firstOrCreate(['name' => 'finance', 'guard_name' => $guard]);
         $finance->syncPermissions([
+            'view tenants', 'view roles', 'view permissions',
+            'cases.view',
+            'consultations.view',
+            'reports.view',
+        ]);
+
+        $trainee = Role::firstOrCreate(['name' => 'trainee', 'guard_name' => $guard]);
+        $trainee->syncPermissions([
             'view tenants', 'view roles', 'view permissions',
             'cases.view',
             'consultations.view',

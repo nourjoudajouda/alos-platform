@@ -7,6 +7,7 @@ use App\Models\Admin;
 use App\Models\Client;
 use App\Models\ClientReportSetting;
 use App\Models\GeneratedReport;
+use App\Services\PlanLimitService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -37,6 +38,14 @@ class ClientReportController extends Controller
         if (! auth()->user()->can('reports.view')) {
             abort(403, __('You do not have permission to view reports.'));
         }
+        $tenant = $client->tenant;
+        if ($tenant) {
+            try {
+                app(PlanLimitService::class)->ensureFeature($tenant, PlanLimitService::FEATURE_REPORTS);
+            } catch (\RuntimeException $e) {
+                abort(403, $e->getMessage());
+            }
+        }
 
         $settings = $client->reportSettings ?? new ClientReportSetting([
             'client_id' => $client->id,
@@ -65,6 +74,14 @@ class ClientReportController extends Controller
         $this->authorizeClient($client);
         if (! auth()->user()->can('reports.manage')) {
             abort(403, __('You do not have permission to manage report settings.'));
+        }
+        $tenant = $client->tenant;
+        if ($tenant) {
+            try {
+                app(PlanLimitService::class)->ensureFeature($tenant, PlanLimitService::FEATURE_REPORTS);
+            } catch (\RuntimeException $e) {
+                return redirect()->route('admin.core.clients.reports.index', $client)->with('error', $e->getMessage());
+            }
         }
 
         $validated = $request->validate([
@@ -110,6 +127,14 @@ class ClientReportController extends Controller
         $this->authorizeClient($client);
         if (! auth()->user()->can('reports.view')) {
             abort(403, __('You do not have permission to view reports.'));
+        }
+        $tenant = $client->tenant;
+        if ($tenant) {
+            try {
+                app(PlanLimitService::class)->ensureFeature($tenant, PlanLimitService::FEATURE_REPORTS);
+            } catch (\RuntimeException $e) {
+                abort(403, $e->getMessage());
+            }
         }
         if ($report->client_id !== $client->id) {
             abort(404, __('Not found.'));

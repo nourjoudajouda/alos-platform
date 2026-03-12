@@ -5,6 +5,7 @@ $tenantLogoUrl = $tenant ? $tenant->getSettingsOrCreate()->logo_url : null;
 $tenantDisplayName = $tenant ? $tenant->getSettingsOrCreate()->getDisplayName() : config('variables.templateName');
 $companyMenuItems = [
   (object)['name' => 'Dashboard', 'url' => url('/company'), 'slug' => 'company.dashboard', 'icon' => 'menu-icon icon-base ti tabler-layout-dashboard'],
+  (object)['name' => 'Subscription', 'url' => route('company.settings.subscription.show'), 'slug' => 'company.settings.subscription.show', 'icon' => 'menu-icon icon-base ti tabler-credit-card'],
   (object)['name' => 'Branding Settings', 'url' => route('company.settings.branding.edit'), 'slug' => 'company.settings.branding.edit', 'icon' => 'menu-icon icon-base ti tabler-palette'],
 ];
 @endphp

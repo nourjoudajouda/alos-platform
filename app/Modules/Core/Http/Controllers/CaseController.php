@@ -9,6 +9,7 @@ use App\Models\CaseModel;
 use App\Models\Client;
 use App\Models\User;
 use App\Services\AuditLogService;
+use App\Services\PlanLimitService;
 use Illuminate\Support\Facades\App;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -138,6 +139,15 @@ class CaseController extends Controller
 
         $client = Client::findOrFail($validated['client_id']);
         $this->authorizeClient($client);
+        $tenant = $client->tenant;
+        if ($tenant) {
+            try {
+                app(PlanLimitService::class)->ensureFeature($tenant, PlanLimitService::FEATURE_CASE_MANAGEMENT);
+                app(PlanLimitService::class)->checkCaseLimit($tenant);
+            } catch (\RuntimeException $e) {
+                return redirect()->route('admin.core.cases.create', ['client_id' => $client->id])->withInput()->with('error', $e->getMessage());
+            }
+        }
 
         $caseNumber = trim((string) $validated['case_number']);
         $caseNumberSuffix = CaseModel::parseCaseNumberSuffix($caseNumber);
@@ -154,6 +164,9 @@ class CaseController extends Controller
             'description' => $validated['description'] ?? null,
         ]);
 
+        if ($tenant) {
+            app(PlanLimitService::class)->invalidateUsageCache($tenant);
+        }
         App::make(AuditLogService::class)->recordAudit(\App\Models\AuditLog::ACTION_CREATE_CASE, \App\Models\AuditLog::ENTITY_CASE, $case->id, [], [], $client->tenant_id);
 
         return redirect()
@@ -190,6 +203,14 @@ class CaseController extends Controller
     public function update(Request $request, CaseModel $case): RedirectResponse
     {
         $this->authorizeCase($case);
+        $tenant = $case->client->tenant;
+        if ($tenant) {
+            try {
+                app(PlanLimitService::class)->ensureFeature($tenant, PlanLimitService::FEATURE_CASE_MANAGEMENT);
+            } catch (\RuntimeException $e) {
+                return redirect()->route('admin.core.cases.edit', $case)->withInput()->with('error', $e->getMessage());
+            }
+        }
         $clientIds = $this->accessibleClientIds();
 
         $validated = $request->validate([
@@ -234,10 +255,22 @@ class CaseController extends Controller
     public function destroy(CaseModel $case): RedirectResponse
     {
         $this->authorizeCase($case);
+        $tenant = $case->client->tenant;
+        if ($tenant) {
+            try {
+                app(PlanLimitService::class)->ensureFeature($tenant, PlanLimitService::FEATURE_CASE_MANAGEMENT);
+            } catch (\RuntimeException $e) {
+                return redirect()->route('admin.core.cases.show', $case)->with('error', $e->getMessage());
+            }
+        }
         $client = $case->client;
+        $tenant = $case->client->tenant;
         $oldValues = $case->only(['case_number', 'case_type', 'court_name', 'status', 'client_id', 'tenant_id']);
         App::make(AuditLogService::class)->recordAudit(\App\Models\AuditLog::ACTION_DELETE, \App\Models\AuditLog::ENTITY_CASE, $case->id, $oldValues, [], $case->tenant_id);
         $case->delete();
+        if ($tenant) {
+            app(PlanLimitService::class)->invalidateUsageCache($tenant);
+        }
 
         return redirect()
             ->route('admin.core.clients.show', [$client, 'tab' => 'cases'])
