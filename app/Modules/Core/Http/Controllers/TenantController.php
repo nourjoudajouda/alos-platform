@@ -224,7 +224,20 @@ class TenantController extends Controller
         $validated['phone'] = $validated['phone'] ?? null;
         $validated['city'] = $validated['city'] ?? null;
         $validated['country'] = $validated['country'] ?? null;
+
+        $auditFields = [
+            'name', 'slug', 'status', 'subscription_plan_id', 'contract_start_date', 'contract_end_date',
+            'billing_cycle', 'plan_price', 'country', 'email', 'subscription_status',
+        ];
+        $oldValues = $tenant->only($auditFields);
+        foreach ($oldValues as $k => $v) {
+            if ($v instanceof \DateTimeInterface) {
+                $oldValues[$k] = $v->format('Y-m-d');
+            }
+        }
+        $newValues = array_intersect_key($validated, array_flip($auditFields));
         $tenant->update($validated);
+        App::make(AuditLogService::class)->recordAudit(AuditLog::ACTION_UPDATE, AuditLog::ENTITY_TENANT, $tenant->id, $oldValues, $newValues, $tenant->id);
 
         return redirect()
             ->route('admin.core.tenants.index')

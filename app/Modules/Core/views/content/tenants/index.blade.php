@@ -47,12 +47,12 @@
     <div class="mb-3">
       <label for="filterDateFrom" class="form-label">{{ __('From date') }}</label>
       <input type="date" name="date_from" id="filterDateFrom" class="form-control" value="{{ $filterDateFrom ?? '' }}">
-      <div class="form-text small">{{ __('Filter tenants created from this date') }}</div>
+      <div class="form-text small">{{ __('Filter law firms created from this date') }}</div>
     </div>
     <div class="mb-3">
       <label for="filterDateTo" class="form-label">{{ __('To date') }}</label>
       <input type="date" name="date_to" id="filterDateTo" class="form-control" value="{{ $filterDateTo ?? '' }}">
-      <div class="form-text small">{{ __('Filter tenants created until this date') }}</div>
+      <div class="form-text small">{{ __('Filter law firms created until this date') }}</div>
     </div>
     <div class="mb-3">
       <label for="filterPlan" class="form-label">{{ __('Filter by Plan') }}</label>
