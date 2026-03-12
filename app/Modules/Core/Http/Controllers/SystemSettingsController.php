@@ -3,7 +3,9 @@
 namespace App\Modules\Core\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\SubscriptionPlan;
+use App\Services\AuditLogService;
 use App\Services\SystemSettingsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -142,6 +144,15 @@ class SystemSettingsController extends Controller
             $this->settings->set('system_logo', $validated['system_logo'] ?? '', 'string', 'general');
             $this->settings->set('favicon', $validated['favicon'] ?? '', 'string', 'general');
         }
+
+        app(AuditLogService::class)->recordPlatformAudit(
+            AuditLog::ACTION_SECURITY_CONFIG_CHANGE,
+            'system_settings',
+            0,
+            [],
+            ['group' => $group],
+            null
+        );
 
         return redirect()
             ->route('admin.core.system-settings.index', ['tab' => $group])

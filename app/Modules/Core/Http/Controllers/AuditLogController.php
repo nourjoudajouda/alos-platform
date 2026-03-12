@@ -19,7 +19,7 @@ class AuditLogController extends Controller
     {
         $user = auth()->user();
         $query = AuditLog::query()
-            ->with(['tenant', 'user'])
+            ->with(['tenant', 'user', 'admin'])
             ->orderByDesc('created_at');
 
         if (! $user instanceof Admin) {
@@ -37,6 +37,9 @@ class AuditLogController extends Controller
         }
         if ($request->filled('user_id')) {
             $query->where('user_id', $request->get('user_id'));
+        }
+        if ($request->filled('admin_user_id') && $user instanceof Admin) {
+            $query->where('admin_user_id', $request->get('admin_user_id'));
         }
         if ($request->filled('entity_type')) {
             $query->where('entity_type', $request->get('entity_type'));
@@ -71,10 +74,12 @@ class AuditLogController extends Controller
     public function show(AuditLog $auditLog): View
     {
         $user = auth()->user();
-        if (! $user instanceof Admin && ($user->tenant_id !== $auditLog->tenant_id)) {
-            abort(404, __('Not found.'));
+        if (! $user instanceof Admin) {
+            if ($auditLog->tenant_id === null || $user->tenant_id !== $auditLog->tenant_id) {
+                abort(404, __('Not found.'));
+            }
         }
-        $auditLog->load(['tenant', 'user']);
+        $auditLog->load(['tenant', 'user', 'admin']);
 
         return view('core::content.audit-logs.show', [
             'log' => $auditLog,

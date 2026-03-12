@@ -110,7 +110,7 @@
             <tr>
               <td class="text-nowrap small">{{ $log->created_at?->format('Y-m-d H:i') }}</td>
               <td><span class="text-muted small">{{ $log->tenant?->name ?? '—' }}</span></td>
-              <td><span class="text-muted small">{{ $log->user?->name ?? $log->user_id ?? '—' }}</span></td>
+              <td><span class="text-muted small">{{ $log->admin?->name ?? $log->user?->name ?? ($log->admin_user_id ? '#' . $log->admin_user_id : '—') }}</span></td>
               <td><code class="small">{{ $log->action }}</code></td>
               <td><span class="small">{{ $log->entity_type }} @if($log->entity_id)#{{ $log->entity_id }}@endif</span></td>
               <td><span class="text-muted small">{{ $log->ip_address }}</span></td>

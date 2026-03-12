@@ -3,7 +3,9 @@
 namespace App\Modules\Core\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\SubscriptionPlan;
+use App\Services\AuditLogService;
 use App\Services\PlanLimitService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -54,7 +56,15 @@ class SubscriptionPlanController extends Controller
         $features = $this->buildFeaturesFromRequest($request);
         $validated['features_json'] = $features;
 
-        SubscriptionPlan::create($validated);
+        $plan = SubscriptionPlan::create($validated);
+        app(AuditLogService::class)->recordPlatformAudit(
+            AuditLog::ACTION_CREATE_SUBSCRIPTION_PLAN,
+            AuditLog::ENTITY_SUBSCRIPTION_PLAN,
+            $plan->id,
+            [],
+            $plan->only(['plan_name', 'price', 'user_limit', 'lawyer_limit', 'storage_limit']),
+            null
+        );
 
         return redirect()
             ->route('admin.core.subscription-plans.index')
@@ -83,7 +93,16 @@ class SubscriptionPlanController extends Controller
         $features = $this->buildFeaturesFromRequest($request);
         $validated['features_json'] = $features;
 
+        $oldValues = $subscription_plan->only(['plan_name', 'price', 'user_limit', 'lawyer_limit', 'storage_limit']);
         $subscription_plan->update($validated);
+        app(AuditLogService::class)->recordPlatformAudit(
+            AuditLog::ACTION_UPDATE_SUBSCRIPTION_PLAN,
+            AuditLog::ENTITY_SUBSCRIPTION_PLAN,
+            $subscription_plan->id,
+            $oldValues,
+            $subscription_plan->only(['plan_name', 'price', 'user_limit', 'lawyer_limit', 'storage_limit']),
+            null
+        );
 
         return redirect()
             ->route('admin.core.subscription-plans.index')
@@ -98,7 +117,17 @@ class SubscriptionPlanController extends Controller
                 ->with('error', __('Cannot delete a plan that is assigned to one or more tenants.'));
         }
 
+        $oldValues = $subscription_plan->only(['plan_name', 'price', 'user_limit', 'lawyer_limit', 'storage_limit']);
+        $planId = $subscription_plan->id;
         $subscription_plan->delete();
+        app(AuditLogService::class)->recordPlatformAudit(
+            AuditLog::ACTION_DELETE_SUBSCRIPTION_PLAN,
+            AuditLog::ENTITY_SUBSCRIPTION_PLAN,
+            $planId,
+            $oldValues,
+            [],
+            null
+        );
 
         return redirect()
             ->route('admin.core.subscription-plans.index')

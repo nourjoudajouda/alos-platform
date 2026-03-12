@@ -32,6 +32,15 @@ class AuditLog extends Model
     public const ACTION_CREATE_CLIENT = 'create_client';
     public const ACTION_UPDATE_CLIENT = 'update_client';
 
+    public const ACTION_ADMIN_LOGIN = 'admin_login';
+    public const ACTION_ADMIN_LOGOUT = 'admin_logout';
+    public const ACTION_SUSPEND_TENANT = 'suspend_tenant';
+    public const ACTION_ACTIVATE_TENANT = 'activate_tenant';
+    public const ACTION_UPDATE_SUBSCRIPTION_PLAN = 'update_subscription_plan';
+    public const ACTION_CREATE_SUBSCRIPTION_PLAN = 'create_subscription_plan';
+    public const ACTION_DELETE_SUBSCRIPTION_PLAN = 'delete_subscription_plan';
+    public const ACTION_SECURITY_CONFIG_CHANGE = 'security_config_change';
+
     public const ENTITY_TENANT = 'tenant';
     public const ENTITY_USER = 'user';
     public const ENTITY_CLIENT = 'client';
@@ -42,10 +51,13 @@ class AuditLog extends Model
     public const ENTITY_MESSAGE = 'message';
     public const ENTITY_CASE_SESSION = 'case_session';
     public const ENTITY_REPORT = 'report';
+    public const ENTITY_SUBSCRIPTION_PLAN = 'subscription_plan';
+    public const ENTITY_ADMIN = 'admin';
 
     protected $fillable = [
         'tenant_id',
         'user_id',
+        'admin_user_id',
         'action',
         'entity_type',
         'entity_id',
@@ -70,5 +82,10 @@ class AuditLog extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function admin(): BelongsTo
+    {
+        return $this->belongsTo(Admin::class, 'admin_user_id');
     }
 }

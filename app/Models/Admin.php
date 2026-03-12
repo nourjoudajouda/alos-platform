@@ -18,6 +18,8 @@ class Admin extends Authenticatable
         'email',
         'password',
         'role',
+        'two_factor_enabled',
+        'two_factor_secret',
     ];
 
     protected $hidden = [
@@ -29,9 +31,20 @@ class Admin extends Authenticatable
     {
         return [
             'password' => 'hashed',
+            'two_factor_enabled' => 'boolean',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    public function loginLogs()
+    {
+        return $this->hasMany(AdminLoginLog::class, 'admin_user_id');
+    }
+
+    public function ipWhitelist()
+    {
+        return $this->hasMany(AdminIpWhitelist::class, 'admin_user_id');
     }
 
     /** Admins are never client portal users (they are platform administrators). */

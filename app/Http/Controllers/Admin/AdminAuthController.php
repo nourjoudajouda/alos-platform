@@ -3,14 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Admin;
 use App\Models\AuditLog;
+use App\Services\AdminLoginLogService;
 use App\Services\AuditLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 /**
- * تسجيل دخول لوحة الإدارة — تحت /admin/login (مميز عن تسجيل التيننت).
+ * ALOS-S1-37 — Platform Admin login.
+ * Login monitoring, audit and compliance logging integrated.
  */
 class AdminAuthController extends Controller
 {
@@ -31,20 +34,50 @@ class AdminAuthController extends Controller
         ]);
 
         if (! Auth::guard('admin')->attempt($validated, (bool) $request->boolean('remember'))) {
-            app(AuditLogService::class)->recordCompliance('login_failed', __('Admin login failed for email.'), null, null, null, null);
+            app(AdminLoginLogService::class)->logFailed($validated['email'], $request);
+            app(AuditLogService::class)->recordCompliance(
+                'admin_login_failed',
+                __('Admin login failed for email.'),
+                null,
+                null,
+                null,
+                null,
+                'admin'
+            );
             throw ValidationException::withMessages([
                 'email' => [__('auth.failed')],
             ]);
         }
 
         $request->session()->regenerate();
-        app(AuditLogService::class)->recordAudit(AuditLog::ACTION_LOGIN, AuditLog::ENTITY_USER, 0, [], ['email' => $validated['email']], null);
+        /** @var Admin $admin */
+        $admin = Auth::guard('admin')->user();
+        app(AdminLoginLogService::class)->logSuccess($admin, $request);
+        app(AuditLogService::class)->recordPlatformAudit(
+            AuditLog::ACTION_ADMIN_LOGIN,
+            AuditLog::ENTITY_ADMIN,
+            $admin->id,
+            [],
+            ['email' => $validated['email']],
+            null
+        );
         return redirect()->intended(route('admin.core.dashboard'));
     }
 
     public function destroy(Request $request)
     {
-        app(AuditLogService::class)->recordAudit(AuditLog::ACTION_LOGOUT, AuditLog::ENTITY_USER, 0, [], [], null);
+        $admin = Auth::guard('admin')->user();
+        if ($admin instanceof Admin) {
+            app(AdminLoginLogService::class)->logLogout($admin, $request);
+            app(AuditLogService::class)->recordPlatformAudit(
+                AuditLog::ACTION_ADMIN_LOGOUT,
+                AuditLog::ENTITY_ADMIN,
+                $admin->id,
+                [],
+                [],
+                null
+            );
+        }
         Auth::guard('admin')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

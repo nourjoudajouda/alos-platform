@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\AdminLoginLog;
 use App\Models\AuditLog;
+use App\Models\ComplianceLog;
 use App\Models\SubscriptionPlan;
 use App\Models\Tenant;
 use Illuminate\Support\Facades\Schema;
@@ -39,6 +41,63 @@ class PlatformDashboardSummaryService
             'expiring_contracts_list' => $this->getExpiringContractsList(),
             'expired_contracts_list' => $this->getExpiredContractsList(),
             'recent_platform_activity' => $this->getRecentPlatformActivity(),
+            'security' => $this->getSecurityOverview(),
+        ];
+    }
+
+    /**
+     * ALOS-S1-38 — Dashboard Security Widget data.
+     */
+    public function getSecurityOverview(): array
+    {
+        $failedLogins24h = AdminLoginLog::where('login_status', AdminLoginLog::STATUS_FAILED)
+            ->where('login_time', '>=', now()->subDay())
+            ->count();
+
+        $recentAdminLogins = AdminLoginLog::query()
+            ->with('admin')
+            ->where('login_status', AdminLoginLog::STATUS_SUCCESS)
+            ->orderByDesc('login_time')
+            ->limit(10)
+            ->get()
+            ->map(function (AdminLoginLog $log) {
+                return [
+                    'id' => $log->id,
+                    'admin_name' => $log->admin?->name ?? $log->email ?? __('Unknown'),
+                    'email' => $log->email,
+                    'ip_address' => $log->ip_address,
+                    'login_time' => $log->login_time?->toIso8601String(),
+                    'login_time_human' => $log->login_time?->diffForHumans(),
+                ];
+            })
+            ->all();
+
+        $securityEvents = ComplianceLog::query()
+            ->where(function ($q) {
+                $q->whereIn('attempted_action', ['admin_login_failed', 'ip_restriction_violation', 'login_failed'])
+                    ->orWhere(function ($q2) {
+                        $q2->where('user_type', 'admin')->where('attempted_action', 'like', '%admin%');
+                    });
+            })
+            ->orderByDesc('created_at')
+            ->limit(5)
+            ->get()
+            ->map(function (ComplianceLog $log) {
+                return [
+                    'id' => $log->id,
+                    'action' => $log->attempted_action,
+                    'description' => $log->description,
+                    'ip_address' => $log->ip_address,
+                    'created_at' => $log->created_at?->toIso8601String(),
+                    'created_at_human' => $log->created_at?->diffForHumans(),
+                ];
+            })
+            ->all();
+
+        return [
+            'failed_logins_24h' => $failedLogins24h,
+            'recent_admin_logins' => $recentAdminLogins,
+            'security_events' => $securityEvents,
         ];
     }
 
@@ -173,20 +232,23 @@ class PlatformDashboardSummaryService
     public function getRecentPlatformActivity(): array
     {
         $query = AuditLog::query()
-            ->with('user')
+            ->with(['user', 'admin'])
             ->orderByDesc('created_at')
             ->limit(self::RECENT_ACTIVITY_LIMIT * 2);
 
-        // Platform-level: admin actions (tenant_id null) or tenant entity changes
+        // Platform-level: admin actions, tenant changes, subscription plan changes
         $query->where(function ($q) {
             $q->whereNull('tenant_id')
-                ->orWhere('entity_type', AuditLog::ENTITY_TENANT);
+                ->orWhere('entity_type', AuditLog::ENTITY_TENANT)
+                ->orWhere('entity_type', AuditLog::ENTITY_ADMIN)
+                ->orWhere('entity_type', AuditLog::ENTITY_SUBSCRIPTION_PLAN)
+                ->orWhereNotNull('admin_user_id');
         });
 
         $logs = $query->get()->take(self::RECENT_ACTIVITY_LIMIT);
 
         return $logs->map(function (AuditLog $log) {
-            $userName = $log->user?->name ?? __('Platform Admin');
+            $userName = $log->admin?->name ?? $log->user?->name ?? __('Platform Admin');
             $action = $log->action;
             $entity = $log->entity_type;
 

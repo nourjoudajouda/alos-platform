@@ -19,7 +19,7 @@ class ComplianceLogController extends Controller
     {
         $user = auth()->user();
         $query = ComplianceLog::query()
-            ->with(['tenant', 'user'])
+            ->with(['tenant', 'user', 'admin'])
             ->orderByDesc('created_at');
 
         if (! $user instanceof Admin) {
@@ -67,10 +67,12 @@ class ComplianceLogController extends Controller
     public function show(ComplianceLog $compliance_log): View
     {
         $user = auth()->user();
-        if (! $user instanceof Admin && ($user->tenant_id !== $compliance_log->tenant_id)) {
-            abort(404, __('Not found.'));
+        if (! $user instanceof Admin) {
+            if ($compliance_log->tenant_id === null || $user->tenant_id !== $compliance_log->tenant_id) {
+                abort(404, __('Not found.'));
+            }
         }
-        $compliance_log->load(['tenant', 'user']);
+        $compliance_log->load(['tenant', 'user', 'admin']);
 
         return view('core::content.compliance-logs.show', [
             'log' => $compliance_log,

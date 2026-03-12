@@ -46,8 +46,8 @@
             <dd class="col-sm-8">{{ $log->entity_id }}</dd>
             <dt class="col-sm-4">{{ __('Tenant') }}</dt>
             <dd class="col-sm-8">{{ $log->tenant?->name ?? '—' }}</dd>
-            <dt class="col-sm-4">{{ __('User') }}</dt>
-            <dd class="col-sm-8">{{ $log->user?->name ?? $log->user_id ?? '—' }}</dd>
+            <dt class="col-sm-4">{{ __('User / Admin') }}</dt>
+            <dd class="col-sm-8">{{ $log->admin?->name ?? $log->user?->name ?? ($log->admin_user_id ? '#' . $log->admin_user_id : ($log->user_id ? '#' . $log->user_id : '—')) }}</dd>
             <dt class="col-sm-4">{{ __('IP address') }}</dt>
             <dd class="col-sm-8">{{ $log->ip_address }}</dd>
             <dt class="col-sm-4">{{ __('Created at') }}</dt>

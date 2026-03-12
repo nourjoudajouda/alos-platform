@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Admin;
 use App\Models\AuditLog;
 use App\Models\ComplianceLog;
 use App\Models\User;
@@ -22,12 +23,16 @@ class AuditLogService
         array $oldValues = [],
         array $newValues = [],
         ?int $tenantId = null,
-        ?int $userId = null
+        ?int $userId = null,
+        ?int $adminUserId = null
     ): AuditLog {
         $user = $userId ? User::find($userId) : auth()->user();
         $uid = null;
+        $aid = $adminUserId;
         if ($user instanceof User) {
             $uid = $userId ?? $user->id;
+        } elseif ($user instanceof Admin && $aid === null) {
+            $aid = $user->id;
         }
         $tenantId = $tenantId ?? ($user instanceof User ? $user->tenant_id : null);
         $entityId = $entityId ?? 0;
@@ -35,9 +40,38 @@ class AuditLogService
         return AuditLog::create([
             'tenant_id' => $tenantId,
             'user_id' => $uid,
+            'admin_user_id' => $aid,
             'action' => $action,
             'entity_type' => $entityType,
             'entity_id' => (int) $entityId,
+            'old_values' => $oldValues,
+            'new_values' => $newValues,
+            'ip_address' => request()?->ip() ?? '0.0.0.0',
+        ]);
+    }
+
+    /**
+     * Record platform-level audit (admin actions). Explicitly sets admin_user_id.
+     */
+    public function recordPlatformAudit(
+        string $action,
+        string $entityType,
+        $entityId,
+        array $oldValues = [],
+        array $newValues = [],
+        ?int $tenantId = null,
+        ?int $adminUserId = null
+    ): AuditLog {
+        $admin = $adminUserId !== null ? Admin::find($adminUserId) : auth()->user();
+        $aid = $admin instanceof Admin ? $admin->id : $adminUserId;
+
+        return AuditLog::create([
+            'tenant_id' => $tenantId,
+            'user_id' => null,
+            'admin_user_id' => $aid,
+            'action' => $action,
+            'entity_type' => $entityType,
+            'entity_id' => (int) ($entityId ?? 0),
             'old_values' => $oldValues,
             'new_values' => $newValues,
             'ip_address' => request()?->ip() ?? '0.0.0.0',
@@ -51,17 +85,27 @@ class AuditLogService
         ?int $targetId = null,
         ?int $tenantId = null,
         ?int $userId = null,
-        ?string $userType = null
+        ?string $userType = null,
+        ?int $adminUserId = null
     ): ComplianceLog {
         $user = $userId ? User::find($userId) : auth()->user();
         $uid = ($user instanceof User) ? ($userId ?? $user->id) : null;
-        if ($userType === null && $user instanceof User) {
-            $userType = $user->isClientPortalUser() ? 'client' : 'internal';
+        $aid = $adminUserId;
+        if ($user instanceof Admin && $aid === null) {
+            $aid = $user->id;
+        }
+        if ($userType === null) {
+            if ($user instanceof User) {
+                $userType = $user->isClientPortalUser() ? 'client' : 'internal';
+            } elseif ($user instanceof Admin) {
+                $userType = 'admin';
+            }
         }
 
         return ComplianceLog::create([
             'tenant_id' => $tenantId ?? ($user instanceof User ? $user->tenant_id : null),
             'user_id' => $uid,
+            'admin_user_id' => $aid,
             'user_type' => $userType,
             'attempted_action' => $attemptedAction,
             'target_entity' => $targetEntity,

@@ -140,7 +140,7 @@ class TenantController extends Controller
         $validated['city'] = $validated['city'] ?? null;
         $validated['country'] = $validated['country'] ?? null;
         $tenant = Tenant::create($validated);
-        App::make(AuditLogService::class)->recordAudit(AuditLog::ACTION_CREATE_TENANT, AuditLog::ENTITY_TENANT, $tenant->id, [], [], $tenant->id);
+        App::make(AuditLogService::class)->recordPlatformAudit(AuditLog::ACTION_CREATE_TENANT, AuditLog::ENTITY_TENANT, $tenant->id, [], $tenant->only(['name', 'slug', 'subscription_plan_id', 'status']), $tenant->id);
 
         return redirect()
             ->route('admin.core.tenants.index')
@@ -237,7 +237,7 @@ class TenantController extends Controller
         }
         $newValues = array_intersect_key($validated, array_flip($auditFields));
         $tenant->update($validated);
-        App::make(AuditLogService::class)->recordAudit(AuditLog::ACTION_UPDATE, AuditLog::ENTITY_TENANT, $tenant->id, $oldValues, $newValues, $tenant->id);
+        App::make(AuditLogService::class)->recordPlatformAudit(AuditLog::ACTION_UPDATE, AuditLog::ENTITY_TENANT, $tenant->id, $oldValues, $newValues, $tenant->id);
 
         return redirect()
             ->route('admin.core.tenants.index')
@@ -253,7 +253,7 @@ class TenantController extends Controller
         }
 
         $oldValues = $tenant->only(['name', 'slug', 'domain']);
-        App::make(AuditLogService::class)->recordAudit(AuditLog::ACTION_DELETE, AuditLog::ENTITY_TENANT, $tenant->id, $oldValues, [], $tenant->id);
+        App::make(AuditLogService::class)->recordPlatformAudit(AuditLog::ACTION_DELETE, AuditLog::ENTITY_TENANT, $tenant->id, $oldValues, [], $tenant->id);
         $tenant->delete();
 
         return redirect()
@@ -268,7 +268,7 @@ class TenantController extends Controller
             'status' => Tenant::STATUS_SUSPENDED,
             'is_active' => false,
         ]);
-        App::make(AuditLogService::class)->recordAudit(AuditLog::ACTION_UPDATE, AuditLog::ENTITY_TENANT, $tenant->id, ['status' => $oldStatus], ['status' => Tenant::STATUS_SUSPENDED], $tenant->id);
+        App::make(AuditLogService::class)->recordPlatformAudit(AuditLog::ACTION_SUSPEND_TENANT, AuditLog::ENTITY_TENANT, $tenant->id, ['status' => $oldStatus], ['status' => Tenant::STATUS_SUSPENDED], $tenant->id);
 
         return redirect()
             ->route('admin.core.tenants.show', $tenant)
@@ -282,7 +282,7 @@ class TenantController extends Controller
             'status' => Tenant::STATUS_ACTIVE,
             'is_active' => true,
         ]);
-        App::make(AuditLogService::class)->recordAudit(AuditLog::ACTION_UPDATE, AuditLog::ENTITY_TENANT, $tenant->id, ['status' => $oldStatus], ['status' => Tenant::STATUS_ACTIVE], $tenant->id);
+        App::make(AuditLogService::class)->recordPlatformAudit(AuditLog::ACTION_ACTIVATE_TENANT, AuditLog::ENTITY_TENANT, $tenant->id, ['status' => $oldStatus], ['status' => Tenant::STATUS_ACTIVE], $tenant->id);
 
         return redirect()
             ->route('admin.core.tenants.show', $tenant)

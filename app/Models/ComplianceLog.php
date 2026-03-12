@@ -15,6 +15,7 @@ class ComplianceLog extends Model
     protected $fillable = [
         'tenant_id',
         'user_id',
+        'admin_user_id',
         'user_type',
         'attempted_action',
         'target_entity',
@@ -32,5 +33,10 @@ class ComplianceLog extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function admin(): BelongsTo
+    {
+        return $this->belongsTo(Admin::class, 'admin_user_id');
     }
 }
