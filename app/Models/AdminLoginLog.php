@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class AdminLoginLog extends Model
 {
-    public const UPDATED_AT = null;
+    public $timestamps = false;
 
     public const STATUS_SUCCESS = 'success';
     public const STATUS_FAILED = 'failed';
