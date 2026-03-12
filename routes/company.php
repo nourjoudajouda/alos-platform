@@ -7,6 +7,8 @@ use App\Modules\Core\Http\Controllers\ClientReportController;
 use App\Modules\Core\Http\Controllers\ConsultationController;
 use App\Modules\Core\Http\Controllers\DocumentController;
 use App\Modules\Core\Http\Controllers\MessageThreadController;
+use App\Modules\Core\Http\Controllers\NotificationController;
+use App\Modules\Core\Http\Controllers\ReminderRuleController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -74,4 +76,21 @@ Route::prefix('cases')->name('cases.')->group(function () {
     Route::get('/{case}/sessions/{session}/edit', [CaseSessionController::class, 'edit'])->name('sessions.edit')->middleware('permission:cases.manage');
     Route::put('/{case}/sessions/{session}', [CaseSessionController::class, 'update'])->name('sessions.update')->middleware('permission:cases.manage');
     Route::delete('/{case}/sessions/{session}', [CaseSessionController::class, 'destroy'])->name('sessions.destroy')->middleware('permission:cases.manage');
+});
+
+// ALOS-S1-13 — Session Reminder Rules (tenant-scoped; per law firm)
+Route::prefix('reminder-rules')->name('reminder-rules.')->group(function () {
+    Route::get('/', [ReminderRuleController::class, 'index'])->name('index');
+    Route::get('/create', [ReminderRuleController::class, 'create'])->name('create');
+    Route::post('/', [ReminderRuleController::class, 'store'])->name('store');
+    Route::get('/{reminderRule}/edit', [ReminderRuleController::class, 'edit'])->name('edit');
+    Route::put('/{reminderRule}', [ReminderRuleController::class, 'update'])->name('update');
+    Route::delete('/{reminderRule}', [ReminderRuleController::class, 'destroy'])->name('destroy');
+});
+
+// ALOS-S1-26 — In-app notifications (tenant office: current user only)
+Route::prefix('notifications')->name('notifications.')->group(function () {
+    Route::get('/', [NotificationController::class, 'index'])->name('index');
+    Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all');
+    Route::post('/{notification}/read', [NotificationController::class, 'markAsRead'])->name('read');
 });

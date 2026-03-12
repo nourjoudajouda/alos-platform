@@ -1,6 +1,8 @@
 @php
   $configData = Helper::appClasses();
   $clientRoutePrefix = $clientRoutePrefix ?? 'admin.core.clients';
+  $caseRoutePrefix = $caseRoutePrefix ?? 'admin.core.cases';
+  $consultationRoutePrefix = $consultationRoutePrefix ?? 'admin.core.consultations';
   $initials = strtoupper(mb_substr(preg_replace('/[^a-zA-Z0-9\p{Arabic}]/u', '', $client->name), 0, 2) ?: 'CL');
   if (mb_strlen($initials) > 2) $initials = mb_substr($initials, 0, 2);
   $contentDir = app()->getLocale() === 'ar' ? 'rtl' : 'ltr';
@@ -119,7 +121,7 @@
         <div class="card-header d-flex align-items-center justify-content-between">
           <h5 class="card-title mb-0">{{ __('Cases') }}</h5>
           @if($userHasClientAccess && auth()->user()->can('cases.manage'))
-            <a href="{{ route('admin.core.cases.create', ['client_id' => $client->id]) }}" class="btn btn-primary btn-sm">
+            <a href="{{ route($caseRoutePrefix . '.create', ['client_id' => $client->id]) }}" class="btn btn-primary btn-sm">
               <i class="icon-base ti tabler-plus {{ $contentDir === 'rtl' ? 'ms-1' : 'me-1' }}"></i>
               {{ __('Add Case') }}
             </a>
@@ -136,7 +138,7 @@
               <i class="icon-base ti tabler-briefcase icon-32px d-block mb-3 opacity-50"></i>
               <p class="mb-2">{{ __('No cases yet.') }}</p>
               @if(auth()->user()->can('cases.manage'))
-                <a href="{{ route('admin.core.cases.create', ['client_id' => $client->id]) }}" class="btn btn-primary btn-sm">{{ __('Add Case') }}</a>
+                <a href="{{ route($caseRoutePrefix . '.create', ['client_id' => $client->id]) }}" class="btn btn-primary btn-sm">{{ __('Add Case') }}</a>
               @endif
             </div>
           @else
@@ -157,16 +159,16 @@
                       $sc = match($c->status) { 'open' => 'primary', 'pending' => 'warning', 'closed' => 'secondary', default => 'secondary' };
                     @endphp
                     <tr>
-                      <td><a href="{{ route('admin.core.cases.show', $c) }}" class="fw-medium">{{ $c->case_number }}</a></td>
+                      <td><a href="{{ route($caseRoutePrefix . '.show', $c) }}" class="fw-medium">{{ $c->case_number }}</a></td>
                       <td><span class="text-muted small">{{ $c->case_type ?? '—' }}</span></td>
                       <td><span class="badge bg-label-{{ $sc }}">{{ __(\App\Models\CaseModel::STATUSES[$c->status] ?? $c->status) }}</span></td>
                       <td><span class="text-muted small">{{ $c->responsibleLawyer?->name ?? '—' }}</span></td>
                       <td class="text-nowrap">
-                        <a href="{{ route('admin.core.cases.show', $c) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('View') }}">
+                        <a href="{{ route($caseRoutePrefix . '.show', $c) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('View') }}">
                           <i class="icon-base ti tabler-eye"></i>
                         </a>
                         @can('cases.manage')
-                        <a href="{{ route('admin.core.cases.edit', $c) }}" class="btn btn-icon btn-sm btn-text-warning rounded" title="{{ __('Edit') }}">
+                        <a href="{{ route($caseRoutePrefix . '.edit', $c) }}" class="btn btn-icon btn-sm btn-text-warning rounded" title="{{ __('Edit') }}">
                           <i class="icon-base ti tabler-pencil"></i>
                         </a>
                         @endcan
@@ -187,7 +189,7 @@
         <div class="card-header d-flex align-items-center justify-content-between">
           <h5 class="card-title mb-0">{{ __('Consultations') }}</h5>
           @if($userHasClientAccess && auth()->user()->can('consultations.manage'))
-            <a href="{{ route('admin.core.consultations.create', ['client_id' => $client->id]) }}" class="btn btn-primary btn-sm">
+            <a href="{{ route($consultationRoutePrefix . '.create', ['client_id' => $client->id]) }}" class="btn btn-primary btn-sm">
               <i class="icon-base ti tabler-plus {{ $contentDir === 'rtl' ? 'ms-1' : 'me-1' }}"></i>
               {{ __('Add Consultation') }}
             </a>
@@ -204,7 +206,7 @@
               <i class="icon-base ti tabler-calendar-event icon-32px d-block mb-3 opacity-50"></i>
               <p class="mb-2">{{ __('No consultations yet.') }}</p>
               @if(auth()->user()->can('consultations.manage'))
-                <a href="{{ route('admin.core.consultations.create', ['client_id' => $client->id]) }}" class="btn btn-primary btn-sm">{{ __('Add Consultation') }}</a>
+                <a href="{{ route($consultationRoutePrefix . '.create', ['client_id' => $client->id]) }}" class="btn btn-primary btn-sm">{{ __('Add Consultation') }}</a>
               @endif
             </div>
           @else
@@ -225,16 +227,16 @@
                       $sc = match($c->status) { 'open' => 'primary', 'completed' => 'success', 'archived' => 'secondary', default => 'secondary' };
                     @endphp
                     <tr>
-                      <td><a href="{{ route('admin.core.consultations.show', $c) }}" class="fw-medium">{{ $c->title }}</a></td>
+                      <td><a href="{{ route($consultationRoutePrefix . '.show', $c) }}" class="fw-medium">{{ $c->title }}</a></td>
                       <td><span class="text-muted small">{{ $c->consultation_date?->format('Y-m-d') ?? '—' }}</span></td>
                       <td><span class="text-muted small">{{ $c->responsibleUser?->name ?? '—' }}</span></td>
                       <td><span class="badge bg-label-{{ $sc }}">{{ __(\App\Models\Consultation::STATUSES[$c->status] ?? $c->status) }}</span></td>
                       <td class="text-nowrap">
-                        <a href="{{ route('admin.core.consultations.show', $c) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('View') }}">
+                        <a href="{{ route($consultationRoutePrefix . '.show', $c) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('View') }}">
                           <i class="icon-base ti tabler-eye"></i>
                         </a>
                         @can('consultations.manage')
-                        <a href="{{ route('admin.core.consultations.edit', $c) }}" class="btn btn-icon btn-sm btn-text-warning rounded" title="{{ __('Edit') }}">
+                        <a href="{{ route($consultationRoutePrefix . '.edit', $c) }}" class="btn btn-icon btn-sm btn-text-warning rounded" title="{{ __('Edit') }}">
                           <i class="icon-base ti tabler-pencil"></i>
                         </a>
                         @endcan

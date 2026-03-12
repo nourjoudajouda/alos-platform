@@ -1,13 +1,14 @@
 @php
+  $reminderRulesRoutePrefix = $reminderRulesRoutePrefix ?? 'company.reminder-rules';
   $crudIndexId = 'reminder-rules';
   $crudIndexTitle = __('Reminder Rules') . ' — ' . config('app.name');
-  $crudIndexFiltersAction = route('admin.core.reminder-rules.index');
+  $crudIndexFiltersAction = route($reminderRulesRoutePrefix . '.index');
   $crudIndexPerPage = $perPage;
   $crudIndexTableTitle = __('Session Reminder Rules');
-  $crudIndexAddUrl = route('admin.core.reminder-rules.create');
+  $crudIndexAddUrl = route($reminderRulesRoutePrefix . '.create');
   $crudIndexAddLabel = __('Add Rule');
   $crudIndexEmptyMessage = __('No reminder rules yet.');
-  $crudIndexEmptyLink = route('admin.core.reminder-rules.create');
+  $crudIndexEmptyLink = route($reminderRulesRoutePrefix . '.create');
   $crudIndexEmptyLinkText = __('Add Rule');
   $crudIndexShowViewToggle = false;
   $items = $rules;
@@ -31,7 +32,7 @@
 @section('crud_offcanvas')
   <p class="text-muted small">{{ __('Use per page in the main filters.') }}</p>
   <div class="d-flex gap-2">
-    <a href="{{ route('admin.core.reminder-rules.index') }}" class="btn btn-outline-secondary flex-grow-1">{{ __('Reset') }}</a>
+    <a href="{{ route($reminderRulesRoutePrefix . '.index') }}" class="btn btn-outline-secondary flex-grow-1">{{ __('Reset') }}</a>
     <button type="button" class="btn btn-secondary" data-bs-dismiss="offcanvas">{{ __('Close') }}</button>
   </div>
 @endsection
@@ -86,10 +87,10 @@
       </td>
       <td class="text-nowrap">
         <div class="table-actions">
-          <a href="{{ route('admin.core.reminder-rules.edit', $rule) }}" class="btn btn-icon btn-sm btn-text-warning rounded" title="{{ __('Edit') }}">
+          <a href="{{ route($reminderRulesRoutePrefix . '.edit', $rule) }}" class="btn btn-icon btn-sm btn-text-warning rounded" title="{{ __('Edit') }}">
             <i class="icon-base ti tabler-pencil"></i>
           </a>
-          <form action="{{ route('admin.core.reminder-rules.destroy', $rule) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Delete this reminder rule?') }}');">
+          <form action="{{ route($reminderRulesRoutePrefix . '.destroy', $rule) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Delete this reminder rule?') }}');">
             @csrf
             @method('DELETE')
             <button type="submit" class="btn btn-icon btn-sm btn-text-danger rounded" title="{{ __('Delete') }}">

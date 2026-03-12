@@ -23,10 +23,12 @@
       <form action="{{ route('admin.core.contracts.index') }}" method="get" class="d-flex flex-wrap gap-2 mb-3">
         <input type="hidden" name="per_page" value="{{ $perPage }}">
         <input type="text" name="search" class="form-control form-control-sm" style="max-width: 200px;" placeholder="{{ __('Search by name or slug') }}" value="{{ request('search') }}">
+        @if($hasContractEndDate ?? true)
         <select name="expiring" class="form-select form-select-sm" style="max-width: 180px;">
           <option value="">{{ __('All contracts') }}</option>
           <option value="1" {{ request('expiring') === '1' ? 'selected' : '' }}>{{ __('Expiring in 30 days') }}</option>
         </select>
+        @endif
         <button type="submit" class="btn btn-sm btn-primary">{{ __('Search') }}</button>
       </form>
 

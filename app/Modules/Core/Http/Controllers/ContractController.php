@@ -5,6 +5,7 @@ namespace App\Modules\Core\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 /**
@@ -18,9 +19,15 @@ class ContractController extends Controller
         $perPage = (int) $request->get('per_page', 15);
         $perPage = in_array($perPage, [10, 15, 25, 50], true) ? $perPage : 15;
 
-        $query = Tenant::query()
-            ->with('subscriptionPlan')
-            ->orderByRaw('contract_end_date IS NULL, contract_end_date ASC');
+        $hasContractEndDate = Schema::hasColumn('tenants', 'contract_end_date');
+
+        $query = Tenant::query()->with('subscriptionPlan');
+
+        if ($hasContractEndDate) {
+            $query->orderByRaw('contract_end_date IS NULL, contract_end_date ASC');
+        } else {
+            $query->orderBy('name');
+        }
 
         if ($request->filled('search')) {
             $term = $request->get('search');
@@ -30,12 +37,10 @@ class ContractController extends Controller
             });
         }
 
-        if ($request->filled('expiring')) {
-            if ($request->get('expiring') === '1') {
-                $query->whereNotNull('contract_end_date')
-                    ->where('contract_end_date', '>=', now()->startOfDay())
-                    ->where('contract_end_date', '<=', now()->addDays(30)->endOfDay());
-            }
+        if ($hasContractEndDate && $request->filled('expiring') && $request->get('expiring') === '1') {
+            $query->whereNotNull('contract_end_date')
+                ->where('contract_end_date', '>=', now()->startOfDay())
+                ->where('contract_end_date', '<=', now()->addDays(30)->endOfDay());
         }
 
         $tenants = $query->paginate($perPage)->withQueryString();
@@ -43,6 +48,7 @@ class ContractController extends Controller
         return view('core::content.contracts.index', [
             'tenants' => $tenants,
             'perPage' => $perPage,
+            'hasContractEndDate' => $hasContractEndDate,
         ]);
     }
 }

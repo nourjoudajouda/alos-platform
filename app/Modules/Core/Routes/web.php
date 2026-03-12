@@ -6,7 +6,6 @@ use App\Modules\Core\Http\Controllers\DashboardController;
 use App\Modules\Core\Http\Controllers\NotificationController;
 use App\Modules\Core\Http\Controllers\ComplianceLogController;
 use App\Modules\Core\Http\Controllers\PermissionController;
-use App\Modules\Core\Http\Controllers\ReminderRuleController;
 use App\Modules\Core\Http\Controllers\RoleController;
 use App\Modules\Core\Http\Controllers\SubscriptionPlanController;
 use App\Modules\Core\Http\Controllers\SystemSettingsController;
@@ -44,15 +43,7 @@ Route::middleware(['auth:admin'])->prefix('contracts')->name('core.contracts.')-
     Route::get('/', [ContractController::class, 'index'])->name('index');
 });
 
-// ALOS-S1-13 — Session Reminder Rules (Admin)
-Route::middleware(['auth:admin'])->prefix('reminder-rules')->name('core.reminder-rules.')->group(function () {
-    Route::get('/', [ReminderRuleController::class, 'index'])->name('index');
-    Route::get('/create', [ReminderRuleController::class, 'create'])->name('create');
-    Route::post('/', [ReminderRuleController::class, 'store'])->name('store');
-    Route::get('/{reminderRule}/edit', [ReminderRuleController::class, 'edit'])->name('edit');
-    Route::put('/{reminderRule}', [ReminderRuleController::class, 'update'])->name('update');
-    Route::delete('/{reminderRule}', [ReminderRuleController::class, 'destroy'])->name('destroy');
-});
+// ALOS-S1-13 — Session Reminder Rules: tenant-scoped; live under /company (see routes/company.php).
 
 // ALOS-S1-29 — Subscription Plans (admin CRUD)
 Route::middleware(['auth:admin'])->prefix('subscription-plans')->name('core.subscription-plans.')->group(function () {

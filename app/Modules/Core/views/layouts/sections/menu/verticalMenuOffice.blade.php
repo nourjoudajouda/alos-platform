@@ -8,6 +8,8 @@ $companyMenuItems = [
   (object)['name' => 'Clients', 'url' => url('/company/clients'), 'slug' => 'company.clients.index', 'icon' => 'menu-icon icon-base ti tabler-users-group'],
   (object)['name' => 'Cases', 'url' => url('/company/cases'), 'slug' => 'company.cases.index', 'icon' => 'menu-icon icon-base ti tabler-briefcase'],
   (object)['name' => 'Consultations', 'url' => url('/company/consultations'), 'slug' => 'company.consultations.index', 'icon' => 'menu-icon icon-base ti tabler-calendar-event'],
+  (object)['name' => 'Reminder Rules', 'url' => route('company.reminder-rules.index'), 'slug' => 'company.reminder-rules.index', 'icon' => 'menu-icon icon-base ti tabler-bell'],
+  (object)['name' => 'Notifications', 'url' => route('company.notifications.index'), 'slug' => 'company.notifications.index', 'icon' => 'menu-icon icon-base ti tabler-bell-ringing'],
   (object)['name' => 'Subscription', 'url' => route('company.settings.subscription.show'), 'slug' => 'company.settings.subscription.show', 'icon' => 'menu-icon icon-base ti tabler-credit-card'],
   (object)['name' => 'Branding Settings', 'url' => route('company.settings.branding.edit'), 'slug' => 'company.settings.branding.edit', 'icon' => 'menu-icon icon-base ti tabler-palette'],
 ];

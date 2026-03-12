@@ -10,9 +10,16 @@ use Illuminate\View\View;
 
 /**
  * ALOS-S1-26 — In-app notifications: list, mark as read (tenant-scoped, current user only).
+ * Used from admin (admin.core.notifications) and from tenant office (company.notifications).
  */
 class NotificationController extends Controller
 {
+    protected function notificationsRoutePrefix(): string
+    {
+        $name = request()->route()?->getName() ?? '';
+        return str_starts_with($name, 'company.') ? 'company.notifications' : 'admin.core.notifications';
+    }
+
     public function index(Request $request): View
     {
         $user = auth()->user();
@@ -35,9 +42,14 @@ class NotificationController extends Controller
             $notifications = $query->paginate($perPage)->withQueryString();
         }
 
+        $prefix = $this->notificationsRoutePrefix();
+        $pageConfigs = str_starts_with($prefix, 'company.') ? ['myLayout' => 'office', 'customizerHide' => true] : [];
+
         return view('core::content.notifications.index', [
             'notifications' => $notifications,
             'isOfficeUser' => $user instanceof \App\Models\User,
+            'notificationsRoutePrefix' => $prefix,
+            'pageConfigs' => $pageConfigs,
         ]);
     }
 

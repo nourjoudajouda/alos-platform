@@ -40,6 +40,7 @@ use Illuminate\Support\Facades\Route;
   $tenantUser = Auth::guard('admin')->check() ? null : Auth::user();
   $tenant = $tenantUser?->tenant;
   $showPublicSiteLink = $tenant && $tenant->getSettingsOrCreate()->hasPublicSiteEnabled();
+  $notificationsIndexRoute = Auth::guard('admin')->check() ? route('admin.core.notifications.index') : route('company.notifications.index');
 @endphp
 <ul class="navbar-nav flex-row align-items-center ms-auto">
     <!-- Language -->
@@ -123,7 +124,7 @@ use Illuminate\Support\Facades\Route;
           <ul class="list-group list-group-flush">
             @forelse($notificationsRecent ?? [] as $n)
             <li class="list-group-item list-group-item-action dropdown-notifications-item">
-              <a href="{{ $n->link ?? route('admin.core.notifications.index') }}" class="text-body text-decoration-none d-flex">
+              <a href="{{ $n->link ?? $notificationsIndexRoute }}" class="text-body text-decoration-none d-flex">
                 <div class="flex-shrink-0 me-3"><span class="avatar avatar-online">@include('core::_partials.navbar-icons', ['name' => 'bell', 'class' => 'icon-lg'])</span></div>
                 <div class="flex-grow-1">
                   <h6 class="mb-0 {{ $n->read_status ? '' : 'fw-semibold' }}">{{ $n->title }}</h6>
@@ -139,7 +140,7 @@ use Illuminate\Support\Facades\Route;
             @endforelse
           </ul>
         </li>
-        <li class="dropdown-menu-footer border-top"><a class="dropdown-item d-flex justify-content-center py-2" href="{{ route('admin.core.notifications.index') }}">{{ __('View all notifications') }}</a></li>
+        <li class="dropdown-menu-footer border-top"><a class="dropdown-item d-flex justify-content-center py-2" href="{{ $notificationsIndexRoute }}">{{ __('View all notifications') }}</a></li>
       </ul>
     </li>
     <!-- User (أدمن من جدول admins أو يوزر تيننت من جدول users) -->

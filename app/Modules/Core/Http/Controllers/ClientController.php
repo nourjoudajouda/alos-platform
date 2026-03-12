@@ -167,6 +167,9 @@ class ClientController extends Controller
             ? $client->consultations()->with('responsibleUser')->orderByDesc('consultation_date')->orderByDesc('updated_at')->get()
             : collect();
 
+        $caseRoutePrefix = $this->isCompanyContext() ? 'company.cases' : 'admin.core.cases';
+        $consultationRoutePrefix = $this->isCompanyContext() ? 'company.consultations' : 'admin.core.consultations';
+
         return view('core::content.clients.show', [
             'client' => $client,
             'assignableUsers' => $assignableUsers,
@@ -176,6 +179,8 @@ class ClientController extends Controller
             'clientCases' => $clientCases,
             'clientConsultations' => $clientConsultations,
             'clientRoutePrefix' => $this->clientRoutePrefix(),
+            'caseRoutePrefix' => $caseRoutePrefix,
+            'consultationRoutePrefix' => $consultationRoutePrefix,
             'pageConfigs' => $this->companyPageConfigs(),
         ]);
     }

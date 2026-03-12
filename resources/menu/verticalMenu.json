@@ -52,6 +52,12 @@
       "slug": "core.audit-logs"
     },
     {
+      "url": "/admin/compliance-logs",
+      "name": "Compliance Logs",
+      "icon": "menu-icon icon-base ti tabler-shield-check",
+      "slug": "core.compliance-logs"
+    },
+    {
       "url": "/admin/system-settings",
       "name": "System Settings",
       "icon": "menu-icon icon-base ti tabler-settings",

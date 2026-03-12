@@ -49,20 +49,8 @@
             <div class="invalid-feedback">{{ $message }}</div>
           @enderror
         </div>
-        <div class="mb-3">
-          <label for="plan" class="form-label">{{ __('Plan') }}</label>
-          <select name="plan" id="plan" class="form-select">
-            <option value="">{{ __('All') }}</option>
-            @foreach(\App\Models\Tenant::PLANS as $p)
-              <option value="{{ $p }}" {{ old('plan', $tenant->plan) === $p ? 'selected' : '' }}>{{ __(ucfirst($p)) }}</option>
-            @endforeach
-          </select>
-          @error('plan')
-            <div class="invalid-feedback">{{ $message }}</div>
-          @enderror
-        </div>
         <hr class="my-4">
-        <h6 class="mb-3">{{ __('Subscription (ALOS-S1-29)') }}</h6>
+        <h6 class="mb-3">{{ __('Subscription') }}</h6>
         <div class="mb-3">
           <label for="subscription_plan_id" class="form-label">{{ __('Subscription plan') }}</label>
           <select name="subscription_plan_id" id="subscription_plan_id" class="form-select">

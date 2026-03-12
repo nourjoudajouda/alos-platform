@@ -1,6 +1,7 @@
 @php
   $configData = Helper::appClasses();
   $contentDir = app()->getLocale() === 'ar' ? 'rtl' : 'ltr';
+  $notificationsRoutePrefix = $notificationsRoutePrefix ?? 'admin.core.notifications';
 @endphp
 @extends('core::layouts.layoutMaster')
 
@@ -19,7 +20,7 @@
       <p class="text-muted small mb-0">{{ __('Your in-app notifications.') }}</p>
     </div>
     @if($notifications->where('read_status', false)->isNotEmpty())
-    <form action="{{ route('admin.core.notifications.read-all') }}" method="post" class="d-inline">
+    <form action="{{ route($notificationsRoutePrefix . '.read-all') }}" method="post" class="d-inline">
       @csrf
       <button type="submit" class="btn btn-sm btn-outline-primary">{{ __('Mark all as read') }}</button>
     </form>
@@ -59,7 +60,7 @@
                 <a href="{{ $n->link }}" class="btn btn-sm btn-text-primary">{{ __('View') }}</a>
               @endif
               @if(!$n->read_status)
-                <form action="{{ route('admin.core.notifications.read', $n->id) }}" method="post" class="d-inline">
+                <form action="{{ route($notificationsRoutePrefix . '.read', $n->id) }}" method="post" class="d-inline">
                   @csrf
                   <button type="submit" class="btn btn-sm btn-text-secondary">{{ __('Mark read') }}</button>
                 </form>

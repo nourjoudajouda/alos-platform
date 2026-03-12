@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\SubscriptionPlan;
 use App\Models\Tenant;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * ALOS-S1-31B — Platform Dashboard Summary Service.
@@ -27,11 +27,14 @@ class PlatformDashboardService
             ->whereNotNull('subscription_plan_id')
             ->count();
 
-        $expiringContracts = Tenant::where('is_active', true)
-            ->whereNotNull('contract_end_date')
-            ->where('contract_end_date', '>=', now()->startOfDay())
-            ->where('contract_end_date', '<=', now()->addDays(self::EXPIRING_DAYS)->endOfDay())
-            ->count();
+        $expiringContracts = 0;
+        if (Schema::hasColumn('tenants', 'contract_end_date')) {
+            $expiringContracts = Tenant::where('is_active', true)
+                ->whereNotNull('contract_end_date')
+                ->where('contract_end_date', '>=', now()->startOfDay())
+                ->where('contract_end_date', '<=', now()->addDays(self::EXPIRING_DAYS)->endOfDay())
+                ->count();
+        }
 
         $totalSubscriptionPlans = SubscriptionPlan::count();
 
