@@ -19,15 +19,35 @@ use Illuminate\View\View;
 /**
  * ALOS-S1-06 — Client Module Skeleton (CRUD + Team Access Placeholder).
  * ALOS-S1-07 — Client Team Access (Lead Lawyer + Assigned Users).
+ * ALOS-S1-31B — When used under company.* routes: tenant-scoped, no company picker.
  */
 class ClientController extends Controller
 {
+    protected function isCompanyContext(): bool
+    {
+        return str_starts_with(request()->route()->getName() ?? '', 'company.');
+    }
+
+    protected function clientRoutePrefix(): string
+    {
+        return $this->isCompanyContext() ? 'company.clients' : 'admin.core.clients';
+    }
+
+    protected function companyPageConfigs(): array
+    {
+        return $this->isCompanyContext() ? ['myLayout' => 'office', 'customizerHide' => true] : [];
+    }
+
     public function index(Request $request): View
     {
         $perPage = (int) $request->get('per_page', 10);
         $perPage = in_array($perPage, [10, 25, 50, 100], true) ? $perPage : 10;
 
         $query = Client::query()->with('tenant')->orderByDesc('created_at');
+
+        if (! auth()->user() instanceof Admin) {
+            $query->where('tenant_id', auth()->user()->tenant_id);
+        }
 
         if ($request->filled('search')) {
             $term = $request->get('search');
@@ -38,14 +58,20 @@ class ClientController extends Controller
             });
         }
 
-        if ($request->filled('tenant_id')) {
+        if (! $this->isCompanyContext() && $request->filled('tenant_id')) {
             $query->where('tenant_id', $request->get('tenant_id'));
         }
 
         $clients = $query->paginate($perPage)->withQueryString();
 
-        $totalClients = Client::count();
-        $recentClients = Client::where('created_at', '>=', now()->subDays(30))->count();
+        $baseQuery = Client::query();
+        if (! auth()->user() instanceof Admin) {
+            $baseQuery->where('tenant_id', auth()->user()->tenant_id);
+        }
+        $totalClients = $baseQuery->count();
+        $recentClients = (clone $baseQuery)->where('created_at', '>=', now()->subDays(30))->count();
+
+        $tenants = $this->isCompanyContext() ? collect() : Tenant::orderBy('name')->get();
 
         return view('core::content.clients.index', [
             'clients' => $clients,
@@ -53,24 +79,39 @@ class ClientController extends Controller
             'totalClients' => $totalClients,
             'recentClients' => $recentClients,
             'filterTenantId' => $request->get('tenant_id', ''),
-            'tenants' => Tenant::orderBy('name')->get(),
+            'tenants' => $tenants,
+            'clientRoutePrefix' => $this->clientRoutePrefix(),
+            'pageConfigs' => $this->companyPageConfigs(),
         ]);
     }
 
     public function create(): View
     {
-        $tenants = Tenant::orderBy('name')->get();
-        return view('core::content.clients.create', ['tenants' => $tenants]);
+        $tenants = $this->isCompanyContext() ? collect() : Tenant::orderBy('name')->get();
+        return view('core::content.clients.create', [
+            'tenants' => $tenants,
+            'clientRoutePrefix' => $this->clientRoutePrefix(),
+            'pageConfigs' => $this->companyPageConfigs(),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'tenant_id' => ['nullable', 'integer', 'exists:tenants,id'],
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
-        ]);
+        ];
+        if (! $this->isCompanyContext()) {
+            $rules['tenant_id'] = ['nullable', 'integer', 'exists:tenants,id'];
+        }
+        $validated = $request->validate($rules);
+
+        if ($this->isCompanyContext()) {
+            $validated['tenant_id'] = auth()->user()->tenant_id;
+        } else {
+            $validated['tenant_id'] = $validated['tenant_id'] ?? null;
+        }
 
         $tenantId = $validated['tenant_id'] ?? null;
         if ($tenantId) {
@@ -79,7 +120,7 @@ class ClientController extends Controller
                 try {
                     app(\App\Services\PlanLimitService::class)->checkClientLimit($tenant);
                 } catch (\RuntimeException $e) {
-                    return redirect()->route('admin.core.clients.create')->withInput()->with('error', $e->getMessage());
+                    return redirect()->route($this->clientRoutePrefix() . '.create')->withInput()->with('error', $e->getMessage());
                 }
             }
         }
@@ -94,13 +135,16 @@ class ClientController extends Controller
         App::make(AuditLogService::class)->recordAudit(AuditLog::ACTION_CREATE_CLIENT, AuditLog::ENTITY_CLIENT, $client->id, [], [], $client->tenant_id);
 
         return redirect()
-            ->route('admin.core.clients.index')
+            ->route($this->clientRoutePrefix() . '.index')
             ->with('success', __('Client created successfully.'));
     }
 
     public function show(Client $client): View
     {
         $user = auth()->user();
+        if ($this->isCompanyContext() && $client->tenant_id !== $user->tenant_id) {
+            abort(404, __('Not found.'));
+        }
         $isAdmin = $user instanceof Admin;
         $userHasClientAccess = $isAdmin
             || (! $user->isClientPortalUser() && $client->teamAccess()->where('user_id', $user->id)->exists());
@@ -131,34 +175,58 @@ class ClientController extends Controller
             'userHasClientAccess' => $userHasClientAccess,
             'clientCases' => $clientCases,
             'clientConsultations' => $clientConsultations,
+            'clientRoutePrefix' => $this->clientRoutePrefix(),
+            'pageConfigs' => $this->companyPageConfigs(),
         ]);
     }
 
     public function edit(Client $client): View
     {
-        $tenants = Tenant::orderBy('name')->get();
-        return view('core::content.clients.edit', ['client' => $client, 'tenants' => $tenants]);
+        if ($this->isCompanyContext() && $client->tenant_id !== auth()->user()->tenant_id) {
+            abort(404, __('Not found.'));
+        }
+        $tenants = $this->isCompanyContext() ? collect() : Tenant::orderBy('name')->get();
+        return view('core::content.clients.edit', [
+            'client' => $client,
+            'tenants' => $tenants,
+            'clientRoutePrefix' => $this->clientRoutePrefix(),
+            'pageConfigs' => $this->companyPageConfigs(),
+        ]);
     }
 
     public function update(Request $request, Client $client): RedirectResponse
     {
-        $validated = $request->validate([
-            'tenant_id' => ['nullable', 'integer', 'exists:tenants,id'],
+        if ($this->isCompanyContext() && $client->tenant_id !== auth()->user()->tenant_id) {
+            abort(404, __('Not found.'));
+        }
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
-        ]);
+        ];
+        if (! $this->isCompanyContext()) {
+            $rules['tenant_id'] = ['nullable', 'integer', 'exists:tenants,id'];
+        }
+        $validated = $request->validate($rules);
+        if ($this->isCompanyContext()) {
+            $validated['tenant_id'] = $client->tenant_id;
+        } else {
+            $validated['tenant_id'] = $validated['tenant_id'] ?? null;
+        }
 
         $client->update($validated);
         App::make(AuditLogService::class)->recordAudit(AuditLog::ACTION_UPDATE_CLIENT, AuditLog::ENTITY_CLIENT, $client->id, [], [], $client->tenant_id);
 
         return redirect()
-            ->route('admin.core.clients.index')
+            ->route($this->clientRoutePrefix() . '.index')
             ->with('success', __('Client updated successfully.'));
     }
 
     public function destroy(Client $client): RedirectResponse
     {
+        if ($this->isCompanyContext() && $client->tenant_id !== auth()->user()->tenant_id) {
+            abort(404, __('Not found.'));
+        }
         $tenantId = $client->tenant_id;
         $oldValues = $client->only(['name', 'email', 'tenant_id']);
         App::make(AuditLogService::class)->recordAudit(AuditLog::ACTION_DELETE, AuditLog::ENTITY_CLIENT, $client->id, $oldValues, [], $tenantId);
@@ -171,7 +239,7 @@ class ClientController extends Controller
         }
 
         return redirect()
-            ->route('admin.core.clients.index')
+            ->route($this->clientRoutePrefix() . '.index')
             ->with('success', __('Client deleted successfully.'));
     }
 
@@ -212,7 +280,7 @@ class ClientController extends Controller
         $client->teamAccess()->sync($sync);
 
         return redirect()
-            ->route('admin.core.clients.show', [$client, 'tab' => 'team-access'])
+            ->route($this->clientRoutePrefix() . '.show', [$client, 'tab' => 'team-access'])
             ->with('success', __('Team access updated successfully.'));
     }
 
@@ -226,12 +294,12 @@ class ClientController extends Controller
             try {
                 app(\App\Services\PlanLimitService::class)->ensureFeature($tenant, \App\Services\PlanLimitService::FEATURE_CLIENT_PORTAL);
             } catch (\RuntimeException $e) {
-                return redirect()->route('admin.core.clients.show', [$client, 'tab' => 'portal'])->with('error', $e->getMessage());
+                return redirect()->route($this->clientRoutePrefix() . '.show', [$client, 'tab' => 'portal'])->with('error', $e->getMessage());
             }
         }
         if ($client->portalUser) {
             return redirect()
-                ->route('admin.core.clients.show', [$client, 'tab' => 'portal'])
+                ->route($this->clientRoutePrefix() . '.show', [$client, 'tab' => 'portal'])
                 ->with('error', __('This client already has a portal account.'));
         }
 
@@ -260,7 +328,7 @@ class ClientController extends Controller
         $user->save();
 
         return redirect()
-            ->route('admin.core.clients.show', [$client, 'tab' => 'portal'])
+            ->route($this->clientRoutePrefix() . '.show', [$client, 'tab' => 'portal'])
             ->with('success', __('Portal account created successfully.'));
     }
 
@@ -274,13 +342,13 @@ class ClientController extends Controller
             try {
                 app(\App\Services\PlanLimitService::class)->ensureFeature($tenant, \App\Services\PlanLimitService::FEATURE_CLIENT_PORTAL);
             } catch (\RuntimeException $e) {
-                return redirect()->route('admin.core.clients.show', [$client, 'tab' => 'portal'])->with('error', $e->getMessage());
+                return redirect()->route($this->clientRoutePrefix() . '.show', [$client, 'tab' => 'portal'])->with('error', $e->getMessage());
             }
         }
         $portalUser = $client->portalUser;
         if (! $portalUser) {
             return redirect()
-                ->route('admin.core.clients.show', [$client, 'tab' => 'portal'])
+                ->route($this->clientRoutePrefix() . '.show', [$client, 'tab' => 'portal'])
                 ->with('error', __('No portal account for this client.'));
         }
 
@@ -307,7 +375,7 @@ class ClientController extends Controller
         $portalUser->save();
 
         return redirect()
-            ->route('admin.core.clients.show', [$client, 'tab' => 'portal'])
+            ->route($this->clientRoutePrefix() . '.show', [$client, 'tab' => 'portal'])
             ->with('success', __('Portal account updated successfully.'));
     }
 
@@ -321,13 +389,13 @@ class ClientController extends Controller
             try {
                 app(\App\Services\PlanLimitService::class)->ensureFeature($tenant, \App\Services\PlanLimitService::FEATURE_CLIENT_PORTAL);
             } catch (\RuntimeException $e) {
-                return redirect()->route('admin.core.clients.show', [$client, 'tab' => 'portal'])->with('error', $e->getMessage());
+                return redirect()->route($this->clientRoutePrefix() . '.show', [$client, 'tab' => 'portal'])->with('error', $e->getMessage());
             }
         }
         $portalUser = $client->portalUser;
         if (! $portalUser) {
             return redirect()
-                ->route('admin.core.clients.show', [$client, 'tab' => 'portal'])
+                ->route($this->clientRoutePrefix() . '.show', [$client, 'tab' => 'portal'])
                 ->with('error', __('No portal account for this client.'));
         }
 
@@ -336,7 +404,7 @@ class ClientController extends Controller
 
         $status = $portalUser->portal_active ? __('activated') : __('deactivated');
         return redirect()
-            ->route('admin.core.clients.show', [$client, 'tab' => 'portal'])
+            ->route($this->clientRoutePrefix() . '.show', [$client, 'tab' => 'portal'])
             ->with('success', __('Portal account :status.', ['status' => $status]));
     }
 }

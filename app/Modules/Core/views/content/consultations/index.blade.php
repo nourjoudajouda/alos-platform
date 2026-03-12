@@ -1,13 +1,15 @@
 @php
+  $consultationRoutePrefix = $consultationRoutePrefix ?? 'admin.core.consultations';
+  $clientRoutePrefix = $clientRoutePrefix ?? 'admin.core.clients';
   $crudIndexId = 'consultations';
   $crudIndexTitle = __('Consultations') . ' — ' . config('app.name');
-  $crudIndexFiltersAction = route('admin.core.consultations.index');
+  $crudIndexFiltersAction = route($consultationRoutePrefix . '.index');
   $crudIndexPerPage = $perPage;
   $crudIndexTableTitle = __('Consultations');
-  $crudIndexAddUrl = route('admin.core.consultations.create');
+  $crudIndexAddUrl = route($consultationRoutePrefix . '.create');
   $crudIndexAddLabel = __('Add Consultation');
   $crudIndexEmptyMessage = __('No consultations yet.');
-  $crudIndexEmptyLink = route('admin.core.consultations.create');
+  $crudIndexEmptyLink = route($consultationRoutePrefix . '.create');
   $crudIndexEmptyLinkText = __('Add Consultation');
   $crudIndexShowViewToggle = false;
   $items = $consultations;
@@ -30,7 +32,7 @@
 @endsection
 
 @section('crud_offcanvas')
-  <form action="{{ route('admin.core.consultations.index') }}" method="get" id="filtersFormSideConsultations">
+  <form action="{{ route($consultationRoutePrefix . '.index') }}" method="get" id="filtersFormSideConsultations">
     <input type="hidden" name="per_page" value="{{ $perPage }}">
     <input type="hidden" name="search" value="{{ request('search') }}">
     <div class="mb-3">
@@ -72,7 +74,7 @@
     <tr>
       <td><span class="fw-medium">{{ $consultation->title }}</span></td>
       <td>
-        <a href="{{ route('admin.core.clients.show', [$consultation->client, 'tab' => 'consultations']) }}">{{ $consultation->client->name }}</a>
+        <a href="{{ route($clientRoutePrefix . '.show', [$consultation->client, 'tab' => 'consultations']) }}">{{ $consultation->client->name }}</a>
       </td>
       <td><span class="text-muted small">{{ $consultation->consultation_date?->format('Y-m-d') ?? '—' }}</span></td>
       <td><span class="text-muted small">{{ $consultation->responsibleUser?->name ?? '—' }}</span></td>
@@ -92,14 +94,14 @@
       </td>
       <td class="text-nowrap">
         <div class="table-actions">
-          <a href="{{ route('admin.core.consultations.show', $consultation) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('View') }}">
+          <a href="{{ route($consultationRoutePrefix . '.show', $consultation) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('View') }}">
             <i class="icon-base ti tabler-eye"></i>
           </a>
           @can('consultations.manage')
-          <a href="{{ route('admin.core.consultations.edit', $consultation) }}" class="btn btn-icon btn-sm btn-text-warning rounded" title="{{ __('Edit') }}">
+          <a href="{{ route($consultationRoutePrefix . '.edit', $consultation) }}" class="btn btn-icon btn-sm btn-text-warning rounded" title="{{ __('Edit') }}">
             <i class="icon-base ti tabler-pencil"></i>
           </a>
-          <form action="{{ route('admin.core.consultations.destroy', $consultation) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Delete this consultation?') }}');">
+          <form action="{{ route($consultationRoutePrefix . '.destroy', $consultation) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Delete this consultation?') }}');">
             @csrf
             @method('DELETE')
             <button type="submit" class="btn btn-icon btn-sm btn-text-danger rounded" title="{{ __('Delete') }}">

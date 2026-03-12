@@ -1,5 +1,6 @@
 @php
   $configData = Helper::appClasses();
+  $clientRoutePrefix = $clientRoutePrefix ?? 'admin.core.clients';
 @endphp
 @extends('core::layouts.layoutMaster')
 
@@ -10,16 +11,17 @@
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
     <h4 class="fw-bold mb-0">{{ __('Edit Client') }}</h4>
     <div class="d-flex gap-2">
-      <a href="{{ route('admin.core.clients.show', $client) }}" class="btn btn-outline-secondary btn-sm">{{ __('View') }}</a>
-      <a href="{{ route('admin.core.clients.index') }}" class="btn btn-outline-secondary btn-sm">{{ __('Back to list') }}</a>
+      <a href="{{ route($clientRoutePrefix . '.show', $client) }}" class="btn btn-outline-secondary btn-sm">{{ __('View') }}</a>
+      <a href="{{ route($clientRoutePrefix . '.index') }}" class="btn btn-outline-secondary btn-sm">{{ __('Back to list') }}</a>
     </div>
   </div>
 
   <div class="card">
     <div class="card-body">
-      <form action="{{ route('admin.core.clients.update', $client) }}" method="post">
+      <form action="{{ route($clientRoutePrefix . '.update', $client) }}" method="post">
         @csrf
         @method('PUT')
+        @if($tenants->isNotEmpty())
         <div class="mb-3">
           <label for="tenant_id" class="form-label">{{ __('Tenant') }}</label>
           <select name="tenant_id" id="tenant_id" class="form-select">
@@ -32,6 +34,7 @@
             <div class="invalid-feedback d-block">{{ $message }}</div>
           @enderror
         </div>
+        @endif
         <div class="mb-3">
           <label for="name" class="form-label">{{ __('Name') }} <span class="text-danger">*</span></label>
           <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $client->name) }}" required maxlength="255">
@@ -55,7 +58,7 @@
         </div>
         <div class="d-flex gap-2">
           <button type="submit" class="btn btn-primary">{{ __('Update Client') }}</button>
-          <a href="{{ route('admin.core.clients.index') }}" class="btn btn-outline-secondary">{{ __('Cancel') }}</a>
+          <a href="{{ route($clientRoutePrefix . '.index') }}" class="btn btn-outline-secondary">{{ __('Cancel') }}</a>
         </div>
       </form>
     </div>

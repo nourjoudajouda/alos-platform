@@ -1,13 +1,14 @@
 @php
+  $clientRoutePrefix = $clientRoutePrefix ?? 'admin.core.clients';
   $crudIndexId = 'clients';
   $crudIndexTitle = __('Clients') . ' — ' . config('app.name');
-  $crudIndexFiltersAction = route('admin.core.clients.index');
+  $crudIndexFiltersAction = route($clientRoutePrefix . '.index');
   $crudIndexPerPage = $perPage;
   $crudIndexTableTitle = __('Clients');
-  $crudIndexAddUrl = route('admin.core.clients.create');
+  $crudIndexAddUrl = route($clientRoutePrefix . '.create');
   $crudIndexAddLabel = __('Add Client');
   $crudIndexEmptyMessage = __('No clients yet.');
-  $crudIndexEmptyLink = route('admin.core.clients.create');
+  $crudIndexEmptyLink = route($clientRoutePrefix . '.create');
   $crudIndexEmptyLinkText = __('Add Client');
   $crudIndexShowViewToggle = true;
   $items = $clients;
@@ -32,7 +33,7 @@
 @endsection
 
 @section('crud_offcanvas')
-  <form action="{{ route('admin.core.clients.index') }}" method="get" id="filtersFormSideClients">
+  <form action="{{ route($clientRoutePrefix . '.index') }}" method="get" id="filtersFormSideClients">
     <input type="hidden" name="per_page" value="{{ $perPage }}">
     <input type="hidden" name="search" value="{{ request('search') }}">
     @if(request('view'))<input type="hidden" name="view" value="{{ request('view') }}">@endif
@@ -55,7 +56,7 @@
 @section('crud_table_header')
   <th>{{ __('Name') }}</th>
   <th>{{ __('Email') }}</th>
-  <th>{{ __('Tenant') }}</th>
+  @if($clientRoutePrefix !== 'company.clients')<th>{{ __('Tenant') }}</th>@endif
   <th>{{ __('Created At') }}</th>
   <th class="text-nowrap" style="min-width: 7rem;">{{ __('Actions') }}</th>
 @endsection
@@ -76,6 +77,7 @@
         </div>
       </td>
       <td><span class="text-muted small">{{ $client->email ?? '—' }}</span></td>
+      @if($clientRoutePrefix !== 'company.clients')
       <td>
         @if($client->tenant)
           <span class="badge bg-label-secondary">{{ $client->tenant->name }}</span>
@@ -83,16 +85,17 @@
           <span class="text-muted">—</span>
         @endif
       </td>
+      @endif
       <td><span class="text-nowrap">{{ $client->created_at?->format('Y-m-d') }}</span></td>
       <td class="text-nowrap">
         <div class="table-actions">
-          <a href="{{ route('admin.core.clients.show', $client) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('View') }}">
+          <a href="{{ route($clientRoutePrefix . '.show', $client) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('View') }}">
             <i class="icon-base ti tabler-eye"></i>
           </a>
-          <a href="{{ route('admin.core.clients.edit', $client) }}" class="btn btn-icon btn-sm btn-text-warning rounded" title="{{ __('Edit') }}">
+          <a href="{{ route($clientRoutePrefix . '.edit', $client) }}" class="btn btn-icon btn-sm btn-text-warning rounded" title="{{ __('Edit') }}">
             <i class="icon-base ti tabler-pencil"></i>
           </a>
-          <form action="{{ route('admin.core.clients.destroy', $client) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Delete this client?') }}');">
+          <form action="{{ route($clientRoutePrefix . '.destroy', $client) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Delete this client?') }}');">
             @csrf
             @method('DELETE')
             <button type="submit" class="btn btn-icon btn-sm btn-text-danger rounded" title="{{ __('Delete') }}">
@@ -104,7 +107,7 @@
     </tr>
   @empty
     <tr>
-      <td colspan="5" class="text-center text-muted py-5">
+      <td colspan="{{ $clientRoutePrefix === 'company.clients' ? 4 : 5 }}" class="text-center text-muted py-5">
         <i class="icon-base ti tabler-users-group icon-32px d-block mb-2 opacity-50"></i>
         {{ $crudIndexEmptyMessage }} <a href="{{ $crudIndexEmptyLink }}">{{ $crudIndexEmptyLinkText }}</a>
       </td>

@@ -1,13 +1,15 @@
 @php
+  $caseRoutePrefix = $caseRoutePrefix ?? 'admin.core.cases';
+  $clientRoutePrefix = $clientRoutePrefix ?? 'admin.core.clients';
   $crudIndexId = 'cases';
   $crudIndexTitle = __('Cases') . ' — ' . config('app.name');
-  $crudIndexFiltersAction = route('admin.core.cases.index');
+  $crudIndexFiltersAction = route($caseRoutePrefix . '.index');
   $crudIndexPerPage = $perPage;
   $crudIndexTableTitle = __('Cases');
-  $crudIndexAddUrl = route('admin.core.cases.create');
+  $crudIndexAddUrl = route($caseRoutePrefix . '.create');
   $crudIndexAddLabel = __('Add Case');
   $crudIndexEmptyMessage = __('No cases yet.');
-  $crudIndexEmptyLink = route('admin.core.cases.create');
+  $crudIndexEmptyLink = route($caseRoutePrefix . '.create');
   $crudIndexEmptyLinkText = __('Add Case');
   $crudIndexShowViewToggle = false;
   $items = $cases;
@@ -30,7 +32,7 @@
 @endsection
 
 @section('crud_offcanvas')
-  <form action="{{ route('admin.core.cases.index') }}" method="get" id="filtersFormSideCases">
+  <form action="{{ route($caseRoutePrefix . '.index') }}" method="get" id="filtersFormSideCases">
     <input type="hidden" name="per_page" value="{{ $perPage }}">
     <input type="hidden" name="search" value="{{ request('search') }}">
     <div class="mb-3">
@@ -72,7 +74,7 @@
     <tr>
       <td><span class="fw-medium">{{ $case->case_number }}</span></td>
       <td>
-        <a href="{{ route('admin.core.clients.show', [$case->client, 'tab' => 'cases']) }}">{{ $case->client->name }}</a>
+        <a href="{{ route($clientRoutePrefix . '.show', [$case->client, 'tab' => 'cases']) }}">{{ $case->client->name }}</a>
       </td>
       <td><span class="text-muted small">{{ $case->case_type ?? '—' }}</span></td>
       <td>
@@ -89,14 +91,14 @@
       <td><span class="text-muted small">{{ $case->responsibleLawyer?->name ?? '—' }}</span></td>
       <td class="text-nowrap">
         <div class="table-actions">
-          <a href="{{ route('admin.core.cases.show', $case) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('View') }}">
+          <a href="{{ route($caseRoutePrefix . '.show', $case) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('View') }}">
             <i class="icon-base ti tabler-eye"></i>
           </a>
           @can('cases.manage')
-          <a href="{{ route('admin.core.cases.edit', $case) }}" class="btn btn-icon btn-sm btn-text-warning rounded" title="{{ __('Edit') }}">
+          <a href="{{ route($caseRoutePrefix . '.edit', $case) }}" class="btn btn-icon btn-sm btn-text-warning rounded" title="{{ __('Edit') }}">
             <i class="icon-base ti tabler-pencil"></i>
           </a>
-          <form action="{{ route('admin.core.cases.destroy', $case) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Delete this case?') }}');">
+          <form action="{{ route($caseRoutePrefix . '.destroy', $case) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Delete this case?') }}');">
             @csrf
             @method('DELETE')
             <button type="submit" class="btn btn-icon btn-sm btn-text-danger rounded" title="{{ __('Delete') }}">

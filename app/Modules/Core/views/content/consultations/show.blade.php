@@ -1,5 +1,7 @@
 @php
   $configData = Helper::appClasses();
+  $consultationRoutePrefix = $consultationRoutePrefix ?? 'admin.core.consultations';
+  $clientRoutePrefix = $clientRoutePrefix ?? 'admin.core.clients';
   $contentDir = app()->getLocale() === 'ar' ? 'rtl' : 'ltr';
   $statusLabels = \App\Models\Consultation::STATUSES;
   $statusClass = match($consultation->status) {
@@ -28,7 +30,7 @@
           <div>
             <h4 class="mb-1">{{ $consultation->title }}</h4>
             <p class="text-muted mb-1 small">{{ $consultation->consultation_date?->format('Y-m-d') ?? '—' }}</p>
-            <a href="{{ route('admin.core.clients.show', $consultation->client) }}" class="text-primary small">{{ $consultation->client->name }}</a>
+            <a href="{{ route($clientRoutePrefix . '.show', $consultation->client) }}" class="text-primary small">{{ $consultation->client->name }}</a>
             <span class="badge bg-label-{{ $statusClass }} ms-2">{{ __($statusLabels[$consultation->status] ?? $consultation->status) }}</span>
             @if($consultation->is_shared_with_client)
               <span class="badge bg-label-info ms-1">{{ __('Shared with client') }}</span>
@@ -38,18 +40,18 @@
         </div>
         <div class="d-flex gap-2">
           @can('consultations.manage')
-          <a href="{{ route('admin.core.consultations.edit', $consultation) }}" class="btn btn-warning btn-sm">
+          <a href="{{ route($consultationRoutePrefix . '.edit', $consultation) }}" class="btn btn-warning btn-sm">
             <i class="icon-base ti tabler-pencil {{ $contentDir === 'rtl' ? 'ms-1' : 'me-1' }}"></i>
             {{ __('Edit') }}
           </a>
-          <form action="{{ route('admin.core.consultations.destroy', $consultation) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Delete this consultation?') }}');">
+          <form action="{{ route($consultationRoutePrefix . '.destroy', $consultation) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Delete this consultation?') }}');">
             @csrf
             @method('DELETE')
             <button type="submit" class="btn btn-outline-danger btn-sm">{{ __('Delete') }}</button>
           </form>
           @endcan
-          <a href="{{ route('admin.core.clients.show', [$consultation->client, 'tab' => 'consultations']) }}" class="btn btn-outline-secondary btn-sm">{{ __('Client profile') }}</a>
-          <a href="{{ route('admin.core.consultations.index') }}" class="btn btn-outline-secondary btn-sm">{{ __('Back to list') }}</a>
+          <a href="{{ route($clientRoutePrefix . '.show', [$consultation->client, 'tab' => 'consultations']) }}" class="btn btn-outline-secondary btn-sm">{{ __('Client profile') }}</a>
+          <a href="{{ route($consultationRoutePrefix . '.index') }}" class="btn btn-outline-secondary btn-sm">{{ __('Back to list') }}</a>
         </div>
       </div>
     </div>
@@ -74,7 +76,7 @@
             <dt class="col-sm-3">{{ __('Title') }}</dt>
             <dd class="col-sm-9">{{ $consultation->title }}</dd>
             <dt class="col-sm-3">{{ __('Client') }}</dt>
-            <dd class="col-sm-9"><a href="{{ route('admin.core.clients.show', $consultation->client) }}">{{ $consultation->client->name }}</a></dd>
+            <dd class="col-sm-9"><a href="{{ route($clientRoutePrefix . '.show', $consultation->client) }}">{{ $consultation->client->name }}</a></dd>
             <dt class="col-sm-3">{{ __('Consultation date') }}</dt>
             <dd class="col-sm-9">{{ $consultation->consultation_date?->format('Y-m-d') ?? '—' }}</dd>
             <dt class="col-sm-3">{{ __('Responsible') }}</dt>
@@ -95,7 +97,7 @@
       <div class="card mb-4">
         <div class="card-header d-flex align-items-center justify-content-between">
           <h5 class="card-title mb-0">{{ __('Documents') }}</h5>
-          <a href="{{ route('admin.core.clients.documents.index', ['client' => $consultation->client, 'consultation_id' => $consultation->id]) }}" class="btn btn-primary btn-sm">
+          <a href="{{ route($clientRoutePrefix . '.documents.index', ['client' => $consultation->client, 'consultation_id' => $consultation->id]) }}" class="btn btn-primary btn-sm">
             <i class="icon-base ti tabler-folder-plus {{ $contentDir === 'rtl' ? 'ms-1' : 'me-1' }}"></i>
             {{ __('Open Document Center') }}
           </a>
@@ -106,7 +108,7 @@
             <div class="text-center text-muted py-4">
               <i class="icon-base ti tabler-folder-off icon-32px d-block mb-2 opacity-50"></i>
               <p class="mb-0">{{ __('No documents linked to this consultation.') }}</p>
-              <a href="{{ route('admin.core.clients.documents.index', ['client' => $consultation->client, 'consultation_id' => $consultation->id]) }}" class="btn btn-outline-primary btn-sm mt-2">{{ __('Add document') }}</a>
+              <a href="{{ route($clientRoutePrefix . '.documents.index', ['client' => $consultation->client, 'consultation_id' => $consultation->id]) }}" class="btn btn-outline-primary btn-sm mt-2">{{ __('Add document') }}</a>
             </div>
           @else
             <div class="table-responsive">
@@ -130,7 +132,7 @@
                       </td>
                       <td class="text-muted small">{{ $doc->created_at?->format('Y-m-d H:i') }}</td>
                       <td>
-                        <a href="{{ route('admin.core.clients.documents.download', [$consultation->client, $doc]) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('Download') }}">
+                        <a href="{{ route($clientRoutePrefix . '.documents.download', [$consultation->client, $doc]) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('Download') }}">
                           <i class="icon-base ti tabler-download"></i>
                         </a>
                       </td>
@@ -160,7 +162,7 @@
               <ul class="dropdown-menu">
                 @foreach($unlinkedThreads as $t)
                   <li>
-                    <form action="{{ route('admin.core.consultations.link-thread', $consultation) }}" method="post" class="d-inline">
+                    <form action="{{ route($consultationRoutePrefix . '.link-thread', $consultation) }}" method="post" class="d-inline">
                       @csrf
                       <input type="hidden" name="thread_id" value="{{ $t->id }}">
                       <button type="submit" class="dropdown-item">{{ $t->subject }} ({{ $t->created_at?->format('Y-m-d') }})</button>
@@ -196,18 +198,18 @@
                 <tbody>
                   @foreach($linkedThreads as $thread)
                     <tr>
-                      <td><a href="{{ route('admin.core.clients.threads.show', [$consultation->client, $thread]) }}">{{ $thread->subject }}</a></td>
+                      <td><a href="{{ route($clientRoutePrefix . '.threads.show', [$consultation->client, $thread]) }}">{{ $thread->subject }}</a></td>
                       <td class="text-muted small">{{ $thread->created_at?->format('Y-m-d H:i') }}</td>
                       <td>
                         @can('consultations.manage')
-                        <form action="{{ route('admin.core.consultations.unlink-thread', [$consultation, $thread]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Unlink this thread?') }}');">
+                        <form action="{{ route($consultationRoutePrefix . '.unlink-thread', [$consultation, $thread]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Unlink this thread?') }}');">
                           @csrf
                           <button type="submit" class="btn btn-icon btn-sm btn-text-secondary rounded" title="{{ __('Unlink') }}">
                             <i class="icon-base ti tabler-link-off"></i>
                           </button>
                         </form>
                         @endcan
-                        <a href="{{ route('admin.core.clients.threads.show', [$consultation->client, $thread]) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('View') }}">
+                        <a href="{{ route($clientRoutePrefix . '.threads.show', [$consultation->client, $thread]) }}" class="btn btn-icon btn-sm btn-text-primary rounded" title="{{ __('View') }}">
                           <i class="icon-base ti tabler-eye"></i>
                         </a>
                       </td>
@@ -228,7 +230,7 @@
 <div class="modal fade" id="createThreadModal" tabindex="-1" aria-labelledby="createThreadModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form action="{{ route('admin.core.consultations.create-thread', $consultation) }}" method="post">
+      <form action="{{ route($consultationRoutePrefix . '.create-thread', $consultation) }}" method="post">
         @csrf
         <div class="modal-header">
           <h5 class="modal-title" id="createThreadModalLabel">{{ __('Create message thread for consultation') }}</h5>

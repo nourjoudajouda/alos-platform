@@ -12,14 +12,14 @@
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
     <h4 class="fw-bold mb-0">{{ __('Edit Consultation') }}: {{ $consultation->title }}</h4>
     <div class="d-flex gap-2">
-      <a href="{{ route('admin.core.consultations.show', $consultation) }}" class="btn btn-outline-secondary btn-sm">{{ __('View') }}</a>
-      <a href="{{ route('admin.core.consultations.index') }}" class="btn btn-outline-secondary btn-sm">{{ __('Back to list') }}</a>
+      <a href="{{ route(($consultationRoutePrefix ?? 'admin.core.consultations') . '.show', $consultation) }}" class="btn btn-outline-secondary btn-sm">{{ __('View') }}</a>
+      <a href="{{ route(($consultationRoutePrefix ?? 'admin.core.consultations') . '.index') }}" class="btn btn-outline-secondary btn-sm">{{ __('Back to list') }}</a>
     </div>
   </div>
 
   <div class="card">
     <div class="card-body">
-      <form action="{{ route('admin.core.consultations.update', $consultation) }}" method="post">
+      <form action="{{ route(($consultationRoutePrefix ?? 'admin.core.consultations') . '.update', $consultation) }}" method="post">
         @csrf
         @method('PUT')
         <div class="row g-3">
@@ -96,7 +96,7 @@
         </div>
         <div class="mt-4 d-flex gap-2">
           <button type="submit" class="btn btn-primary">{{ __('Update Consultation') }}</button>
-          <a href="{{ route('admin.core.consultations.show', $consultation) }}" class="btn btn-outline-secondary">{{ __('Cancel') }}</a>
+          <a href="{{ route(($consultationRoutePrefix ?? 'admin.core.consultations') . '.show', $consultation) }}" class="btn btn-outline-secondary">{{ __('Cancel') }}</a>
         </div>
       </form>
     </div>

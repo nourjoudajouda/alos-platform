@@ -1,5 +1,7 @@
 @php
   $configData = Helper::appClasses();
+  $caseRoutePrefix = $caseRoutePrefix ?? 'admin.core.cases';
+  $clientRoutePrefix = $clientRoutePrefix ?? 'admin.core.clients';
   $contentDir = app()->getLocale() === 'ar' ? 'rtl' : 'ltr';
   $activeTab = request('tab', 'overview');
   $tabs = ['overview', 'sessions', 'documents', 'messages', 'activity'];
@@ -29,25 +31,25 @@
           <div>
             <h4 class="mb-1">{{ $case->case_number }}</h4>
             <p class="text-muted mb-1 small">{{ $case->case_type ?? '—' }} @if($case->court_name) · {{ $case->court_name }} @endif</p>
-            <a href="{{ route('admin.core.clients.show', $case->client) }}" class="text-primary small">{{ $case->client->name }}</a>
+            <a href="{{ route($clientRoutePrefix . '.show', $case->client) }}" class="text-primary small">{{ $case->client->name }}</a>
             <span class="badge bg-label-{{ $statusClass }} ms-2">{{ __($statusLabels[$case->status] ?? $case->status) }}</span>
             <span class="text-muted small ms-2">{{ __('Updated') }} {{ $case->updated_at?->format('Y-m-d') }}</span>
           </div>
         </div>
         <div class="d-flex gap-2">
           @can('cases.manage')
-          <a href="{{ route('admin.core.cases.edit', $case) }}" class="btn btn-warning btn-sm">
+          <a href="{{ route($caseRoutePrefix . '.edit', $case) }}" class="btn btn-warning btn-sm">
             <i class="icon-base ti tabler-pencil {{ $contentDir === 'rtl' ? 'ms-1' : 'me-1' }}"></i>
             {{ __('Edit') }}
           </a>
-          <form action="{{ route('admin.core.cases.destroy', $case) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Delete this case?') }}');">
+          <form action="{{ route($caseRoutePrefix . '.destroy', $case) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('Delete this case?') }}');">
             @csrf
             @method('DELETE')
             <button type="submit" class="btn btn-outline-danger btn-sm">{{ __('Delete') }}</button>
           </form>
           @endcan
-          <a href="{{ route('admin.core.clients.show', [$case->client, 'tab' => 'cases']) }}" class="btn btn-outline-secondary btn-sm">{{ __('Client profile') }}</a>
-          <a href="{{ route('admin.core.cases.index') }}" class="btn btn-outline-secondary btn-sm">{{ __('Back to list') }}</a>
+          <a href="{{ route($clientRoutePrefix . '.show', [$case->client, 'tab' => 'cases']) }}" class="btn btn-outline-secondary btn-sm">{{ __('Client profile') }}</a>
+          <a href="{{ route($caseRoutePrefix . '.index') }}" class="btn btn-outline-secondary btn-sm">{{ __('Back to list') }}</a>
         </div>
       </div>
     </div>
@@ -63,19 +65,19 @@
   {{-- Case profile tabs: Overview | Sessions | Documents | Messages | Activity Log --}}
   <ul class="nav nav-tabs nav-fill mb-3" id="caseProfileTabs" role="tablist">
     <li class="nav-item" role="presentation">
-      <a class="nav-link {{ $activeTab === 'overview' ? 'active' : '' }}" href="{{ route('admin.core.cases.show', ['case' => $case, 'tab' => 'overview']) }}" role="tab">{{ __('Overview') }}</a>
+      <a class="nav-link {{ $activeTab === 'overview' ? 'active' : '' }}" href="{{ route($caseRoutePrefix . '.show', ['case' => $case, 'tab' => 'overview']) }}" role="tab">{{ __('Overview') }}</a>
     </li>
     <li class="nav-item" role="presentation">
-      <a class="nav-link {{ $activeTab === 'sessions' ? 'active' : '' }}" href="{{ route('admin.core.cases.show', ['case' => $case, 'tab' => 'sessions']) }}" role="tab">{{ __('Sessions') }}</a>
+      <a class="nav-link {{ $activeTab === 'sessions' ? 'active' : '' }}" href="{{ route($caseRoutePrefix . '.show', ['case' => $case, 'tab' => 'sessions']) }}" role="tab">{{ __('Sessions') }}</a>
     </li>
     <li class="nav-item" role="presentation">
-      <a class="nav-link {{ $activeTab === 'documents' ? 'active' : '' }}" href="{{ route('admin.core.cases.show', ['case' => $case, 'tab' => 'documents']) }}" role="tab">{{ __('Documents') }}</a>
+      <a class="nav-link {{ $activeTab === 'documents' ? 'active' : '' }}" href="{{ route($caseRoutePrefix . '.show', ['case' => $case, 'tab' => 'documents']) }}" role="tab">{{ __('Documents') }}</a>
     </li>
     <li class="nav-item" role="presentation">
-      <a class="nav-link {{ $activeTab === 'messages' ? 'active' : '' }}" href="{{ route('admin.core.cases.show', ['case' => $case, 'tab' => 'messages']) }}" role="tab">{{ __('Messages') }}</a>
+      <a class="nav-link {{ $activeTab === 'messages' ? 'active' : '' }}" href="{{ route($caseRoutePrefix . '.show', ['case' => $case, 'tab' => 'messages']) }}" role="tab">{{ __('Messages') }}</a>
     </li>
     <li class="nav-item" role="presentation">
-      <a class="nav-link {{ $activeTab === 'activity' ? 'active' : '' }}" href="{{ route('admin.core.cases.show', ['case' => $case, 'tab' => 'activity']) }}" role="tab">{{ __('Activity Log') }}</a>
+      <a class="nav-link {{ $activeTab === 'activity' ? 'active' : '' }}" href="{{ route($caseRoutePrefix . '.show', ['case' => $case, 'tab' => 'activity']) }}" role="tab">{{ __('Activity Log') }}</a>
     </li>
   </ul>
 
@@ -91,7 +93,7 @@
             <dt class="col-sm-3">{{ __('Case number') }}</dt>
             <dd class="col-sm-9">{{ $case->case_number }}</dd>
             <dt class="col-sm-3">{{ __('Client') }}</dt>
-            <dd class="col-sm-9"><a href="{{ route('admin.core.clients.show', $case->client) }}">{{ $case->client->name }}</a></dd>
+            <dd class="col-sm-9"><a href="{{ route($clientRoutePrefix . '.show', $case->client) }}">{{ $case->client->name }}</a></dd>
             <dt class="col-sm-3">{{ __('Case type') }}</dt>
             <dd class="col-sm-9">{{ $case->case_type ?? '—' }}</dd>
             <dt class="col-sm-3">{{ __('Court name') }}</dt>
@@ -117,17 +119,17 @@
         <div class="card-header d-flex align-items-center justify-content-between">
           <h5 class="card-title mb-0">{{ __('Court Hearings') }}</h5>
           <div class="d-flex gap-2">
-            <a href="{{ route('admin.core.cases.sessions.calendar', $case) }}" class="btn btn-outline-primary btn-sm">
+            <a href="{{ route($caseRoutePrefix . '.sessions.calendar', $case) }}" class="btn btn-outline-primary btn-sm">
               <i class="icon-base ti tabler-calendar {{ $contentDir === 'rtl' ? 'ms-1' : 'me-1' }}"></i>
               {{ __('Calendar') }}
             </a>
             @can('cases.manage')
-            <a href="{{ route('admin.core.cases.sessions.create', $case) }}" class="btn btn-primary btn-sm">
+            <a href="{{ route($caseRoutePrefix . '.sessions.create', $case) }}" class="btn btn-primary btn-sm">
               <i class="icon-base ti tabler-plus {{ $contentDir === 'rtl' ? 'ms-1' : 'me-1' }}"></i>
               {{ __('Add Session') }}
             </a>
             @endcan
-            <a href="{{ route('admin.core.cases.sessions.index', $case) }}" class="btn btn-outline-secondary btn-sm">{{ __('View all') }}</a>
+            <a href="{{ route($caseRoutePrefix . '.sessions.index', $case) }}" class="btn btn-outline-secondary btn-sm">{{ __('View all') }}</a>
           </div>
         </div>
         <div class="card-body">
@@ -141,7 +143,7 @@
               <i class="icon-base ti tabler-calendar-event icon-32px d-block mb-2 opacity-50"></i>
               <p class="mb-0">{{ __('No sessions yet.') }}</p>
               @can('cases.manage')
-                <a href="{{ route('admin.core.cases.sessions.create', $case) }}" class="btn btn-primary btn-sm mt-2">{{ __('Add Session') }}</a>
+                <a href="{{ route($caseRoutePrefix . '.sessions.create', $case) }}" class="btn btn-primary btn-sm mt-2">{{ __('Add Session') }}</a>
               @endcan
             </div>
           @else
@@ -167,7 +169,7 @@
                       <td><span class="badge bg-label-{{ $sc }}">{{ __($sessionStatusLabels[$s->status] ?? $s->status) }}</span></td>
                       @can('cases.manage')
                       <td class="text-end">
-                        <a href="{{ route('admin.core.cases.sessions.edit', [$case, $s]) }}" class="btn btn-icon btn-sm btn-text-primary rounded"><i class="icon-base ti tabler-pencil"></i></a>
+                        <a href="{{ route($caseRoutePrefix . '.sessions.edit', [$case, $s]) }}" class="btn btn-icon btn-sm btn-text-primary rounded"><i class="icon-base ti tabler-pencil"></i></a>
                       </td>
                       @endcan
                     </tr>
@@ -175,7 +177,7 @@
                 </tbody>
               </table>
             </div>
-            <a href="{{ route('admin.core.cases.sessions.index', $case) }}" class="btn btn-outline-secondary btn-sm">{{ __('View all sessions') }}</a>
+            <a href="{{ route($caseRoutePrefix . '.sessions.index', $case) }}" class="btn btn-outline-secondary btn-sm">{{ __('View all sessions') }}</a>
           @endif
         </div>
       </div>
@@ -186,7 +188,7 @@
       <div class="card">
         <div class="card-header d-flex align-items-center justify-content-between">
           <h5 class="card-title mb-0">{{ __('Documents') }}</h5>
-          <a href="{{ route('admin.core.clients.documents.index', ['client' => $case->client, 'case_id' => $case->id]) }}" class="btn btn-primary btn-sm">
+          <a href="{{ route($clientRoutePrefix . '.documents.index', ['client' => $case->client, 'case_id' => $case->id]) }}" class="btn btn-primary btn-sm">
             <i class="icon-base ti tabler-folder {{ $contentDir === 'rtl' ? 'ms-1' : 'me-1' }}"></i>
             {{ __('Open Document Center') }}
           </a>

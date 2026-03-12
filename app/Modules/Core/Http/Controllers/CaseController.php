@@ -19,9 +19,25 @@ use Illuminate\View\View;
 /**
  * Case management. User sees cases only for clients they have team access to.
  * Permissions: cases.view (view/list), cases.manage (create/edit/delete).
+ * ALOS-S1-31B — When used under company.* routes: office layout and company.cases.* redirects.
  */
 class CaseController extends Controller
 {
+    protected function isCompanyContext(): bool
+    {
+        return str_starts_with(request()->route()->getName() ?? '', 'company.');
+    }
+
+    protected function caseRoutePrefix(): string
+    {
+        return $this->isCompanyContext() ? 'company.cases' : 'admin.core.cases';
+    }
+
+    protected function companyPageConfigs(): array
+    {
+        return $this->isCompanyContext() ? ['myLayout' => 'office', 'customizerHide' => true] : [];
+    }
+
     private function authorizeClient(Client $client): void
     {
         $user = auth()->user();
@@ -89,6 +105,9 @@ class CaseController extends Controller
             'filterClientId' => $request->get('client_id', ''),
             'filterStatus' => $request->get('status', ''),
             'search' => $request->get('search', ''),
+            'caseRoutePrefix' => $this->caseRoutePrefix(),
+            'clientRoutePrefix' => $this->isCompanyContext() ? 'company.clients' : 'admin.core.clients',
+            'pageConfigs' => $this->companyPageConfigs(),
         ]);
     }
 
@@ -121,6 +140,9 @@ class CaseController extends Controller
             'preselectedClientId' => $preselectedClientId,
             'assignableUsers' => $assignableUsers,
             'defaultCaseNumber' => $defaultCaseNumber,
+            'caseRoutePrefix' => $this->caseRoutePrefix(),
+            'clientRoutePrefix' => $this->isCompanyContext() ? 'company.clients' : 'admin.core.clients',
+            'pageConfigs' => $this->companyPageConfigs(),
         ]);
     }
 
@@ -145,7 +167,7 @@ class CaseController extends Controller
                 app(PlanLimitService::class)->ensureFeature($tenant, PlanLimitService::FEATURE_CASE_MANAGEMENT);
                 app(PlanLimitService::class)->checkCaseLimit($tenant);
             } catch (\RuntimeException $e) {
-                return redirect()->route('admin.core.cases.create', ['client_id' => $client->id])->withInput()->with('error', $e->getMessage());
+                return redirect()->route($this->caseRoutePrefix() . '.create', ['client_id' => $client->id])->withInput()->with('error', $e->getMessage());
             }
         }
 
@@ -170,7 +192,7 @@ class CaseController extends Controller
         App::make(AuditLogService::class)->recordAudit(\App\Models\AuditLog::ACTION_CREATE_CASE, \App\Models\AuditLog::ENTITY_CASE, $case->id, [], [], $client->tenant_id);
 
         return redirect()
-            ->route('admin.core.cases.show', $case)
+            ->route($this->caseRoutePrefix() . '.show', $case)
             ->with('success', __('Case created successfully.'));
     }
 
@@ -179,7 +201,12 @@ class CaseController extends Controller
         $this->authorizeCase($case);
         $case->load(['client', 'responsibleLawyer', 'tenant']);
 
-        return view('core::content.cases.show', ['case' => $case]);
+        return view('core::content.cases.show', [
+            'case' => $case,
+            'caseRoutePrefix' => $this->caseRoutePrefix(),
+            'clientRoutePrefix' => $this->isCompanyContext() ? 'company.clients' : 'admin.core.clients',
+            'pageConfigs' => $this->companyPageConfigs(),
+        ]);
     }
 
     public function edit(CaseModel $case): View
@@ -197,6 +224,9 @@ class CaseController extends Controller
             'case' => $case,
             'clients' => $clients,
             'assignableUsers' => $assignableUsers,
+            'caseRoutePrefix' => $this->caseRoutePrefix(),
+            'clientRoutePrefix' => $this->isCompanyContext() ? 'company.clients' : 'admin.core.clients',
+            'pageConfigs' => $this->companyPageConfigs(),
         ]);
     }
 
@@ -208,7 +238,7 @@ class CaseController extends Controller
             try {
                 app(PlanLimitService::class)->ensureFeature($tenant, PlanLimitService::FEATURE_CASE_MANAGEMENT);
             } catch (\RuntimeException $e) {
-                return redirect()->route('admin.core.cases.edit', $case)->withInput()->with('error', $e->getMessage());
+                return redirect()->route($this->caseRoutePrefix() . '.edit', $case)->withInput()->with('error', $e->getMessage());
             }
         }
         $clientIds = $this->accessibleClientIds();
@@ -248,7 +278,7 @@ class CaseController extends Controller
         \App\Notifications\InApp\CaseUpdatedNotification::send($case, $oldStatus !== $validated['status'] ? __('Case status changed to :status.', ['status' => $validated['status']]) : '');
 
         return redirect()
-            ->route('admin.core.cases.show', $case)
+            ->route($this->caseRoutePrefix() . '.show', $case)
             ->with('success', __('Case updated successfully.'));
     }
 
@@ -260,7 +290,7 @@ class CaseController extends Controller
             try {
                 app(PlanLimitService::class)->ensureFeature($tenant, PlanLimitService::FEATURE_CASE_MANAGEMENT);
             } catch (\RuntimeException $e) {
-                return redirect()->route('admin.core.cases.show', $case)->with('error', $e->getMessage());
+                return redirect()->route($this->caseRoutePrefix() . '.show', $case)->with('error', $e->getMessage());
             }
         }
         $client = $case->client;
@@ -273,7 +303,7 @@ class CaseController extends Controller
         }
 
         return redirect()
-            ->route('admin.core.clients.show', [$client, 'tab' => 'cases'])
+            ->route($this->isCompanyContext() ? 'company.clients.show' : 'admin.core.clients.show', [$client, 'tab' => 'cases'])
             ->with('success', __('Case deleted successfully.'));
     }
 }

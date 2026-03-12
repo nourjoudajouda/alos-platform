@@ -32,6 +32,8 @@ Route::prefix('company')->name('company.')->middleware(['auth', 'tenant_staff'])
     Route::put('/settings/branding', [\App\Http\Controllers\Office\BrandingSettingsController::class, 'update'])->name('settings.branding.update');
     // ALOS-S1-29 — Subscription (plan & usage)
     Route::get('/settings/subscription', [\App\Http\Controllers\Office\SubscriptionSettingsController::class, 'show'])->name('settings.subscription.show');
+    // ALOS-S1-31B — Clients, Cases, Consultations (tenant-scoped; no company picker)
+    require base_path('routes/company.php');
 });
 
 // ALOS-S1-08 — Client Portal (separate login + dashboard)

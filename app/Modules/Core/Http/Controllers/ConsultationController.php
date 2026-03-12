@@ -21,9 +21,25 @@ use Illuminate\View\View;
  * ALOS-S1-14 — Consultations Management.
  * User sees consultations only for clients they have team access to.
  * Permissions: consultations.view, consultations.manage.
+ * ALOS-S1-31B — When used under company.* routes: office layout and company.consultations.* redirects.
  */
 class ConsultationController extends Controller
 {
+    protected function isCompanyContext(): bool
+    {
+        return str_starts_with(request()->route()->getName() ?? '', 'company.');
+    }
+
+    protected function consultationRoutePrefix(): string
+    {
+        return $this->isCompanyContext() ? 'company.consultations' : 'admin.core.consultations';
+    }
+
+    protected function companyPageConfigs(): array
+    {
+        return $this->isCompanyContext() ? ['myLayout' => 'office', 'customizerHide' => true] : [];
+    }
+
     private function authorizeClient(Client $client): void
     {
         $user = auth()->user();
@@ -91,6 +107,9 @@ class ConsultationController extends Controller
             'filterClientId' => $request->get('client_id', ''),
             'filterStatus' => $request->get('status', ''),
             'search' => $request->get('search', ''),
+            'consultationRoutePrefix' => $this->consultationRoutePrefix(),
+            'clientRoutePrefix' => $this->isCompanyContext() ? 'company.clients' : 'admin.core.clients',
+            'pageConfigs' => $this->companyPageConfigs(),
         ]);
     }
 
@@ -112,6 +131,9 @@ class ConsultationController extends Controller
             'clients' => $clients,
             'preselectedClientId' => $preselectedClientId,
             'assignableUsers' => $assignableUsers,
+            'consultationRoutePrefix' => $this->consultationRoutePrefix(),
+            'clientRoutePrefix' => $this->isCompanyContext() ? 'company.clients' : 'admin.core.clients',
+            'pageConfigs' => $this->companyPageConfigs(),
         ]);
     }
 
@@ -148,7 +170,7 @@ class ConsultationController extends Controller
         \App\Notifications\InApp\ConsultationNotification::send($consultation, true);
 
         return redirect()
-            ->route('admin.core.consultations.show', $consultation)
+            ->route($this->consultationRoutePrefix() . '.show', $consultation)
             ->with('success', __('Consultation created successfully.'));
     }
 
@@ -167,6 +189,9 @@ class ConsultationController extends Controller
         return view('core::content.consultations.show', [
             'consultation' => $consultation,
             'availableThreads' => $availableThreads,
+            'consultationRoutePrefix' => $this->consultationRoutePrefix(),
+            'clientRoutePrefix' => $this->isCompanyContext() ? 'company.clients' : 'admin.core.clients',
+            'pageConfigs' => $this->companyPageConfigs(),
         ]);
     }
 
@@ -185,6 +210,9 @@ class ConsultationController extends Controller
             'consultation' => $consultation,
             'clients' => $clients,
             'assignableUsers' => $assignableUsers,
+            'consultationRoutePrefix' => $this->consultationRoutePrefix(),
+            'clientRoutePrefix' => $this->isCompanyContext() ? 'company.clients' : 'admin.core.clients',
+            'pageConfigs' => $this->companyPageConfigs(),
         ]);
     }
 
@@ -223,7 +251,7 @@ class ConsultationController extends Controller
         \App\Notifications\InApp\ConsultationNotification::send($consultation, false);
 
         return redirect()
-            ->route('admin.core.consultations.show', $consultation)
+            ->route($this->consultationRoutePrefix() . '.show', $consultation)
             ->with('success', __('Consultation updated successfully.'));
     }
 
@@ -236,7 +264,7 @@ class ConsultationController extends Controller
         $consultation->delete();
 
         return redirect()
-            ->route('admin.core.clients.show', [$client, 'tab' => 'consultations'])
+            ->route($this->isCompanyContext() ? 'company.clients.show' : 'admin.core.clients.show', [$client, 'tab' => 'consultations'])
             ->with('success', __('Consultation deleted successfully.'));
     }
 
@@ -259,7 +287,7 @@ class ConsultationController extends Controller
         $thread->update(['consultation_id' => $consultation->id]);
 
         return redirect()
-            ->route('admin.core.consultations.show', $consultation)
+            ->route($this->consultationRoutePrefix() . '.show', $consultation)
             ->with('success', __('Message thread linked successfully.'));
     }
 
@@ -276,7 +304,7 @@ class ConsultationController extends Controller
         $thread->update(['consultation_id' => null]);
 
         return redirect()
-            ->route('admin.core.consultations.show', $consultation)
+            ->route($this->consultationRoutePrefix() . '.show', $consultation)
             ->with('success', __('Message thread unlinked.'));
     }
 
@@ -298,7 +326,7 @@ class ConsultationController extends Controller
         ]);
 
         return redirect()
-            ->route('admin.core.clients.threads.show', [$consultation->client, $thread])
+            ->route(($this->isCompanyContext() ? 'company.clients' : 'admin.core.clients') . '.threads.show', [$consultation->client, $thread])
             ->with('success', __('Message thread created for this consultation.'));
     }
 }

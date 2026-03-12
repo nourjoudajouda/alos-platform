@@ -8,7 +8,7 @@
     },
     {
       "url": "/admin/tenants",
-      "name": "Tenants",
+      "name": "Law Firms",
       "icon": "menu-icon icon-base ti tabler-building-store",
       "slug": "core.tenants"
     },
@@ -19,16 +19,10 @@
       "slug": "core.subscription-plans"
     },
     {
-      "url": "/admin/clients",
-      "name": "Clients",
-      "icon": "menu-icon icon-base ti tabler-users-group",
-      "slug": "core.clients"
-    },
-    {
-      "url": "/admin/consultations",
-      "name": "Consultations",
-      "icon": "menu-icon icon-base ti tabler-calendar-event",
-      "slug": "core.consultations"
+      "url": "/admin/contracts",
+      "name": "Contracts",
+      "icon": "menu-icon icon-base ti tabler-file-contract",
+      "slug": "core.contracts"
     },
     {
       "url": "/admin/roles",
@@ -43,16 +37,16 @@
       "slug": "core.permissions"
     },
     {
-      "url": "/admin/reminder-rules",
-      "name": "Reminder Rules",
-      "icon": "menu-icon icon-base ti tabler-bell",
-      "slug": "core.reminder-rules"
+      "url": "/admin/audit-logs",
+      "name": "Audit Logs",
+      "icon": "menu-icon icon-base ti tabler-history",
+      "slug": "core.audit-logs"
     },
     {
-      "url": "/identity/users",
-      "name": "Internal Users",
-      "icon": "menu-icon icon-base ti tabler-users",
-      "slug": "identity.users"
+      "url": "/admin/system-settings",
+      "name": "System Settings",
+      "icon": "menu-icon icon-base ti tabler-settings",
+      "slug": "core.system-settings"
     }
   ]
 }

@@ -1,5 +1,6 @@
 @php
   $configData = Helper::appClasses();
+  $clientRoutePrefix = $clientRoutePrefix ?? 'admin.core.clients';
   $initials = strtoupper(mb_substr(preg_replace('/[^a-zA-Z0-9\p{Arabic}]/u', '', $client->name), 0, 2) ?: 'CL');
   if (mb_strlen($initials) > 2) $initials = mb_substr($initials, 0, 2);
   $contentDir = app()->getLocale() === 'ar' ? 'rtl' : 'ltr';
@@ -50,11 +51,11 @@
           </div>
         </div>
         <div class="d-flex gap-2">
-          <a href="{{ route('admin.core.clients.edit', $client) }}" class="btn btn-warning btn-sm">
+          <a href="{{ route($clientRoutePrefix . '.edit', $client) }}" class="btn btn-warning btn-sm">
             <i class="icon-base ti tabler-pencil {{ $contentDir === 'rtl' ? 'ms-1' : 'me-1' }}"></i>
             {{ __('Edit') }}
           </a>
-          <a href="{{ route('admin.core.clients.index') }}" class="btn btn-outline-secondary btn-sm">{{ __('Back to list') }}</a>
+          <a href="{{ route($clientRoutePrefix . '.index') }}" class="btn btn-outline-secondary btn-sm">{{ __('Back to list') }}</a>
         </div>
       </div>
     </div>
@@ -63,28 +64,28 @@
   {{-- Profile tabs: Overview | Cases | Consultations | Messages | Documents | Team Access --}}
   <ul class="nav nav-tabs nav-fill mb-3" id="clientProfileTabs" role="tablist">
     <li class="nav-item" role="presentation">
-      <a class="nav-link {{ $activeTab === 'overview' ? 'active' : '' }}" href="{{ route('admin.core.clients.show', ['client' => $client, 'tab' => 'overview']) }}" role="tab">{{ __('Overview') }}</a>
+      <a class="nav-link {{ $activeTab === 'overview' ? 'active' : '' }}" href="{{ route($clientRoutePrefix . '.show', ['client' => $client, 'tab' => 'overview']) }}" role="tab">{{ __('Overview') }}</a>
     </li>
     <li class="nav-item" role="presentation">
-      <a class="nav-link {{ $activeTab === 'cases' ? 'active' : '' }}" href="{{ route('admin.core.clients.show', ['client' => $client, 'tab' => 'cases']) }}" role="tab">{{ __('Cases') }}</a>
+      <a class="nav-link {{ $activeTab === 'cases' ? 'active' : '' }}" href="{{ route($clientRoutePrefix . '.show', ['client' => $client, 'tab' => 'cases']) }}" role="tab">{{ __('Cases') }}</a>
     </li>
     <li class="nav-item" role="presentation">
-      <a class="nav-link {{ $activeTab === 'consultations' ? 'active' : '' }}" href="{{ route('admin.core.clients.show', ['client' => $client, 'tab' => 'consultations']) }}" role="tab">{{ __('Consultations') }}</a>
+      <a class="nav-link {{ $activeTab === 'consultations' ? 'active' : '' }}" href="{{ route($clientRoutePrefix . '.show', ['client' => $client, 'tab' => 'consultations']) }}" role="tab">{{ __('Consultations') }}</a>
     </li>
     <li class="nav-item" role="presentation">
-      <a class="nav-link {{ $activeTab === 'messages' ? 'active' : '' }}" href="{{ route('admin.core.clients.show', ['client' => $client, 'tab' => 'messages']) }}" role="tab">{{ __('Messages') }}</a>
+      <a class="nav-link {{ $activeTab === 'messages' ? 'active' : '' }}" href="{{ route($clientRoutePrefix . '.show', ['client' => $client, 'tab' => 'messages']) }}" role="tab">{{ __('Messages') }}</a>
     </li>
     <li class="nav-item" role="presentation">
-      <a class="nav-link {{ $activeTab === 'documents' ? 'active' : '' }}" href="{{ route('admin.core.clients.show', ['client' => $client, 'tab' => 'documents']) }}" role="tab">{{ __('Documents') }}</a>
+      <a class="nav-link {{ $activeTab === 'documents' ? 'active' : '' }}" href="{{ route($clientRoutePrefix . '.show', ['client' => $client, 'tab' => 'documents']) }}" role="tab">{{ __('Documents') }}</a>
     </li>
     <li class="nav-item" role="presentation">
-      <a class="nav-link {{ $activeTab === 'reports' ? 'active' : '' }}" href="{{ route('admin.core.clients.reports.index', $client) }}" role="tab">{{ __('Reports') }}</a>
+      <a class="nav-link {{ $activeTab === 'reports' ? 'active' : '' }}" href="{{ route($clientRoutePrefix . '.reports.index', $client) }}" role="tab">{{ __('Reports') }}</a>
     </li>
     <li class="nav-item" role="presentation">
-      <a class="nav-link {{ $activeTab === 'team-access' ? 'active' : '' }}" href="{{ route('admin.core.clients.show', ['client' => $client, 'tab' => 'team-access']) }}" role="tab">{{ __('Team Access') }}</a>
+      <a class="nav-link {{ $activeTab === 'team-access' ? 'active' : '' }}" href="{{ route($clientRoutePrefix . '.show', ['client' => $client, 'tab' => 'team-access']) }}" role="tab">{{ __('Team Access') }}</a>
     </li>
     <li class="nav-item" role="presentation">
-      <a class="nav-link {{ $activeTab === 'portal' ? 'active' : '' }}" href="{{ route('admin.core.clients.show', ['client' => $client, 'tab' => 'portal']) }}" role="tab">{{ __('Portal') }}</a>
+      <a class="nav-link {{ $activeTab === 'portal' ? 'active' : '' }}" href="{{ route($clientRoutePrefix . '.show', ['client' => $client, 'tab' => 'portal']) }}" role="tab">{{ __('Portal') }}</a>
     </li>
   </ul>
 
@@ -253,7 +254,7 @@
       <div class="card">
         <div class="card-header d-flex align-items-center justify-content-between">
           <h5 class="card-title mb-0">{{ __('Messages') }}</h5>
-          <a href="{{ route('admin.core.clients.threads.index', $client) }}" class="btn btn-primary btn-sm">
+          <a href="{{ route($clientRoutePrefix . '.threads.index', $client) }}" class="btn btn-primary btn-sm">
             <i class="icon-base ti tabler-message {{ $contentDir === 'rtl' ? 'ms-1' : 'me-1' }}"></i>
             {{ __('View conversations') }}
           </a>
@@ -271,7 +272,7 @@
       <div class="card">
         <div class="card-header d-flex align-items-center justify-content-between">
           <h5 class="card-title mb-0">{{ __('Documents') }}</h5>
-          <a href="{{ route('admin.core.clients.documents.index', $client) }}" class="btn btn-primary btn-sm">
+          <a href="{{ route($clientRoutePrefix . '.documents.index', $client) }}" class="btn btn-primary btn-sm">
             <i class="icon-base ti tabler-folder {{ $contentDir === 'rtl' ? 'ms-1' : 'me-1' }}"></i>
             {{ __('Open Document Center') }}
           </a>
@@ -300,7 +301,7 @@
               {{ __('No users in this office. Add internal users to the tenant first, then assign them here.') }}
             </div>
           @else
-            <form action="{{ route('admin.core.clients.team-access.update', $client) }}" method="post">
+            <form action="{{ route($clientRoutePrefix . '.team-access.update', $client) }}" method="post">
               @csrf
               @method('PUT')
               <div class="row g-3">
@@ -355,7 +356,7 @@
             <div class="alert alert-danger">{{ session('error') }}</div>
           @endif
           @if (!$portalUser)
-            <form action="{{ route('admin.core.clients.portal-user.store', $client) }}" method="post" id="portal-create-form">
+            <form action="{{ route($clientRoutePrefix . '.portal-user.store', $client) }}" method="post" id="portal-create-form">
               @csrf
               <div class="row g-3">
                 <div class="col-md-6">
@@ -407,14 +408,14 @@
                 <span class="text-muted small ms-2">{{ __('Permission') }}: {{ $portalPermissions[$portalUser->portal_permission] ?? $portalUser->portal_permission }}</span>
                 <div class="form-text small mt-1">{{ __('Summary above shows saved data. Change the form below and click Update to save.') }}</div>
               </div>
-              <form action="{{ route('admin.core.clients.portal-user.toggle', $client) }}" method="post" class="d-inline">
+              <form action="{{ route($clientRoutePrefix . '.portal-user.toggle', $client) }}" method="post" class="d-inline">
                 @csrf
                 <button type="submit" class="btn btn-sm {{ $portalUser->portal_active ? 'btn-warning' : 'btn-success' }}">
                   {{ $portalUser->portal_active ? __('Disable account') : __('Enable account') }}
                 </button>
               </form>
             </div>
-            <form action="{{ route('admin.core.clients.portal-user.update', $client) }}" method="post" id="portal-update-form">
+            <form action="{{ route($clientRoutePrefix . '.portal-user.update', $client) }}" method="post" id="portal-update-form">
               @csrf
               @method('PUT')
               @if ($errors->any())

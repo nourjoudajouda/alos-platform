@@ -11,7 +11,7 @@
 <div class="container-xxl flex-grow-1 container-p-y" dir="{{ $contentDir }}">
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
     <h4 class="fw-bold mb-0">{{ __('Add Consultation') }}</h4>
-    <a href="{{ route('admin.core.consultations.index') }}" class="btn btn-outline-secondary btn-sm">
+    <a href="{{ route(($consultationRoutePrefix ?? 'admin.core.consultations') . '.index') }}" class="btn btn-outline-secondary btn-sm">
       <i class="icon-base ti tabler-arrow-right {{ $contentDir === 'rtl' ? 'ms-1' : 'me-1' }}"></i>
       {{ __('Back to list') }}
     </a>
@@ -19,7 +19,7 @@
 
   <div class="card">
     <div class="card-body">
-      <form action="{{ route('admin.core.consultations.store') }}" method="post">
+      <form action="{{ route(($consultationRoutePrefix ?? 'admin.core.consultations') . '.store') }}" method="post">
         @csrf
         <div class="row g-3">
           <div class="col-md-6">
@@ -96,7 +96,7 @@
         </div>
         <div class="mt-4 d-flex gap-2">
           <button type="submit" class="btn btn-primary">{{ __('Create Consultation') }}</button>
-          <a href="{{ route('admin.core.consultations.index') }}" class="btn btn-outline-secondary">{{ __('Cancel') }}</a>
+          <a href="{{ route(($consultationRoutePrefix ?? 'admin.core.consultations') . '.index') }}" class="btn btn-outline-secondary">{{ __('Cancel') }}</a>
         </div>
       </form>
     </div>
