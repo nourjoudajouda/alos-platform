@@ -72,19 +72,29 @@ class ClientDashboardService
 
     protected function metrics(int $clientId): array
     {
+        $tenantId = $this->user->tenant_id;
+
         $casesQuery = CaseModel::where('client_id', $clientId);
+        if ($tenantId) {
+            $casesQuery->where('tenant_id', $tenantId);
+        }
         $casesCount = (clone $casesQuery)->count();
         $openCasesCount = (clone $casesQuery)->where('status', CaseModel::STATUS_OPEN)->count();
 
-        $consultationsCount = Consultation::where('client_id', $clientId)
-            ->where('is_shared_with_client', true)
-            ->count();
+        $consultationsQuery = Consultation::where('client_id', $clientId)->where('is_shared_with_client', true);
+        if ($tenantId) {
+            $consultationsQuery->where('tenant_id', $tenantId);
+        }
+        $consultationsCount = $consultationsQuery->count();
 
-        $sharedDocumentsCount = Document::where('client_id', $clientId)
-            ->where('visibility', Document::VISIBILITY_SHARED)
-            ->count();
+        $sharedDocsQuery = Document::where('client_id', $clientId)->where('visibility', Document::VISIBILITY_SHARED);
+        if ($tenantId) {
+            $sharedDocsQuery->where('tenant_id', $tenantId);
+        }
+        $sharedDocumentsCount = $sharedDocsQuery->count();
 
-        $threadIds = MessageThread::where('client_id', $clientId)->pluck('id')->all();
+        $threadQuery = MessageThread::where('client_id', $clientId);
+        $threadIds = $threadQuery->pluck('id')->all();
         $messageThreadsCount = count($threadIds);
         $unreadApprox = 0;
         if ($threadIds) {
@@ -94,10 +104,14 @@ class ClientDashboardService
                 ->count();
         }
 
-        $reportsCount = GeneratedReport::where('client_id', $clientId)->count();
+        $reportsQuery = GeneratedReport::where('client_id', $clientId);
+        if ($tenantId) {
+            $reportsQuery->where('tenant_id', $tenantId);
+        }
+        $reportsCount = $reportsQuery->count();
 
         $upcomingSessionsCount = CaseSession::query()
-            ->whereHas('case', fn ($q) => $q->where('client_id', $clientId))
+            ->whereHas('case', fn ($q) => $q->where('client_id', $clientId)->when($tenantId, fn ($q2) => $q2->where('tenant_id', $tenantId)))
             ->where('status', CaseSession::STATUS_SCHEDULED)
             ->where('session_date', '>=', now()->startOfDay())
             ->count();
@@ -117,8 +131,10 @@ class ClientDashboardService
     /** My Cases — client's cases only (case number, type, status, last update). */
     protected function myCases(int $clientId, int $limit = 8): array
     {
+        $tenantId = $this->user->tenant_id;
         return CaseModel::query()
             ->where('client_id', $clientId)
+            ->when($tenantId, fn ($q) => $q->where('tenant_id', $tenantId))
             ->orderByDesc('updated_at')
             ->limit($limit)
             ->get()
@@ -177,9 +193,11 @@ class ClientDashboardService
     /** Shared Documents — visibility = shared only. */
     protected function sharedDocuments(int $clientId, int $limit = 6): array
     {
+        $tenantId = $this->user->tenant_id;
         return Document::query()
             ->where('client_id', $clientId)
             ->where('visibility', Document::VISIBILITY_SHARED)
+            ->when($tenantId, fn ($q) => $q->where('tenant_id', $tenantId))
             ->orderByDesc('updated_at')
             ->limit($limit)
             ->get()
@@ -196,9 +214,10 @@ class ClientDashboardService
     /** Upcoming Sessions — scheduled sessions for this client's cases. */
     protected function upcomingSessions(int $clientId, int $limit = 6): array
     {
+        $tenantId = $this->user->tenant_id;
         return CaseSession::query()
             ->with(['case'])
-            ->whereHas('case', fn ($q) => $q->where('client_id', $clientId))
+            ->whereHas('case', fn ($q) => $q->where('client_id', $clientId)->when($tenantId, fn ($q2) => $q2->where('tenant_id', $tenantId)))
             ->where('status', CaseSession::STATUS_SCHEDULED)
             ->where('session_date', '>=', now()->startOfDay())
             ->orderBy('session_date')
@@ -219,8 +238,10 @@ class ClientDashboardService
     /** Recent Reports — generated reports for this client. */
     protected function recentReports(int $clientId, int $limit = 5): array
     {
+        $tenantId = $this->user->tenant_id;
         return GeneratedReport::query()
             ->where('client_id', $clientId)
+            ->when($tenantId, fn ($q) => $q->where('tenant_id', $tenantId))
             ->orderByDesc('generated_at')
             ->limit($limit)
             ->get()

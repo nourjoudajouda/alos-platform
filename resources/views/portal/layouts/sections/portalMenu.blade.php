@@ -25,6 +25,12 @@
         <div>{{ __('Dashboard') }}</div>
       </a>
     </li>
+    <li class="menu-item {{ str_starts_with($currentRouteName ?? '', 'portal.cases') ? 'active' : '' }}">
+      <a href="{{ route('portal.cases.index') }}" class="menu-link">
+        <i class="icon-base ti tabler-briefcase"></i>
+        <div>{{ __('My Cases') }}</div>
+      </a>
+    </li>
     <li class="menu-item {{ str_starts_with($currentRouteName ?? '', 'portal.messages') ? 'active' : '' }}">
       <a href="{{ route('portal.messages.index') }}" class="menu-link">
         <i class="icon-base ti tabler-message"></i>

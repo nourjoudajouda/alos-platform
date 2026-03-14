@@ -26,7 +26,7 @@
     <div class="card-body py-3">
       <h6 class="text-muted small text-uppercase mb-2">{{ __('Quick Links') }}</h6>
       <div class="d-flex flex-wrap gap-2">
-        <a href="{{ url('/portal/cases') }}" class="btn btn-sm btn-primary">
+        <a href="{{ route('portal.cases.index') }}" class="btn btn-sm btn-primary">
           <i class="icon-base ti tabler-briefcase me-1"></i>{{ __('View My Cases') }}
         </a>
         <a href="{{ route('portal.messages.index') }}" class="btn btn-sm btn-outline-primary">
@@ -141,7 +141,7 @@
       <div class="card h-100">
         <div class="card-header d-flex justify-content-between align-items-center">
           <h5 class="mb-0"><i class="icon-base ti tabler-briefcase me-2"></i>{{ __('My Cases') }}</h5>
-          <a href="{{ url('/portal/cases') }}" class="btn btn-sm btn-outline-primary">{{ __('View all') }}</a>
+          <a href="{{ route('portal.cases.index') }}" class="btn btn-sm btn-outline-primary">{{ __('View all') }}</a>
         </div>
         <div class="card-body p-0">
           @if (count($myCases) > 0)
@@ -187,7 +187,7 @@
           @if (count($recentMessages) > 0)
             <ul class="list-group list-group-flush">
               @foreach ($recentMessages as $msg)
-                <li class="list-group-item list-group-item-action">
+                <a href="{{ route('portal.messages.show', $msg['id']) }}" class="list-group-item list-group-item-action text-body text-decoration-none">
                   <div class="d-flex justify-content-between align-items-start">
                     <div>
                       <strong>{{ $msg['subject'] ?? __('Message') }}</strong>
@@ -198,9 +198,9 @@
                     <small class="text-muted">{{ $msg['last_message_at'] ?? '' }}</small>
                   </div>
                   @if (!empty($msg['last_message_body']))
-                    <p class="mb-0 mt-1 small text-body">{{ $msg['last_message_body'] }}</p>
+                    <p class="mb-0 mt-1 small text-body opacity-75">{{ $msg['last_message_body'] }}</p>
                   @endif
-                </li>
+                </a>
               @endforeach
             </ul>
           @else
@@ -224,8 +224,13 @@
             <ul class="list-group list-group-flush">
               @foreach ($sharedDocuments as $doc)
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                  <span class="fw-medium">{{ $doc['name'] ?? __('Document') }}</span>
-                  <small class="text-muted">{{ $doc['updated_at_human'] ?? $doc['updated_at'] }}</small>
+                  <a href="{{ route('portal.documents.download', $doc['id']) }}" class="fw-medium text-body text-decoration-none" target="_blank" rel="noopener">{{ $doc['name'] ?? __('Document') }}</a>
+                  <div class="d-flex align-items-center gap-2">
+                    @if (!empty($doc['mime_type']))
+                      <span class="badge bg-label-secondary small">{{ \Illuminate\Support\Str::afterLast($doc['mime_type'], '/') ?: __('File') }}</span>
+                    @endif
+                    <small class="text-muted">{{ $doc['updated_at_human'] ?? $doc['updated_at'] }}</small>
+                  </div>
                 </li>
               @endforeach
             </ul>
@@ -241,8 +246,9 @@
 
     <div class="col-12 col-lg-6">
       <div class="card h-100">
-        <div class="card-header">
+        <div class="card-header d-flex justify-content-between align-items-center">
           <h5 class="mb-0"><i class="icon-base ti tabler-calendar-event me-2"></i>{{ __('Upcoming Sessions') }}</h5>
+          <a href="{{ route('portal.cases.index') }}" class="btn btn-sm btn-outline-primary">{{ __('View cases') }}</a>
         </div>
         <div class="card-body p-0">
           @if (count($upcomingSessions) > 0)
@@ -296,7 +302,7 @@
           @else
             <div class="text-center py-5 px-3">
               <i class="icon-base ti tabler-report icon-32px text-muted d-block mb-2"></i>
-              <p class="text-muted mb-0">{{ __('No reports yet.') }}</p>
+              <p class="text-muted mb-0">{{ __('No reports available.') }}</p>
             </div>
           @endif
         </div>
