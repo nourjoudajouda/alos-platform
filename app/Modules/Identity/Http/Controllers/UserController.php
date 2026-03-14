@@ -5,6 +5,7 @@ namespace App\Modules\Identity\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Modules\Identity\Module;
+use Spatie\Permission\PermissionRegistrar;
 use App\Services\PlanLimitService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -138,8 +139,10 @@ class UserController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'tenant_id' => $tenantId,
+            'user_type' => User::USER_TYPE_TENANT_STAFF,
         ]);
 
+        app(PermissionRegistrar::class)->setPermissionsTeamId($tenantId);
         $user->syncRoles([$validated['role']]);
         $limitService->invalidateUsageCache($tenant);
 
@@ -228,6 +231,7 @@ class UserController extends Controller
         }
         $user->save();
 
+        app(PermissionRegistrar::class)->setPermissionsTeamId($this->tenantId());
         $user->syncRoles([$validated['role']]);
         app(PlanLimitService::class)->invalidateUsageCache($tenant);
 

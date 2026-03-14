@@ -5,10 +5,12 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\PermissionRegistrar;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
  * لوحة التيننت (/company) — فقط يوزرز المكتب (user_type = tenant_staff و tenant_id).
+ * يضبط سياق Spatie teams (tenant_id) لفحص الصلاحيات.
  */
 class EnsureTenantStaff
 {
@@ -18,7 +20,12 @@ class EnsureTenantStaff
             return redirect()->route('login');
         }
 
-        $tenant = Auth::user()->tenant;
+        $user = Auth::user();
+        if ($user->tenant_id) {
+            app(PermissionRegistrar::class)->setPermissionsTeamId($user->tenant_id);
+        }
+
+        $tenant = $user->tenant;
         if (! $tenant || ! $tenant->isActive()) {
             Auth::logout();
             $request->session()->invalidate();

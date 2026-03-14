@@ -5,6 +5,7 @@ namespace App\Http\Controllers\authentications;
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use App\Models\User;
+use Spatie\Permission\PermissionRegistrar;
 use App\Services\SystemSettingsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -93,6 +94,7 @@ class RegisterBasic extends Controller
             'user_type' => User::USER_TYPE_TENANT_STAFF,
         ]);
 
+        app(PermissionRegistrar::class)->setPermissionsTeamId($tenant->id);
         $user->assignRole('admin');
 
         Auth::login($user, (bool) $request->boolean('remember'));

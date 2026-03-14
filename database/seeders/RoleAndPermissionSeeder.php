@@ -109,6 +109,9 @@ class RoleAndPermissionSeeder extends Seeder
         // تعيين دور admin لمستخدم افتراضي
         $user = User::where('email', 'admin@alos.local')->first();
         if ($user && ! $user->hasRole('admin')) {
+            if ($user->tenant_id) {
+                app(PermissionRegistrar::class)->setPermissionsTeamId($user->tenant_id);
+            }
             $user->assignRole('admin');
         }
     }

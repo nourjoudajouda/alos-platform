@@ -46,6 +46,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin_or_tenant' => \App\Http\Middleware\EnsureAdminOrTenantUser::class,
             'tenant_user' => \App\Http\Middleware\EnsureTenantUser::class,
             'tenant_staff' => \App\Http\Middleware\EnsureTenantStaff::class,
+            'tenant_staff_has_role' => \App\Http\Middleware\EnsureTenantStaffHasRole::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

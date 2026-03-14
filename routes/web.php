@@ -25,7 +25,7 @@ Route::middleware('guest')->group(function () {
 Route::post('/logout', [LoginBasic::class, 'destroy'])->name('logout')->middleware('auth');
 
 // لوحة التيننت (مكتب/شركة) — منفصلة عن الأدمن؛ الرابط /company
-Route::prefix('company')->name('company.')->middleware(['auth', 'tenant_staff'])->group(function () {
+Route::prefix('company')->name('company.')->middleware(['auth', 'tenant_staff', 'tenant_staff_has_role'])->group(function () {
     Route::get('/', \App\Http\Controllers\Office\OfficeDashboardController::class)->name('dashboard');
     // ALOS-S1-21 — Branding Settings
     Route::get('/settings/branding', [\App\Http\Controllers\Office\BrandingSettingsController::class, 'edit'])->name('settings.branding.edit');
