@@ -25,7 +25,7 @@ class NewMessageNotification
             'name' => $senderName,
             'subject' => $thread->subject,
         ]);
-        $linkOffice = route('admin.core.clients.threads.show', [$client, $thread]);
+        $linkOffice = route('company.clients.threads.show', [$client, $thread]);
         $data = [
             'link' => $linkOffice,
             'entity_type' => 'message_thread',

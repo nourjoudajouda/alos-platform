@@ -57,8 +57,11 @@
           @endphp
           <div class="border-bottom border-secondary p-3 d-flex align-items-center gap-3 flex-wrap">
             <div class="flex-grow-1 min-w-0">
-              <a href="{{ route('portal.messages.show', $thread) }}" class="fw-medium text-body d-block text-decoration-none">
+              <a href="{{ route('portal.messages.show', $thread) }}" class="fw-medium text-body d-block text-decoration-none d-inline-flex align-items-center gap-2">
                 {{ $thread->subject }}
+                @if (($thread->unread_count ?? 0) > 0)
+                  <span class="badge bg-primary rounded-pill">{{ $thread->unread_count }}</span>
+                @endif
               </a>
               @if ($lastMsg)
                 <p class="text-muted small mb-0 mt-1">

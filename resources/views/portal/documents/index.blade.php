@@ -74,6 +74,11 @@
             <div class="flex-grow-1 min-w-0">
               <span class="fw-medium d-block">{{ $doc->name }}</span>
               <div class="small text-muted">
+                @php
+                  $ext = strtolower(pathinfo($doc->file_name ?? '', PATHINFO_EXTENSION));
+                  $typeLabel = match($ext) { 'pdf' => 'PDF', 'jpg' => 'JPG', 'jpeg' => 'JPEG', 'png' => 'PNG', default => strtoupper($ext) ?: __('File') };
+                @endphp
+                <span class="badge bg-label-secondary me-1">{{ $typeLabel }}</span>
                 {{ $doc->file_name }}
                 @if ($doc->file_size)
                   · {{ number_format($doc->file_size / 1024, 1) }} KB

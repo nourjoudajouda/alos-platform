@@ -56,4 +56,33 @@ class MessageThread extends Model
     {
         return $this->archived_at !== null;
     }
+
+    public function threadReads(): HasMany
+    {
+        return $this->hasMany(ThreadRead::class);
+    }
+
+    /** Mark thread as read for a user (when they open the thread). */
+    public function markAsReadBy(int $userId): void
+    {
+        ThreadRead::updateOrCreate(
+            [
+                'message_thread_id' => $this->id,
+                'user_id' => $userId,
+            ],
+            ['last_read_at' => now()]
+        );
+    }
+
+    /** Count unread messages for a user (messages from others after their last read). */
+    public function unreadCountFor(int $userId): int
+    {
+        $read = $this->threadReads()->where('user_id', $userId)->first();
+        $cutoff = $read?->last_read_at ?? $this->created_at;
+
+        return $this->messages()
+            ->where('created_at', '>', $cutoff)
+            ->where('user_id', '!=', $userId)
+            ->count();
+    }
 }

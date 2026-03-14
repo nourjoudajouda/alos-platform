@@ -1,5 +1,6 @@
 @php
   $configData = Helper::appClasses();
+  $clientRoutePrefix = $clientRoutePrefix ?? 'admin.core.clients';
   $contentDir = app()->getLocale() === 'ar' ? 'rtl' : 'ltr';
 @endphp
 @extends('core::layouts.layoutMaster')
@@ -14,11 +15,11 @@
       <p class="text-muted small mb-0">{{ __('Secure conversations with :name', ['name' => $client->name]) }}</p>
     </div>
     <div class="d-flex gap-2">
-      <a href="{{ route('admin.core.clients.show', [$client, 'tab' => 'messages']) }}" class="btn btn-outline-secondary btn-sm">
+      <a href="{{ route($clientRoutePrefix . '.show', [$client, 'tab' => 'messages']) }}" class="btn btn-outline-secondary btn-sm">
         <i class="icon-base ti tabler-arrow-left {{ $contentDir === 'rtl' ? 'ms-1' : 'me-1' }}"></i>
         {{ __('Back to client') }}
       </a>
-      <a href="{{ $showArchived ? route('admin.core.clients.threads.index', $client) : route('admin.core.clients.threads.index', [$client, 'archived' => 1]) }}" class="btn btn-outline-secondary btn-sm">
+      <a href="{{ $showArchived ? route($clientRoutePrefix . '.threads.index', $client) : route($clientRoutePrefix . '.threads.index', [$client, 'archived' => 1]) }}" class="btn btn-outline-secondary btn-sm">
         {{ $showArchived ? __('Active conversations') : __('Archived') }}
       </a>
     </div>
@@ -31,7 +32,7 @@
   {{-- New conversation --}}
   <div class="card mb-4">
     <div class="card-body">
-      <form action="{{ route('admin.core.clients.threads.store', $client) }}" method="post" class="row g-2 align-items-end">
+      <form action="{{ route($clientRoutePrefix . '.threads.store', $client) }}" method="post" class="row g-2 align-items-end">
         @csrf
         <div class="col-md-8">
           <label for="subject" class="form-label small">{{ __('New conversation subject') }}</label>
@@ -61,8 +62,11 @@
         @endphp
         <div class="border-bottom border-secondary p-3 d-flex align-items-center gap-3 flex-wrap">
           <div class="flex-grow-1 min-w-0">
-            <a href="{{ route('admin.core.clients.threads.show', [$client, $thread]) }}" class="fw-medium text-body d-block text-decoration-none">
+            <a href="{{ route($clientRoutePrefix . '.threads.show', [$client, $thread]) }}" class="fw-medium text-body d-block text-decoration-none d-inline-flex align-items-center gap-2">
               {{ $thread->subject }}
+              @if (($thread->unread_count ?? 0) > 0)
+                <span class="badge bg-primary rounded-pill">{{ $thread->unread_count }}</span>
+              @endif
             </a>
             @if ($lastMsg)
               <p class="text-muted small mb-0 mt-1">
@@ -73,8 +77,8 @@
             @endif
           </div>
           <div class="d-flex gap-2">
-            <a href="{{ route('admin.core.clients.threads.show', [$client, $thread]) }}" class="btn btn-sm btn-outline-primary">{{ __('Open') }}</a>
-            <form action="{{ route('admin.core.clients.threads.archive', [$client, $thread]) }}" method="post" class="d-inline">
+            <a href="{{ route($clientRoutePrefix . '.threads.show', [$client, $thread]) }}" class="btn btn-sm btn-outline-primary">{{ __('Open') }}</a>
+            <form action="{{ route($clientRoutePrefix . '.threads.archive', [$client, $thread]) }}" method="post" class="d-inline">
               @csrf
               <button type="submit" class="btn btn-sm btn-outline-secondary">
                 {{ $thread->archived_at ? __('Restore') : __('Archive') }}

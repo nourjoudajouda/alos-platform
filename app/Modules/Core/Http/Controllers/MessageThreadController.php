@@ -25,12 +25,26 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class MessageThreadController extends Controller
 {
+    protected function isCompanyContext(): bool
+    {
+        return str_starts_with(request()->route()->getName() ?? '', 'company.');
+    }
+
+    protected function clientRoutePrefix(): string
+    {
+        return $this->isCompanyContext() ? 'company.clients' : 'admin.core.clients';
+    }
+
     private function authorizeClient(Client $client): void
     {
         $user = auth()->user();
         if ($user->isClientPortalUser()) {
             App::make(AuditLogService::class)->recordCompliance('access_message', __('Client portal user attempted office messaging.'), 'client', $client->id, $client->tenant_id);
             abort(403, __('Access denied. Use the client portal for messaging.'));
+        }
+        if ($client->tenant_id && $user->tenant_id && (int) $client->tenant_id !== (int) $user->tenant_id) {
+            App::make(AuditLogService::class)->recordCompliance('access_message', __('Attempted message access for client in another tenant.'), 'client', $client->id, $client->tenant_id);
+            abort(403, __('Access denied.'));
         }
         $hasAccess = $client->teamAccess()->where('user_id', $user->id)->exists();
         if (! $hasAccess) {
@@ -55,11 +69,13 @@ class MessageThreadController extends Controller
             $query->whereNull('archived_at');
         }
         $threads = $query->orderByDesc('updated_at')->paginate(15)->withQueryString();
+        $threads->getCollection()->each(fn (MessageThread $t) => $t->setAttribute('unread_count', $t->unreadCountFor(auth()->id())));
 
         return view('core::content.clients.messages.index', [
             'client' => $client,
             'threads' => $threads,
             'showArchived' => $request->boolean('archived'),
+            'clientRoutePrefix' => $this->clientRoutePrefix(),
         ]);
     }
 
@@ -70,11 +86,13 @@ class MessageThreadController extends Controller
             abort(404);
         }
 
-        $thread->load(['messages.user', 'messages.attachments']);
+        $thread->load(['messages.user', 'messages.attachments', 'case']);
+        $thread->markAsReadBy(auth()->id());
 
         return view('core::content.clients.messages.show', [
             'client' => $client,
             'thread' => $thread,
+            'clientRoutePrefix' => $this->clientRoutePrefix(),
         ]);
     }
 
@@ -86,7 +104,7 @@ class MessageThreadController extends Controller
             try {
                 app(PlanLimitService::class)->ensureFeature($tenant, PlanLimitService::FEATURE_INTERNAL_CHAT);
             } catch (\RuntimeException $e) {
-                return redirect()->route('admin.core.clients.threads.index', $client)->with('error', $e->getMessage());
+                return redirect()->route($this->clientRoutePrefix() . '.threads.index', $client)->with('error', $e->getMessage());
             }
         }
 
@@ -99,7 +117,7 @@ class MessageThreadController extends Controller
         ]);
 
         return redirect()
-            ->route('admin.core.clients.threads.show', [$client, $thread])
+            ->route($this->clientRoutePrefix() . '.threads.show', [$client, $thread])
             ->with('success', __('Conversation started.'));
     }
 
@@ -111,7 +129,7 @@ class MessageThreadController extends Controller
             try {
                 app(PlanLimitService::class)->ensureFeature($tenant, PlanLimitService::FEATURE_INTERNAL_CHAT);
             } catch (\RuntimeException $e) {
-                return redirect()->route('admin.core.clients.threads.show', [$client, $thread])->with('error', $e->getMessage());
+                return redirect()->route($this->clientRoutePrefix() . '.threads.show', [$client, $thread])->with('error', $e->getMessage());
             }
         }
         if ($thread->client_id !== (int) $client->id) {
@@ -119,7 +137,7 @@ class MessageThreadController extends Controller
         }
         if ($thread->archived_at) {
             return redirect()
-                ->route('admin.core.clients.threads.show', [$client, $thread])
+                ->route($this->clientRoutePrefix() . '.threads.show', [$client, $thread])
                 ->with('error', __('This conversation is archived.'));
         }
 
@@ -191,7 +209,7 @@ class MessageThreadController extends Controller
         }
 
         return redirect()
-            ->route('admin.core.clients.threads.show', [$client, $thread])
+            ->route($this->clientRoutePrefix() . '.threads.show', [$client, $thread])
             ->with('success', __('Message sent.'));
     }
 
@@ -206,7 +224,7 @@ class MessageThreadController extends Controller
         $status = $thread->archived_at ? __('archived') : __('restored');
 
         return redirect()
-            ->route('admin.core.clients.threads.index', $client)
+            ->route($this->clientRoutePrefix() . '.threads.index', $client)
             ->with('success', __('Conversation :status.', ['status' => $status]));
     }
 

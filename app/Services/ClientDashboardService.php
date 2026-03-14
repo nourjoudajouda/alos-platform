@@ -93,16 +93,9 @@ class ClientDashboardService
         }
         $sharedDocumentsCount = $sharedDocsQuery->count();
 
-        $threadQuery = MessageThread::where('client_id', $clientId);
-        $threadIds = $threadQuery->pluck('id')->all();
-        $messageThreadsCount = count($threadIds);
-        $unreadApprox = 0;
-        if ($threadIds) {
-            $unreadApprox = Message::whereIn('message_thread_id', $threadIds)
-                ->where('user_id', '!=', $this->user->id)
-                ->where('created_at', '>=', now()->subDays(7))
-                ->count();
-        }
+        $threads = MessageThread::where('client_id', $clientId)->get();
+        $messageThreadsCount = $threads->count();
+        $unreadApprox = $threads->sum(fn (MessageThread $t) => $t->unreadCountFor($this->user->id));
 
         $reportsQuery = GeneratedReport::where('client_id', $clientId);
         if ($tenantId) {

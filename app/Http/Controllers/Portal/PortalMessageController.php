@@ -75,6 +75,7 @@ class PortalMessageController extends Controller
             $query->whereNotNull('archived_at');
         }
         $threads = $query->orderByDesc('updated_at')->paginate(15)->withQueryString();
+        $threads->getCollection()->each(fn (MessageThread $t) => $t->setAttribute('unread_count', $t->unreadCountFor($user->id)));
 
         $canSend = in_array($user->portal_permission, [
             \App\Models\User::PORTAL_PERMISSION_MESSAGING,
@@ -97,6 +98,7 @@ class PortalMessageController extends Controller
         $this->authorizeThread($thread, (int) $client->id);
 
         $thread->load(['messages.user', 'messages.attachments']);
+        $thread->markAsReadBy($user->id);
 
         $canSend = in_array($user->portal_permission, [
             \App\Models\User::PORTAL_PERMISSION_MESSAGING,

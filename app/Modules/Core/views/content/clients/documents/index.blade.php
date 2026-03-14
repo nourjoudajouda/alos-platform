@@ -1,5 +1,8 @@
 @php
   $configData = Helper::appClasses();
+  $clientRoutePrefix = $clientRoutePrefix ?? 'admin.core.clients';
+  $caseRoutePrefix = $clientRoutePrefix === 'company.clients' ? 'company.cases' : 'admin.core.cases';
+  $consultationRoutePrefix = $clientRoutePrefix === 'company.clients' ? 'company.consultations' : 'admin.core.consultations';
   $contentDir = app()->getLocale() === 'ar' ? 'rtl' : 'ltr';
 @endphp
 @extends('core::layouts.layoutMaster')
@@ -12,14 +15,14 @@
     <div>
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb mb-1">
-          <li class="breadcrumb-item"><a href="{{ route('admin.core.clients.show', $client) }}">{{ $client->name }}</a></li>
+          <li class="breadcrumb-item"><a href="{{ route($clientRoutePrefix . '.show', $client) }}">{{ $client->name }}</a></li>
           <li class="breadcrumb-item active">{{ __('Documents') }}</li>
         </ol>
       </nav>
       <h4 class="fw-bold mb-1">{{ __('Document Center') }}</h4>
       <p class="text-muted small mb-0">{{ __('Upload and manage documents for :name. Internal documents are office-only; shared documents are visible to the client in the portal.', ['name' => $client->name]) }}</p>
     </div>
-    <a href="{{ route('admin.core.clients.show', [$client, 'tab' => 'documents']) }}" class="btn btn-outline-secondary btn-sm">{{ __('Back to client') }}</a>
+    <a href="{{ route($clientRoutePrefix . '.show', [$client, 'tab' => 'documents']) }}" class="btn btn-outline-secondary btn-sm">{{ __('Back to client') }}</a>
   </div>
 
   @if (session('success'))
@@ -35,7 +38,7 @@
       <h5 class="card-title mb-0">{{ __('Upload document') }}</h5>
     </div>
     <div class="card-body">
-      <form action="{{ route('admin.core.clients.documents.store', $client) }}" method="post" enctype="multipart/form-data">
+      <form action="{{ route($clientRoutePrefix . '.documents.store', $client) }}" method="post" enctype="multipart/form-data">
         @csrf
         @if(request('consultation_id'))<input type="hidden" name="consultation_id" value="{{ request('consultation_id') }}">@endif
         @if(request('case_id'))<input type="hidden" name="case_id" value="{{ request('case_id') }}">@endif
@@ -77,7 +80,7 @@
   {{-- Filter --}}
   <div class="card mb-4">
     <div class="card-body py-2">
-      <form action="{{ route('admin.core.clients.documents.index', $client) }}" method="get" class="d-flex flex-wrap align-items-center gap-2">
+      <form action="{{ route($clientRoutePrefix . '.documents.index', $client) }}" method="get" class="d-flex flex-wrap align-items-center gap-2">
         <label for="filter_visibility" class="form-label mb-0">{{ __('Filter') }}:</label>
         <select name="visibility" id="filter_visibility" class="form-select form-select-sm" style="width: auto;">
           <option value="">{{ __('All') }}</option>
@@ -120,7 +123,7 @@
               </span>
             </span>
           </div>
-          <div class="flex-grow-1 min-w-0">
+            <div class="flex-grow-1 min-w-0">
             <span class="fw-medium d-block">{{ $doc->name }}</span>
             <div class="small text-muted">
               {{ $doc->file_name }}
@@ -131,16 +134,22 @@
               @if ($doc->uploader)
                 · {{ $doc->uploaded_by_type === \App\Models\Document::UPLOADED_BY_CLIENT ? __('Client') : $doc->uploader->name }}
               @endif
+              @if ($doc->case_id && $doc->case)
+                · <a href="{{ route($caseRoutePrefix . '.show', $doc->case) }}" class="text-muted text-decoration-none">{{ __('Case') }}: {{ $doc->case->case_number }}</a>
+              @endif
+              @if ($doc->consultation_id && $doc->consultation)
+                · <a href="{{ route($consultationRoutePrefix . '.show', $doc->consultation) }}" class="text-muted text-decoration-none">{{ __('Consultation') }}</a>
+              @endif
             </div>
           </div>
           <div class="d-flex align-items-center gap-2">
             <span class="badge {{ $doc->visibility === \App\Models\Document::VISIBILITY_SHARED ? 'bg-label-success' : 'bg-label-warning' }}">
               {{ $doc->visibility === \App\Models\Document::VISIBILITY_SHARED ? __('Shared') : __('Internal') }}
             </span>
-            <a href="{{ route('admin.core.clients.documents.download', [$client, $doc]) }}" class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener">
+            <a href="{{ route($clientRoutePrefix . '.documents.download', [$client, $doc]) }}" class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener">
               <i class="icon-base ti tabler-download"></i>
             </a>
-            <form action="{{ route('admin.core.clients.documents.visibility', [$client, $doc]) }}" method="post" class="d-inline">
+            <form action="{{ route($clientRoutePrefix . '.documents.visibility', [$client, $doc]) }}" method="post" class="d-inline">
               @csrf
               @method('PUT')
               <input type="hidden" name="visibility" value="{{ $doc->visibility === \App\Models\Document::VISIBILITY_SHARED ? \App\Models\Document::VISIBILITY_INTERNAL : \App\Models\Document::VISIBILITY_SHARED }}">

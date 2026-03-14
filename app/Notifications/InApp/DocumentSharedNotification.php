@@ -23,7 +23,7 @@ class DocumentSharedNotification
         $title = __('Document shared');
         $messageBody = __('A new document has been shared with you: :name', ['name' => $document->file_name ?? __('Document')]);
         $linkPortal = route('portal.documents.index');
-        $linkOffice = route('admin.core.clients.documents.index', $client);
+        $linkOffice = route('company.clients.documents.index', $client);
         $data = [
             'link' => $linkPortal,
             'entity_type' => 'document',

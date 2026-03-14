@@ -101,15 +101,9 @@ class DashboardSummaryService
             ->where('session_date', '>=', now()->startOfDay());
         $upcomingSessionsCount = (clone $sessionsQuery)->count();
 
-        $threadIds = MessageThread::whereIn('client_id', $clientIds)->pluck('id')->all();
-        $messageThreadsCount = count($threadIds);
-        $unreadApprox = 0;
-        if ($threadIds) {
-            $unreadApprox = Message::whereIn('message_thread_id', $threadIds)
-                ->where('user_id', '!=', $this->user->id)
-                ->where('created_at', '>=', now()->subDays(7))
-                ->count();
-        }
+        $threads = MessageThread::whereIn('client_id', $clientIds)->get();
+        $messageThreadsCount = $threads->count();
+        $unreadApprox = $threads->sum(fn (MessageThread $t) => $t->unreadCountFor($this->user->id));
 
         return [
             'total_clients' => count($clientIds),

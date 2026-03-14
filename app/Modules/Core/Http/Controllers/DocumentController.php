@@ -22,12 +22,26 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class DocumentController extends Controller
 {
+    protected function isCompanyContext(): bool
+    {
+        return str_starts_with(request()->route()->getName() ?? '', 'company.');
+    }
+
+    protected function clientRoutePrefix(): string
+    {
+        return $this->isCompanyContext() ? 'company.clients' : 'admin.core.clients';
+    }
+
     private function authorizeClient(Client $client): void
     {
         $user = auth()->user();
         if ($user->isClientPortalUser()) {
             App::make(AuditLogService::class)->recordCompliance('access_document', __('Client portal user attempted office document access.'), 'client', $client->id, $client->tenant_id);
             abort(403, __('Access denied. Use the client portal for documents.'));
+        }
+        if ($client->tenant_id && $user->tenant_id && (int) $client->tenant_id !== (int) $user->tenant_id) {
+            App::make(AuditLogService::class)->recordCompliance('access_document', __('Attempted document access for client in another tenant.'), 'client', $client->id, $client->tenant_id);
+            abort(403, __('Access denied.'));
         }
         if (! $client->teamAccess()->where('user_id', $user->id)->exists()) {
             App::make(AuditLogService::class)->recordCompliance('access_document', __('Attempted document access for client outside team.'), 'client', $client->id, $client->tenant_id);
@@ -44,7 +58,7 @@ class DocumentController extends Controller
     {
         $this->authorizeClient($client);
 
-        $query = $client->documents()->with('uploader');
+        $query = $client->documents()->with(['uploader', 'case', 'consultation']);
         if ($request->filled('visibility')) {
             $query->where('visibility', $request->get('visibility'));
         }
@@ -64,6 +78,7 @@ class DocumentController extends Controller
             'filterConsultationId' => $request->get('consultation_id', ''),
             'consultations' => $client->consultations()->orderByDesc('consultation_date')->get(),
             'clientCases' => $client->cases()->orderByDesc('updated_at')->get(),
+            'clientRoutePrefix' => $this->clientRoutePrefix(),
         ]);
     }
 
@@ -80,7 +95,7 @@ class DocumentController extends Controller
                 $limitService->checkStorageLimit($tenant, $file ? $file->getSize() : 0);
             } catch (\Throwable $e) {
                 return redirect()
-                    ->route('admin.core.clients.show', [$client, 'tab' => 'documents'])
+                    ->route($this->clientRoutePrefix() . '.show', [$client, 'tab' => 'documents'])
                     ->with('error', $e->getMessage());
             }
         }
@@ -99,7 +114,7 @@ class DocumentController extends Controller
         $path = $this->storeUploadedFile($file, $client->id, $tmpPath);
         if (! $path) {
             return redirect()
-                ->route('admin.core.clients.show', [$client, 'tab' => 'documents'])
+                ->route($this->clientRoutePrefix() . '.show', [$client, 'tab' => 'documents'])
                 ->with('error', __('Failed to save the file. Please try again.'));
         }
 
@@ -138,7 +153,7 @@ class DocumentController extends Controller
             ProcessMajorUpdateReportJob::dispatch($client->id, 'document_shared');
         }
 
-        $redirect = route('admin.core.clients.documents.index', $client);
+        $redirect = route($this->clientRoutePrefix() . '.documents.index', $client);
         $params = [];
         if (! empty($validated['consultation_id'])) {
             $params['consultation_id'] = $validated['consultation_id'];
@@ -172,7 +187,7 @@ class DocumentController extends Controller
         }
 
         return redirect()
-            ->route('admin.core.clients.documents.index', $client)
+            ->route($this->clientRoutePrefix() . '.documents.index', $client)
             ->with('success', __('Document visibility updated.'));
     }
 

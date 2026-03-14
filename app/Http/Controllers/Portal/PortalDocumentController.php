@@ -40,6 +40,7 @@ class PortalDocumentController extends Controller
 
         $documents = $client->documents()
             ->where('visibility', Document::VISIBILITY_SHARED)
+            ->when($client->tenant_id, fn ($q) => $q->where('tenant_id', $client->tenant_id))
             ->with('uploader')
             ->orderByDesc('created_at')
             ->paginate(15)
@@ -112,6 +113,9 @@ class PortalDocumentController extends Controller
         $user = $request->user();
         $client = $this->getClient($user);
         if ($document->client_id !== (int) $client->id) {
+            abort(404);
+        }
+        if ($client->tenant_id && (int) $document->tenant_id !== (int) $client->tenant_id) {
             abort(404);
         }
         if ($document->visibility !== Document::VISIBILITY_SHARED) {
