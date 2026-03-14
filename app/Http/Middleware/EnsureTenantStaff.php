@@ -16,11 +16,22 @@ class EnsureTenantStaff
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (! Auth::check() || ! Auth::user()->isTenantStaff()) {
+        if (! Auth::check()) {
             return redirect()->route('login');
         }
 
         $user = Auth::user();
+
+        // ALOS-S1-08 — Block client portal users from office area
+        if ($user->isClientPortalUser()) {
+            return redirect()->route('portal.dashboard')
+                ->with('message', __('Client portal users cannot access the office area.'));
+        }
+
+        if (! $user->isTenantStaff()) {
+            return redirect()->route('login');
+        }
+
         if ($user->tenant_id) {
             app(PermissionRegistrar::class)->setPermissionsTeamId($user->tenant_id);
         }

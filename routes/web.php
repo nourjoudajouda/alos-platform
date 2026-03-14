@@ -38,8 +38,10 @@ Route::prefix('company')->name('company.')->middleware(['auth', 'tenant_staff', 
 
 // ALOS-S1-08 — Client Portal (separate login + dashboard)
 Route::prefix('portal')->name('portal.')->group(function () {
-    Route::get('/login', [PortalAuthController::class, 'index'])->name('login');
-    Route::post('/login', [PortalAuthController::class, 'store'])->name('login.store');
+    Route::middleware('guest')->group(function () {
+        Route::get('/login', [PortalAuthController::class, 'index'])->name('login');
+        Route::post('/login', [PortalAuthController::class, 'store'])->name('login.store');
+    });
     Route::post('/logout', [PortalAuthController::class, 'destroy'])->name('logout')->middleware('auth');
     Route::get('/', [PortalDashboardController::class, 'index'])->name('dashboard')->middleware(['auth', 'portal_client']);
 

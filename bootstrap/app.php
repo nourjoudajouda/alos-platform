@@ -19,6 +19,9 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($request->is('admin') || $request->is('admin/*')) {
                 return route('admin.login');
             }
+            if ($request->is('portal') || $request->is('portal/*')) {
+                return route('portal.login');
+            }
             if ($request->is('company') || $request->is('company/*')) {
                 return route('login');
             }
@@ -28,6 +31,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectUsersTo(function (Request $request) {
             if ($request->is('admin') || $request->is('admin/*')) {
                 return route('admin.core.dashboard');
+            }
+            if ($request->is('portal') || $request->is('portal/*')) {
+                return route('portal.dashboard');
+            }
+            $user = $request->user();
+            if ($user && method_exists($user, 'isClientPortalUser') && $user->isClientPortalUser()) {
+                return route('portal.dashboard');
             }
             if ($request->is('company') || $request->is('company/*')) {
                 return route('company.dashboard');
@@ -42,7 +52,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
             'not_client_portal' => \App\Http\Middleware\EnsureNotClientPortalUser::class,
-            'portal_client' => \App\Http\Middleware\EnsurePortalClient::class,
+            'portal_client' => \App\Http\Middleware\EnsureClientPortalUser::class,
+            'ensure_client_portal_user' => \App\Http\Middleware\EnsureClientPortalUser::class,
             'admin_or_tenant' => \App\Http\Middleware\EnsureAdminOrTenantUser::class,
             'tenant_user' => \App\Http\Middleware\EnsureTenantUser::class,
             'tenant_staff' => \App\Http\Middleware\EnsureTenantStaff::class,
