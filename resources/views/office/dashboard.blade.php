@@ -26,22 +26,22 @@
         <div class="card-body py-3">
           <h6 class="card-title mb-2 text-muted small text-uppercase">{{ __('Quick Actions') }}</h6>
           <div class="d-flex flex-wrap gap-2">
-            <a href="{{ url('/company/clients/create') }}" class="btn btn-sm btn-primary">
+            <a href="{{ route('company.clients.create') }}" class="btn btn-sm btn-primary">
               <i class="icon-base ti tabler-user-plus me-1"></i>{{ __('Add Client') }}
             </a>
-            <a href="{{ url('/company/cases/create') }}" class="btn btn-sm btn-outline-primary">
+            <a href="{{ route('company.cases.create') }}" class="btn btn-sm btn-outline-primary">
               <i class="icon-base ti tabler-briefcase me-1"></i>{{ __('Add Case') }}
             </a>
-            <a href="{{ url('/company/consultations/create') }}" class="btn btn-sm btn-outline-primary">
+            <a href="{{ route('company.consultations.create') }}" class="btn btn-sm btn-outline-primary">
               <i class="icon-base ti tabler-messages me-1"></i>{{ __('Add Consultation') }}
             </a>
-            <a href="{{ url('/company/sessions/create') }}" class="btn btn-sm btn-outline-primary">
+            <a href="{{ route('company.cases.index') }}" class="btn btn-sm btn-outline-primary">
               <i class="icon-base ti tabler-calendar-event me-1"></i>{{ __('Add Session') }}
             </a>
-            <a href="{{ url('/company/messages') }}" class="btn btn-sm btn-outline-secondary">
+            <a href="{{ route('company.clients.index') }}" class="btn btn-sm btn-outline-secondary">
               <i class="icon-base ti tabler-mail me-1"></i>{{ __('Open Messages') }}
             </a>
-            <a href="{{ url('/company/reports') }}" class="btn btn-sm btn-outline-secondary">
+            <a href="{{ route('company.clients.index') }}" class="btn btn-sm btn-outline-secondary">
               <i class="icon-base ti tabler-report me-1"></i>{{ __('Open Reports') }}
             </a>
           </div>
@@ -256,7 +256,7 @@
       <div class="card h-100">
         <div class="card-header d-flex justify-content-between align-items-center">
           <h5 class="mb-0"><i class="icon-base ti tabler-calendar-event me-2"></i>{{ __('Upcoming Sessions') }}</h5>
-          <a href="{{ url('/company/sessions') }}" class="btn btn-sm btn-outline-primary">{{ __('View all') }}</a>
+          <a href="{{ route('company.cases.index') }}" class="btn btn-sm btn-outline-primary">{{ __('View all') }}</a>
         </div>
         <div class="card-body p-0">
           @if (count($upcomingSessions) > 0)
@@ -298,7 +298,7 @@
       <div class="card h-100">
         <div class="card-header d-flex justify-content-between align-items-center">
           <h5 class="mb-0"><i class="icon-base ti tabler-mail me-2"></i>{{ __('Recent Messages') }}</h5>
-          <a href="{{ url('/company/messages') }}" class="btn btn-sm btn-outline-primary">{{ __('View all') }}</a>
+          <a href="{{ route('company.clients.index') }}" class="btn btn-sm btn-outline-primary">{{ __('View all') }}</a>
         </div>
         <div class="card-body p-0">
           @if (count($recentMessages) > 0)
@@ -331,7 +331,7 @@
       <div class="card h-100">
         <div class="card-header d-flex justify-content-between align-items-center">
           <h5 class="mb-0"><i class="icon-base ti tabler-file-text me-2"></i>{{ __('Recent Documents') }}</h5>
-          <a href="{{ url('/company/documents') }}" class="btn btn-sm btn-outline-primary">{{ __('View all') }}</a>
+          <a href="{{ route('company.clients.index') }}" class="btn btn-sm btn-outline-primary">{{ __('View all') }}</a>
         </div>
         <div class="card-body p-0">
           @if (count($recentDocuments) > 0)
@@ -357,7 +357,7 @@
       <div class="card h-100">
         <div class="card-header d-flex justify-content-between align-items-center">
           <h5 class="mb-0"><i class="icon-base ti tabler-activity me-2"></i>{{ __('Recent Activity') }}</h5>
-          <a href="{{ url('/company/audit-logs') }}" class="btn btn-sm btn-outline-primary">{{ __('View all') }}</a>
+          <a href="{{ route('company.notifications.index') }}" class="btn btn-sm btn-outline-primary">{{ __('View all') }}</a>
         </div>
         <div class="card-body p-0">
           @if (count($recentActivity) > 0)

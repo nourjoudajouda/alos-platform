@@ -4,10 +4,10 @@ $tenant = auth()->user()?->tenant;
 $tenantLogoUrl = $tenant ? $tenant->getSettingsOrCreate()->logo_url : null;
 $tenantDisplayName = $tenant ? $tenant->getSettingsOrCreate()->getDisplayName() : config('variables.templateName');
 $companyMenuItems = [
-  (object)['name' => 'Dashboard', 'url' => url('/company'), 'slug' => 'company.dashboard', 'icon' => 'menu-icon icon-base ti tabler-layout-dashboard'],
-  (object)['name' => 'Clients', 'url' => url('/company/clients'), 'slug' => 'company.clients.index', 'icon' => 'menu-icon icon-base ti tabler-users-group'],
-  (object)['name' => 'Cases', 'url' => url('/company/cases'), 'slug' => 'company.cases.index', 'icon' => 'menu-icon icon-base ti tabler-briefcase'],
-  (object)['name' => 'Consultations', 'url' => url('/company/consultations'), 'slug' => 'company.consultations.index', 'icon' => 'menu-icon icon-base ti tabler-calendar-event'],
+  (object)['name' => 'Dashboard', 'url' => route('company.dashboard'), 'slug' => 'company.dashboard', 'icon' => 'menu-icon icon-base ti tabler-layout-dashboard'],
+  (object)['name' => 'Clients', 'url' => route('company.clients.index'), 'slug' => 'company.clients.index', 'icon' => 'menu-icon icon-base ti tabler-users-group'],
+  (object)['name' => 'Cases', 'url' => route('company.cases.index'), 'slug' => 'company.cases.index', 'icon' => 'menu-icon icon-base ti tabler-briefcase'],
+  (object)['name' => 'Consultations', 'url' => route('company.consultations.index'), 'slug' => 'company.consultations.index', 'icon' => 'menu-icon icon-base ti tabler-calendar-event'],
   (object)['name' => 'Reminder Rules', 'url' => route('company.reminder-rules.index'), 'slug' => 'company.reminder-rules.index', 'icon' => 'menu-icon icon-base ti tabler-bell'],
   (object)['name' => 'Notifications', 'url' => route('company.notifications.index'), 'slug' => 'company.notifications.index', 'icon' => 'menu-icon icon-base ti tabler-bell-ringing'],
   (object)['name' => 'Subscription', 'url' => route('company.settings.subscription.show'), 'slug' => 'company.settings.subscription.show', 'icon' => 'menu-icon icon-base ti tabler-credit-card'],
