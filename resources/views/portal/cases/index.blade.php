@@ -1,5 +1,6 @@
 @php
   $contentDir = app()->getLocale() === 'ar' ? 'rtl' : 'ltr';
+  $statusLabels = \App\Models\CaseModel::STATUSES;
 @endphp
 
 @extends('portal::layouts.portal')
@@ -24,20 +25,25 @@
         @forelse($cases as $case)
           <div class="border-bottom border-secondary p-3 d-flex align-items-center gap-3 flex-wrap">
             <div class="flex-grow-1 min-w-0">
-              <span class="fw-medium d-block">{{ $case->case_number ?? '—' }}</span>
+              <a href="{{ route('portal.cases.show', $case) }}" class="fw-medium d-block text-body">{{ $case->case_number ?? '—' }}</a>
               <div class="small text-muted">
                 {{ $case->case_type ?? '—' }}
                 <span class="badge bg-label-{{ $case->status === 'open' ? 'success' : ($case->status === 'closed' ? 'secondary' : 'warning') }} ms-1">
-                  {{ __(ucfirst($case->status ?? '')) }}
+                  {{ __($statusLabels[$case->status ?? ''] ?? ucfirst((string) $case->status)) }}
                 </span>
+                @if ($case->responsibleLawyer)
+                  · {{ $case->responsibleLawyer->name }}
+                @endif
                 · {{ __('Last updated') }} {{ $case->updated_at?->diffForHumans() }}
               </div>
             </div>
+            <a href="{{ route('portal.cases.show', $case) }}" class="btn btn-sm btn-outline-primary">{{ __('View') }}</a>
           </div>
         @empty
           <div class="text-center py-5 px-3">
             <i class="icon-base ti tabler-briefcase icon-32px text-muted d-block mb-2"></i>
             <p class="text-muted mb-0">{{ __('No cases yet.') }}</p>
+            <p class="small text-muted mt-1">{{ __('When the office opens a case for you, it will appear here.') }}</p>
           </div>
         @endforelse
       </div>
