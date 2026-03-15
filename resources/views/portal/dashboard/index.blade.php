@@ -37,6 +37,8 @@
           <i class="icon-base ti tabler-report me-1"></i>{{ __('View Reports') }}</a>
         <a href="{{ route('portal.consultations.index') }}" class="btn btn-sm btn-outline-secondary">
           <i class="icon-base ti tabler-messages me-1"></i>{{ __('Consultations') }}</a>
+        <a href="{{ route('portal.sessions.index') }}" class="btn btn-sm btn-outline-primary">
+          <i class="icon-base ti tabler-calendar-event me-1"></i>{{ __('Sessions') }}</a>
       </div>
     </div>
   </div>
@@ -248,7 +250,7 @@
       <div class="card h-100">
         <div class="card-header d-flex justify-content-between align-items-center">
           <h5 class="mb-0"><i class="icon-base ti tabler-calendar-event me-2"></i>{{ __('Upcoming Sessions') }}</h5>
-          <a href="{{ route('portal.cases.index') }}" class="btn btn-sm btn-outline-primary">{{ __('View cases') }}</a>
+          <a href="{{ route('portal.sessions.index') }}" class="btn btn-sm btn-outline-primary">{{ __('View all') }}</a>
         </div>
         <div class="card-body p-0">
           @if (count($upcomingSessions) > 0)
@@ -258,6 +260,13 @@
                   <div>
                     <span class="fw-medium">{{ $s['session_date_formatted'] ?? $s['session_date'] }}</span>
                     <span class="text-muted ms-2">{{ $s['session_time'] ?? '' }}</span>
+                    @if (!empty($s['badge']))
+                      @php
+                        $badgeClass = $s['badge'] === 'today' ? 'primary' : ($s['badge'] === 'tomorrow' ? 'info' : 'secondary');
+                        $badgeText = $s['badge'] === 'today' ? __('Today') : ($s['badge'] === 'tomorrow' ? __('Tomorrow') : __('Upcoming'));
+                      @endphp
+                      <span class="badge bg-{{ $badgeClass }} ms-1">{{ $badgeText }}</span>
+                    @endif
                     @if (!empty($s['court_name']))
                       <br><small class="text-muted">{{ $s['court_name'] }}</small>
                     @endif
@@ -272,6 +281,7 @@
             <div class="text-center py-5 px-3">
               <i class="icon-base ti tabler-calendar-event icon-32px text-muted d-block mb-2"></i>
               <p class="text-muted mb-0">{{ __('No upcoming sessions.') }}</p>
+              <a href="{{ route('portal.sessions.index') }}" class="btn btn-sm btn-outline-primary mt-2">{{ __('Sessions') }}</a>
             </div>
           @endif
         </div>

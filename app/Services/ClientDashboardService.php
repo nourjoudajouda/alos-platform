@@ -204,27 +204,42 @@ class ClientDashboardService
             ->all();
     }
 
-    /** Upcoming Sessions — scheduled sessions for this client's cases. */
-    protected function upcomingSessions(int $clientId, int $limit = 6): array
+    /** Upcoming Sessions — scheduled sessions for this client's cases (next 5 for dashboard). */
+    protected function upcomingSessions(int $clientId, int $limit = 5): array
     {
         $tenantId = $this->user->tenant_id;
+        $today = now()->startOfDay();
         return CaseSession::query()
             ->with(['case'])
             ->whereHas('case', fn ($q) => $q->where('client_id', $clientId)->when($tenantId, fn ($q2) => $q2->where('tenant_id', $tenantId)))
             ->where('status', CaseSession::STATUS_SCHEDULED)
-            ->where('session_date', '>=', now()->startOfDay())
+            ->where('session_date', '>=', $today)
             ->orderBy('session_date')
             ->orderBy('session_time')
             ->limit($limit)
             ->get()
-            ->map(fn (CaseSession $s) => [
-                'id' => $s->id,
-                'session_date' => $s->session_date?->format('Y-m-d'),
-                'session_date_formatted' => $s->session_date?->translatedFormat('d M Y'),
-                'session_time' => $s->session_time,
-                'court_name' => $s->court_name,
-                'case_number' => $s->case?->case_number,
-            ])
+            ->map(function (CaseSession $s) use ($today) {
+                $date = $s->session_date ? $s->session_date->startOfDay() : null;
+                $badge = 'upcoming';
+                if ($date) {
+                    if ($date->isSameDay($today)) {
+                        $badge = 'today';
+                    } elseif ($date->isSameDay($today->copy()->addDay())) {
+                        $badge = 'tomorrow';
+                    }
+                }
+                $sessionTime = $s->session_time ? \Carbon\Carbon::parse($s->session_time)->format('H:i') : $s->session_time;
+                return [
+                    'id' => $s->id,
+                    'session_date' => $s->session_date?->format('Y-m-d'),
+                    'session_date_formatted' => $s->session_date?->translatedFormat('d M Y'),
+                    'session_time' => $sessionTime,
+                    'court_name' => $s->court_name,
+                    'case_number' => $s->case?->case_number,
+                    'case_title' => $s->case?->case_type ?? $s->case?->case_number,
+                    'badge' => $badge,
+                ];
+            })
             ->all();
     }
 

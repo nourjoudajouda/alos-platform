@@ -10,6 +10,7 @@ use App\Http\Controllers\Portal\PortalDashboardController;
 use App\Http\Controllers\Portal\PortalConsultationController;
 use App\Http\Controllers\Portal\PortalCaseController;
 use App\Http\Controllers\Portal\PortalDocumentController;
+use App\Http\Controllers\Portal\PortalSessionsController;
 use App\Http\Controllers\Portal\PortalMessageController;
 use App\Http\Controllers\Admin\AdminAuthController;
 
@@ -47,6 +48,7 @@ Route::prefix('portal')->name('portal.')->group(function () {
     Route::get('/', [PortalDashboardController::class, 'index'])->name('dashboard')->middleware(['auth', 'portal_client']);
     Route::get('/cases', [PortalCaseController::class, 'index'])->name('cases.index')->middleware(['auth', 'portal_client']);
     Route::get('/cases/{case}', [PortalCaseController::class, 'show'])->name('cases.show')->middleware(['auth', 'portal_client']);
+    Route::get('/sessions', [PortalSessionsController::class, 'index'])->name('sessions.index')->middleware(['auth', 'portal_client']);
 
     // ALOS-S1-09 — Secure Messaging (client portal)
     Route::get('/messages', [PortalMessageController::class, 'index'])->name('messages.index')->middleware(['auth', 'portal_client']);
