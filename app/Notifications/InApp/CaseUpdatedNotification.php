@@ -28,8 +28,7 @@ class CaseUpdatedNotification
         $service->notifyMany($userIds, \App\Models\InAppNotification::TYPE_CASE_UPDATED, $title, $messageBody, $tenantId, $data);
         $portalUser = $client->portalUser;
         if ($portalUser) {
-            // البوابة لا تحتوي صفحة قضية؛ نربط بصفحة ذات صلة (استشارات أو تقارير)
-            $data['link'] = route('portal.consultations.index');
+            $data['link'] = route('portal.cases.show', $case);
             $service->notify($portalUser->id, \App\Models\InAppNotification::TYPE_CASE_UPDATED, $title, $messageBody, $tenantId, $data);
         }
     }

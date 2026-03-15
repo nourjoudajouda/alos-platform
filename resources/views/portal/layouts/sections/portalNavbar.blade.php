@@ -31,9 +31,9 @@
         <li class="dropdown-notifications-list">
           <ul class="list-group list-group-flush">
             @forelse($notificationsRecent ?? [] as $n)
-            <li class="list-group-item list-group-item-action">
-              <a href="{{ $n->link ?? route('portal.notifications.index') }}" class="text-body text-decoration-none d-flex">
-                <div class="flex-grow-1">
+            <li class="list-group-item list-group-item-action {{ $n->read_status ? '' : 'border-start border-primary border-2' }}">
+              <a href="{{ $n->link ?? route('portal.notifications.index') }}" class="text-body text-decoration-none d-flex py-2">
+                <div class="flex-grow-1 min-width-0">
                   <h6 class="mb-0 {{ $n->read_status ? '' : 'fw-semibold' }}">{{ $n->title }}</h6>
                   <small class="text-muted">{{ Str::limit($n->message, 50) }}</small>
                   <small class="d-block text-muted mt-1">{{ $n->created_at?->diffForHumans() }}</small>
@@ -41,7 +41,7 @@
               </a>
             </li>
             @empty
-            <li class="list-group-item"><small class="text-muted">{{ __('No notifications') }}</small></li>
+            <li class="list-group-item text-center py-3"><small class="text-muted">{{ __('No notifications') }}</small></li>
             @endforelse
           </ul>
         </li>

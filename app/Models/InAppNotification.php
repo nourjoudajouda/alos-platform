@@ -79,4 +79,24 @@ class InAppNotification extends Model
     {
         return $this->data['link'] ?? null;
     }
+
+    /**
+     * Human-readable labels for notification types (for portal display).
+     */
+    public static function typeLabels(): array
+    {
+        return [
+            self::TYPE_NEW_MESSAGE => __('New message'),
+            self::TYPE_SESSION_REMINDER => __('Upcoming session'),
+            self::TYPE_DOCUMENT_SHARED => __('Document shared'),
+            self::TYPE_REPORT_GENERATED => __('Report generated'),
+            self::TYPE_CASE_UPDATED => __('Case status updated'),
+            self::TYPE_CONSULTATION => __('Consultation'),
+        ];
+    }
+
+    public function getTypeLabelAttribute(): string
+    {
+        return self::typeLabels()[$this->type] ?? $this->type;
+    }
 }

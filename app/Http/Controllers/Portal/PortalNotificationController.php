@@ -10,12 +10,16 @@ use Illuminate\View\View;
 
 /**
  * ALOS-S1-26 — Client portal: current user's notifications only.
+ * All access is scoped by authenticated portal user and tenant_id; no client can see another's notifications.
  */
 class PortalNotificationController extends Controller
 {
     public function index(Request $request): View
     {
         $user = $request->user();
+        if (! $user || ! $user->client_id) {
+            abort(403, __('Access denied.'));
+        }
         $query = InAppNotification::forUser($user->id)
             ->forTenant($user->tenant_id)
             ->orderByDesc('created_at');
@@ -30,6 +34,9 @@ class PortalNotificationController extends Controller
     public function markAsRead(int $notification): RedirectResponse
     {
         $user = auth()->user();
+        if (! $user || ! $user->client_id) {
+            abort(403, __('Access denied.'));
+        }
         $n = InAppNotification::where('id', $notification)->firstOrFail();
         if ($n->user_id !== $user->id || ($user->tenant_id && $n->tenant_id !== $user->tenant_id)) {
             abort(404);
@@ -41,6 +48,9 @@ class PortalNotificationController extends Controller
     public function markAllAsRead(): RedirectResponse
     {
         $user = auth()->user();
+        if (! $user || ! $user->client_id) {
+            abort(403, __('Access denied.'));
+        }
         InAppNotification::forUser($user->id)->forTenant($user->tenant_id)->unread()
             ->update(['read_status' => true, 'read_at' => now()]);
         return redirect()->back()->with('success', __('All marked as read.'));

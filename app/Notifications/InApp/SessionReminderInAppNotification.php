@@ -38,8 +38,11 @@ class SessionReminderInAppNotification
             'date' => $date,
             'time' => $time ? ' ' . $time : '',
         ]);
+        $isPortalUser = $u->isClientPortalUser();
         $data = [
-            'link' => route('admin.core.cases.sessions.index', $case),
+            'link' => $isPortalUser
+                ? route('portal.sessions.index')
+                : route('admin.core.cases.sessions.index', $case),
             'entity_type' => 'case_session',
             'entity_id' => $session->id,
             'case_id' => $case->id,
