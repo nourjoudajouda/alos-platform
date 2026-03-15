@@ -7,8 +7,8 @@
 @section('title', Str::limit($thread->subject, 50) . ' — ' . __('Client Portal'))
 
 @section('content')
-  <div class="container-xxl flex-grow-1 container-p-y" dir="{{ $contentDir }}">
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <div class="mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
       <div>
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb mb-1">

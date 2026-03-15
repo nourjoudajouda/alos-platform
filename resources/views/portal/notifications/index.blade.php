@@ -4,12 +4,22 @@
 @endphp
 @extends('portal::layouts.portal')
 
-@section('title', __('Notifications') . ' — ' . config('app.name'))
+@section('title', __('Notifications') . ' — ' . __('Client Portal'))
 
 @section('content')
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <h4 class="fw-bold mb-0">{{ __('Notifications') }}</h4>
-  <div class="d-flex flex-wrap align-items-center gap-2">
+  <div class="mb-4">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('portal.dashboard') }}">{{ __('Dashboard') }}</a></li>
+        <li class="breadcrumb-item active">{{ __('Notifications') }}</li>
+      </ol>
+    </nav>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <div>
+        <h4 class="fw-bold mb-1">{{ __('Notifications') }}</h4>
+        <p class="text-muted small mb-0">{{ __('Messages, documents, sessions, and reports updates.') }}</p>
+      </div>
+      <div class="d-flex flex-wrap align-items-center gap-2">
     @if(request()->filled('unread'))
       <a href="{{ route('portal.notifications.index') }}" class="btn btn-sm btn-outline-secondary">{{ __('All notifications') }}</a>
     @else
@@ -21,10 +31,11 @@
       <button type="submit" class="btn btn-sm btn-outline-primary">{{ __('Mark all as read') }}</button>
     </form>
     @endif
+      </div>
+    </div>
   </div>
-</div>
 
-<div class="card">
+  <div class="card">
   <div class="list-group list-group-flush">
     @forelse($notifications as $n)
     <div class="list-group-item {{ $n->read_status ? '' : 'bg-light border-start border-primary border-3' }}">
@@ -51,8 +62,8 @@
       </div>
     </div>
     @empty
-    <div class="list-group-item text-center py-5">
-      <i class="icon-base ti tabler-bell-off text-muted mb-2" style="font-size: 2.5rem;"></i>
+    <div class="list-group-item text-center py-5 px-4">
+      <i class="icon-base ti tabler-bell-off icon-32px text-muted d-block mb-2"></i>
       <p class="mb-0 text-muted">{{ __('No notifications yet.') }}</p>
       <p class="small text-muted mt-1">{{ __('When you have new messages, shared documents, session reminders, or reports, they will appear here.') }}</p>
     </div>
@@ -61,5 +72,5 @@
   @if($notifications->hasPages())
   <div class="card-footer">{{ $notifications->links() }}</div>
   @endif
-</div>
+  </div>
 @endsection

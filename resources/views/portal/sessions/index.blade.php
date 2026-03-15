@@ -12,19 +12,18 @@
 @section('title', __('Sessions') . ' — ' . __('Client Portal'))
 
 @section('content')
-  <div class="container-xxl flex-grow-1 container-p-y" dir="{{ $contentDir }}">
-    <div class="mb-4">
-      <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="{{ route('portal.dashboard') }}">{{ __('Dashboard') }}</a></li>
-          <li class="breadcrumb-item active">{{ __('Sessions') }}</li>
-        </ol>
-      </nav>
-      <h4 class="fw-bold mb-1">{{ __('Upcoming Sessions') }}</h4>
-      <p class="text-muted small mb-0">{{ __('Court sessions and hearings related to your cases.') }}</p>
-    </div>
+  <div class="mb-4">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('portal.dashboard') }}">{{ __('Dashboard') }}</a></li>
+        <li class="breadcrumb-item active">{{ __('Sessions') }}</li>
+      </ol>
+    </nav>
+    <h4 class="fw-bold mb-1">{{ __('Upcoming Sessions') }}</h4>
+    <p class="text-muted small mb-0">{{ __('Court sessions and hearings related to your cases.') }}</p>
+  </div>
 
-    <div class="card">
+  <div class="card">
       <div class="card-body p-0">
         @forelse($sessions as $s)
           <div class="border-bottom border-secondary p-3 d-flex align-items-center gap-3 flex-wrap">
@@ -52,8 +51,8 @@
             </div>
           </div>
         @empty
-          <div class="text-center py-5 px-3">
-            <i class="icon-base ti tabler-calendar-event icon-32px text-muted d-block mb-2"></i>
+          <div class="text-center py-5 px-4">
+            <i class="icon-base ti tabler-calendar-off icon-32px text-muted d-block mb-2"></i>
             <p class="text-muted mb-0">{{ __('No upcoming sessions.') }}</p>
             <p class="small text-muted mt-1">{{ __('When new court sessions are scheduled for your cases, they will appear here.') }}</p>
           </div>
@@ -65,5 +64,4 @@
         </div>
       @endif
     </div>
-  </div>
 @endsection

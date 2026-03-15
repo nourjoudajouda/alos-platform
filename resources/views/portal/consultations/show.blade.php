@@ -14,12 +14,12 @@
 @section('title', $consultation->title . ' — ' . __('Client Portal'))
 
 @section('content')
-  <div class="container-xxl flex-grow-1 container-p-y" dir="{{ $contentDir }}">
-    <div class="mb-4">
+  <div class="mb-4">
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb mb-1">
+          <li class="breadcrumb-item"><a href="{{ route('portal.dashboard') }}">{{ __('Dashboard') }}</a></li>
           <li class="breadcrumb-item"><a href="{{ route('portal.consultations.index') }}">{{ __('Consultations') }}</a></li>
-          <li class="breadcrumb-item active">{{ $consultation->title }}</li>
+          <li class="breadcrumb-item active">{{ Str::limit($consultation->title, 40) }}</li>
         </ol>
       </nav>
       <h4 class="fw-bold mb-1">{{ $consultation->title }}</h4>
@@ -123,5 +123,4 @@
       <i class="icon-base ti tabler-arrow-left {{ $contentDir === 'rtl' ? 'ms-1' : 'me-1' }}"></i>
       {{ __('Back to consultations') }}
     </a>
-  </div>
 @endsection

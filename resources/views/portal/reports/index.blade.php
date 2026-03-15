@@ -7,13 +7,18 @@
 @section('title', __('Reports') . ' — ' . __('Client Portal'))
 
 @section('content')
-  <div class="container-xxl flex-grow-1 container-p-y" dir="{{ $contentDir }}">
-    <div class="mb-4">
-      <h4 class="fw-bold mb-1">{{ __('Reports') }}</h4>
-      <p class="text-muted small mb-0">{{ __('Reports shared with you by the office: case status, activity summary, and new documents.') }}</p>
-    </div>
+  <div class="mb-4">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('portal.dashboard') }}">{{ __('Dashboard') }}</a></li>
+        <li class="breadcrumb-item active">{{ __('Reports') }}</li>
+      </ol>
+    </nav>
+    <h4 class="fw-bold mb-1">{{ __('Reports') }}</h4>
+    <p class="text-muted small mb-0">{{ __('Reports shared with you by the office: case status, activity summary, and new documents.') }}</p>
+  </div>
 
-    <div class="card">
+  <div class="card">
       <div class="card-body p-0">
         @forelse($reports as $r)
           <div class="border-bottom border-secondary p-3 d-flex align-items-center gap-3 flex-wrap">
@@ -37,9 +42,10 @@
             </div>
           </div>
         @empty
-          <div class="text-center py-5 text-muted p-4">
-            <i class="icon-base ti tabler-file-report icon-32px d-block mb-3 opacity-50"></i>
-            <p class="mb-0">{{ __('No reports yet. The office will share reports with you according to your report settings.') }}</p>
+          <div class="text-center py-5 px-4">
+            <i class="icon-base ti tabler-file-report icon-32px text-muted d-block mb-2"></i>
+            <p class="text-muted mb-0">{{ __('No reports yet.') }}</p>
+            <p class="small text-muted mt-1">{{ __('The office will share reports with you according to your report settings.') }}</p>
           </div>
         @endforelse
       </div>
@@ -49,5 +55,4 @@
         </div>
       @endif
     </div>
-  </div>
 @endsection

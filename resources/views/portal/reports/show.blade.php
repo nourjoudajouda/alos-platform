@@ -12,8 +12,15 @@
 @section('title', Str::limit($report->title, 50) . ' — ' . __('Client Portal'))
 
 @section('content')
-  <div class="container-xxl flex-grow-1 container-p-y" dir="{{ $contentDir }}">
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <div class="mb-4">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item"><a href="{{ route('portal.dashboard') }}">{{ __('Dashboard') }}</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('portal.reports.index') }}">{{ __('Reports') }}</a></li>
+        <li class="breadcrumb-item active">{{ Str::limit($report->title, 40) }}</li>
+      </ol>
+    </nav>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
       <div>
         <h4 class="fw-bold mb-1">{{ $report->title }}</h4>
         <p class="text-muted small mb-0">
@@ -26,8 +33,9 @@
       </div>
       <a href="{{ route('portal.reports.index') }}" class="btn btn-outline-secondary btn-sm">{{ __('Back to reports') }}</a>
     </div>
+  </div>
 
-    <div class="card">
+  <div class="card">
       <div class="card-body">
         @if(($payload['report_type'] ?? '') === 'case_status' && !empty($payload['cases']))
           <h6 class="mb-3">{{ __('Cases') }}</h6>
@@ -108,5 +116,4 @@
         @endif
       </div>
     </div>
-  </div>
 @endsection

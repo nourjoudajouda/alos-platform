@@ -8,11 +8,16 @@
 @section('title', __('Consultations') . ' — ' . __('Client Portal'))
 
 @section('content')
-  <div class="container-xxl flex-grow-1 container-p-y" dir="{{ $contentDir }}">
-    <div class="mb-4">
-      <h4 class="fw-bold mb-1">{{ __('My Consultations') }}</h4>
-      <p class="text-muted small mb-0">{{ __('Consultations shared with you by the office.') }}</p>
-    </div>
+  <div class="mb-4">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('portal.dashboard') }}">{{ __('Dashboard') }}</a></li>
+        <li class="breadcrumb-item active">{{ __('Consultations') }}</li>
+      </ol>
+    </nav>
+    <h4 class="fw-bold mb-1">{{ __('My Consultations') }}</h4>
+    <p class="text-muted small mb-0">{{ __('Consultations shared with you by the office.') }}</p>
+  </div>
 
     @if (session('success'))
       <div class="alert alert-success alert-dismissible">{{ session('success') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
@@ -60,9 +65,10 @@
             </a>
           </div>
         @empty
-          <div class="text-center py-5 text-muted">
-            <i class="icon-base ti tabler-calendar-event icon-32px d-block mb-2"></i>
-            <p class="mb-0">{{ __('No consultations shared with you yet.') }}</p>
+          <div class="text-center py-5 px-4">
+            <i class="icon-base ti tabler-calendar-off icon-32px text-muted d-block mb-2"></i>
+            <p class="text-muted mb-0">{{ __('No consultations shared with you yet.') }}</p>
+            <p class="small text-muted mt-1">{{ __('When the office shares a consultation with you, it will appear here.') }}</p>
           </div>
         @endforelse
       </div>
@@ -72,5 +78,4 @@
         </div>
       @endif
     </div>
-  </div>
 @endsection

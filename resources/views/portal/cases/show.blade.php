@@ -15,8 +15,7 @@
 @section('title', ($case->case_number ?? __('Case')) . ' — ' . __('Client Portal'))
 
 @section('content')
-  <div class="container-xxl flex-grow-1 container-p-y" dir="{{ $contentDir }}">
-    <div class="mb-4">
+  <div class="mb-4">
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb mb-1">
           <li class="breadcrumb-item"><a href="{{ route('portal.dashboard') }}">{{ __('Dashboard') }}</a></li>
@@ -130,8 +129,7 @@
       </div>
     </div>
 
-    <div class="mb-2">
-      <a href="{{ route('portal.cases.index') }}" class="btn btn-outline-secondary">{{ __('Back to My Cases') }}</a>
-    </div>
+  <div class="mb-2">
+    <a href="{{ route('portal.cases.index') }}" class="btn btn-outline-secondary"><i class="icon-base ti tabler-arrow-left {{ $contentDir === 'rtl' ? 'ms-1' : 'me-1' }}"></i>{{ __('Back to My Cases') }}</a>
   </div>
 @endsection

@@ -30,15 +30,17 @@
           <i class="icon-base ti tabler-briefcase me-1"></i>{{ __('View My Cases') }}
         </a>
         <a href="{{ route('portal.messages.index') }}" class="btn btn-sm btn-outline-primary">
-          <i class="icon-base ti tabler-mail me-1"></i>{{ __('Open Messages') }}</a>
+          <i class="icon-base ti tabler-message me-1"></i>{{ __('Open Messages') }}</a>
         <a href="{{ route('portal.documents.index') }}" class="btn btn-sm btn-outline-primary">
           <i class="icon-base ti tabler-file-text me-1"></i>{{ __('View Documents') }}</a>
         <a href="{{ route('portal.reports.index') }}" class="btn btn-sm btn-outline-primary">
-          <i class="icon-base ti tabler-report me-1"></i>{{ __('View Reports') }}</a>
+          <i class="icon-base ti tabler-file-report me-1"></i>{{ __('View Reports') }}</a>
         <a href="{{ route('portal.consultations.index') }}" class="btn btn-sm btn-outline-secondary">
           <i class="icon-base ti tabler-messages me-1"></i>{{ __('Consultations') }}</a>
         <a href="{{ route('portal.sessions.index') }}" class="btn btn-sm btn-outline-primary">
-          <i class="icon-base ti tabler-calendar-event me-1"></i>{{ __('Sessions') }}</a>
+          <i class="icon-base ti tabler-calendar-event me-1"></i>{{ __('View Sessions') }}</a>
+        <a href="{{ route('portal.notifications.index') }}" class="btn btn-sm btn-outline-primary">
+          <i class="icon-base ti tabler-bell-ringing me-1"></i>{{ __('View Notifications') }}</a>
       </div>
     </div>
   </div>
@@ -311,8 +313,9 @@
             </ul>
           @else
             <div class="text-center py-5 px-3">
-              <i class="icon-base ti tabler-report icon-32px text-muted d-block mb-2"></i>
+              <i class="icon-base ti tabler-file-report icon-32px text-muted d-block mb-2"></i>
               <p class="text-muted mb-0">{{ __('No reports available.') }}</p>
+              <a href="{{ route('portal.reports.index') }}" class="btn btn-sm btn-outline-primary mt-2">{{ __('Reports') }}</a>
             </div>
           @endif
         </div>
